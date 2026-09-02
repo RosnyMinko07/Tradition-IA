@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil - Tradition IA</title>
+  <meta name="description" content="Plateforme professionnelle pour la traduction, la préservation et l'apprentissage des langues locales du Gabon (Fang, Punu, Nzébi, Myènè, Téké, Vili, Obamba, Guisir, Kota) avec assistant IA.">
+ 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/pdf_knowledge.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+
+  <!-- Background Orbs -->
+  <div class="bg-glow-container">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+
+  <div id="app">
+    <!-- Navbar Publique Épurée -->
+    <header class="navbar">
+      <a href="index.html" class="navbar-brand">
+        <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
+        <span>Tradition<span style="color: var(--primary);">IA</span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link active">Accueil</a>
+        <a href="translate.html" class="nav-link">Traduction</a>
+        <a href="ai-assistant.html" class="nav-link">Assistant IA</a>
+        <a href="dictionary.html" class="nav-link">Dictionnaire</a>
+        <a href="history.html" class="nav-link">Historique</a>
+        <a href="profile.html" class="nav-link">Mon Profil</a>
+      </nav>
+
+      <div id="nav-user-container">
+        <div class="nav-auth-buttons">
+          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
+          <a href="register.html" class="btn btn-primary" style="padding: 8px 16px;">S'inscrire</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout Container Unifié -->
+    <div class="layout-container">
+      <!-- Main Content Container -->
+      <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section" style="padding: 10px 0 30px 0;">
+          <div>
+            <span class="badge badge-blue-pro" style="margin-bottom: 16px;">IA & Patrimoine Culturel du Gabon</span>
+            <h1 class="hero-title">Préserver & Traduire les <span>Langues Gabonaises</span></h1>
+            <p class="hero-desc">
+              Découvrez la première plateforme intelligente dédiée au Fang, Punu, Nzébi, Myènè, Téké, Vili, Obamba, Guisir et Kota du Gabon. Traduisez, apprenez et échangez avec notre assistant virtuel spécialisé.
+            </p>
+            <div class="hero-buttons">
+              <a href="translate.html" class="btn btn-primary" style="padding: 14px 28px; font-size: 1.05rem;">
+                Commencer à Traduire ➔
+              </a>
+              <a href="dictionary.html" class="btn btn-secondary" style="padding: 14px 24px; font-size: 1.05rem;">
+                Explorer le Dictionnaire
+              </a>
+            </div>
+          </div>
+
+          <div class="hero-mask-display">
+            <div class="hero-mask-glow"></div>
+            <img src="images/gabon_masque_nobg.png" alt="Carte du Gabon et Masques Traditionnels" class="hero-gabon-map-img" />
+          </div>
+        </section>
+
+        <!-- Statistiques -->
+        <div class="grid-4" style="margin-top: 40px;">
+          <div class="glass-card stat-card">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">Langues Supportées</div>
+              <div class="stat-val" style="color: var(--text-main);">7+</div>
+            </div>
+            <div class="stat-icon" style="background: rgba(255, 255, 255, 0.08); color: var(--text-main);">🗣️</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">Mots au Dictionnaire</div>
+              <div class="stat-val" style="color: var(--blue);">5,240+</div>
+            </div>
+            <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--blue);">📚</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">Précision IA</div>
+              <div class="stat-val" style="color: var(--gold);">94.2%</div>
+            </div>
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--gold);">⚡</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">Traduction IA</div>
+              <div class="stat-val" style="color: var(--text-main);">Instantanée</div>
+            </div>
+            <div class="stat-icon" style="background: rgba(255, 255, 255, 0.08); color: var(--text-main);">🤖</div>
+          </div>
+        </div>
+
+        <!-- Grille des Langues -->
+        <div style="margin-top: 60px;">
+          <div style="margin-bottom: 28px;">
+            <h2 style="font-size: 1.8rem;">Langues Locales du Gabon</h2>
+            <p style="color: var(--text-muted);">Explorez la richesse linguistique des provinces gabonaises</p>
+          </div>
+          <div id="landing-languages-grid" class="grid-4"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const gridEl = document.getElementById('landing-languages-grid');
+      
+      function renderLanguageCards(langs) {
+        if (!gridEl || !langs || !langs.length) return;
+        gridEl.innerHTML = langs.map(l => {
+          const maskHtml = window.Masks 
+            ? window.Masks.render(l.name, 72) 
+            : `<div class="mask-img-wrapper" style="width:72px;height:72px;"><img src="images/${(l.name||'fang').toLowerCase()}.png" class="mask-real-img"/></div>`;
+          
+          return `
+            <div class="glass-card glass-card-interactive" style="padding: 22px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                  <div>${maskHtml}</div>
+                  <span class="badge badge-green" style="font-size: 0.75rem; font-weight: 600;">${l.code ? l.code.toUpperCase() : 'GAB'}</span>
+                </div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 4px; color: var(--text-main);">${l.name}</h3>
+                <p style="font-size: 0.84rem; color: var(--primary); margin-bottom: 8px; font-weight: 500;">Nom natif: ${l.nativeName}</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; min-height: 48px;">${l.description}</p>
+              </div>
+              <a href="translate.html?target=${encodeURIComponent(l.name)}" class="btn btn-outline" style="width: 100%; margin-top: 14px; justify-content: center; font-size: 0.84rem; padding: 9px;">Traduire le ${l.name}</a>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 1. Immediate instant render using MOCK_LANGUAGES or current Store
+      const initialLangs = (window.Store && window.Store.languages && window.Store.languages.length) 
+        ? window.Store.languages 
+        : (window.MOCK_LANGUAGES || []);
+      renderLanguageCards(initialLangs);
+
+      // 2. Refresh when async store data is loaded
+      if (window.Store && typeof window.Store.loadInitialData === 'function') {
+        await window.Store.loadInitialData();
+        if (window.Store.languages && window.Store.languages.length) {
+          renderLanguageCards(window.Store.languages);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

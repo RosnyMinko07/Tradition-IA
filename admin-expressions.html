@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Expressions - Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div class="bg-glow-container"><div class="bg-orb bg-orb-1"></div></div>
+  <div id="app">
+    <header class="navbar">
+      <a href="admin.html" class="navbar-brand">
+        <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
+        <span>Tradition<span style="color: var(--primary);">IA</span> <span class="admin-badge">[Admin]</span></span>
+      </a>
+      <div id="nav-user-container">
+        <div class="nav-auth-buttons">
+          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <aside class="sidebar">
+        <div class="sidebar-title">Administration</div>
+        <a href="admin.html" class="sidebar-item">📊 Dashboard Admin</a>
+        <a href="admin-users.html" class="sidebar-item">👥 Utilisateurs</a>
+        <a href="admin-languages.html" class="sidebar-item">🗣️ Langues Gabonaises</a>
+        <a href="admin-dictionary.html" class="sidebar-item">📚 Dictionnaire</a>
+        <a href="admin-expressions.html" class="sidebar-item active">💬 Expressions</a>
+        <a href="admin-ai-validation.html" class="sidebar-item">🤖 Validation IA</a>
+        <a href="admin-analytics.html" class="sidebar-item">📈 Analyses & Rapports</a>
+      </aside>
+
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-title-group">
+            <h1>Gestion des Expressions Idiomatiques</h1>
+            <p class="page-subtitle">Ajoutez et modérez les proverbes et expressions fréquentes</p>
+          </div>
+          <button id="btn-open-expr-modal" class="btn btn-primary">+ Nouvelle Expression</button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Expression (Français)</th>
+                <th>Traduction Gabon</th>
+                <th>Langue</th>
+                <th>Contexte</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expr-table-body">
+              <!-- Chargé par JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modale Ajouter Expression -->
+        <div id="modal-add-expr" class="modal-backdrop">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h3 style="font-size: 1.2rem;">💬 Ajouter une Expression Idiomatique</h3>
+              <button class="btn btn-secondary btn-icon" data-close-modal>✕</button>
+            </div>
+            <form id="form-add-expr">
+              <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="form-group">
+                  <label class="form-label">Expression en Français</label>
+                  <input type="text" id="new-expr-phrase" class="form-input" placeholder="ex: Comment allez-vous ?" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Traduction Gabon</label>
+                  <input type="text" id="new-expr-trans" class="form-input" placeholder="ex: Mbolo mi neng ?" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Langue Cible</label>
+                  <select id="new-expr-lang" class="form-select">
+                    <!-- Options chargées -->
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contexte d'utilisation</label>
+                  <input type="text" id="new-expr-context" class="form-input" placeholder="ex: Salutation du matin">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+                <button type="submit" class="btn btn-primary">Enregistrer l'Expression</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.Store) {
+        await window.Store.loadInitialData();
+
+        const langSelect = document.getElementById('new-expr-lang');
+        if (langSelect && window.Store.languages) {
+          langSelect.innerHTML = window.Store.languages.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+        }
+
+        renderExpr();
+
+        document.getElementById('btn-open-expr-modal')?.addEventListener('click', () => {
+          document.getElementById('modal-add-expr')?.classList.add('active');
+        });
+
+        document.getElementById('form-add-expr')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const newExpr = {
+            phrase: document.getElementById('new-expr-phrase').value,
+            translation: document.getElementById('new-expr-trans').value,
+            targetLang: document.getElementById('new-expr-lang').value,
+            sourceLang: 'Français',
+            context: document.getElementById('new-expr-context').value || 'Général'
+          };
+          await window.Store.addExpression(newExpr);
+          document.getElementById('modal-add-expr')?.classList.remove('active');
+          window.showToast('Expression ajoutée avec succès !');
+          renderExpr();
+        });
+      }
+    });
+
+    function renderExpr() {
+      const container = document.getElementById('expr-table-body');
+      if (!container || !window.Store) return;
+      container.innerHTML = window.Store.expressions.map(e => `
+        <tr>
+          <td style="font-weight: 700; color: #FFF;">${e.phrase}</td>
+          <td style="font-weight: 700; color: var(--primary);">${e.translation}</td>
+          <td><span class="badge badge-green">${e.targetLang}</span></td>
+          <td style="color: var(--text-muted); font-size: 0.85rem;">${e.context || 'Usage général'}</td>
+          <td>
+            <button class="btn btn-danger btn-del-e" data-id="${e.id}" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.querySelectorAll('.btn-del-e').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (confirm('Supprimer cette expression ?')) {
+            await window.Store.deleteExpression(btn.getAttribute('data-id'));
+            window.showToast('Expression supprimée !');
+            renderExpr();
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

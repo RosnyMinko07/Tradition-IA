@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistant IA - Tradition IA</title>
+  <meta name="description" content="Assistant virtuel intelligent pour les langues gabonaises. Posez vos questions sur la grammaire, la culture et le vocabulaire Fang, Punu, Myènè et plus.">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/pdf_knowledge.js"></script>
+  <script src="js/common.js"></script>
+
+  <style>
+    /* ── Typing animation ── */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 12px 16px;
+    }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ── Suggestions rapides ── */
+    .chat-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 16px 0;
+    }
+    .suggestion-chip {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .suggestion-chip:hover {
+      background: rgba(59, 130, 246, 0.25);
+      transform: translateY(-1px);
+    }
+
+    /* ── Chat bubble source badge ── */
+    .chat-badge {
+      font-size: 0.68rem;
+      opacity: 0.6;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ── Error bubble ── */
+    .chat-bubble-error {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border: 1px solid rgba(239, 68, 68, 0.3) !important;
+      color: #fca5a5 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow-container">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <div id="app">
+    <header class="navbar">
+      <a href="index.html" class="navbar-brand">
+        <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
+        <span>Tradition<span style="color: var(--primary);">IA</span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Accueil</a>
+        <a href="translate.html" class="nav-link">Traduction</a>
+        <a href="ai-assistant.html" class="nav-link active">Assistant IA</a>
+        <a href="dictionary.html" class="nav-link">Dictionnaire</a>
+        <a href="history.html" class="nav-link">Historique</a>
+        <a href="profile.html" class="nav-link">Mon Profil</a>
+      </nav>
+
+      <div id="nav-user-container">
+        <div class="nav-auth-buttons">
+          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
+          <a href="register.html" class="btn btn-primary" style="padding: 8px 16px;">S'inscrire</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <main class="main-content" style="max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div class="page-header">
+          <div class="page-title-group">
+            <h1>Assistant Virtuel IA</h1>
+            <p class="page-subtitle">Posez vos questions sur la grammaire, la culture et le vocabulaire des langues gabonaises. Propulsé par IA avec connaissance des langues locales.</p>
+          </div>
+        </div>
+
+        <div class="glass-card chat-container">
+          <!-- Chat Header Bar -->
+          <div class="chat-header-bar">
+            <div class="chat-header-left">
+              <div class="chat-avatar-wrapper">
+                <img src="images/tradiia_icon.png" alt="Assistant Tradition IA" class="chat-avatar-img">
+                <div class="chat-status-indicator" title="En ligne"></div>
+              </div>
+              <div class="chat-header-info">
+                <h3>Assistant Tradition IA <span class="badge badge-gold" style="font-size: 0.7rem; padding: 2px 7px;">v2.0 Pro</span></h3>
+                <p>Spécialiste du patrimoine linguistique & culturel du Gabon</p>
+              </div>
+            </div>
+
+            <div class="chat-header-actions">
+              <select id="chat-persona-mode" class="chat-mode-select" title="Choisir le rôle de l'assistant">
+                <option value="tuteur">🎓 Mode Tuteur Linguistique</option>
+                <option value="culture">🏛️ Mode Guide Culturel & Rites</option>
+                <option value="traducteur">⚡ Mode Traduction & Vocabulaire</option>
+              </select>
+              <button id="btn-toggle-tts" class="btn btn-secondary btn-icon" title="Activer/Désactiver la lecture vocale automatique" style="font-size: 0.85rem;">🔊</button>
+              <button id="btn-clear-chat" class="btn btn-secondary btn-icon" title="Effacer la conversation" style="font-size: 0.85rem;">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Suggestions rapides -->
+          <div class="chat-suggestions" id="chat-suggestions">
+            <button class="suggestion-chip" data-question="Comment dit-on 'Bonjour' et 'Merci' dans les 9 langues du Gabon ?">👋 Salutations 9 langues</button>
+            <button class="suggestion-chip" data-question="Explique-moi les règles de grammaire et prononciation en Fang">📚 Grammaire Fang</button>
+            <button class="suggestion-chip" data-question="Raconte-moi l'histoire et la symbolique du masque Mukudj Punu">🎭 Masque Mukudj Punu</button>
+            <button class="suggestion-chip" data-question="Donne-moi 5 proverbes ancestraux gabonais avec leur signification">📜 Proverbes gabonais</button>
+            <button class="suggestion-chip" data-question="Comment compter de 1 à 10 en Nzébi et en Myènè ?">🔢 Compter en Nzébi/Myènè</button>
+            <button class="suggestion-chip" data-question="Quelles sont les traditions et rites du peuple Téké ?">🏛️ Culture Téké</button>
+          </div>
+
+          <!-- Liste des messages -->
+          <div id="chat-messages-list" class="chat-messages">
+            <!-- Messages chargés par script -->
+          </div>
+
+          <!-- Barre de saisie -->
+          <div class="chat-input-bar">
+            <button id="btn-chat-voice" class="btn btn-secondary btn-icon" title="Parler au micro (Saisie vocale)">🎙️</button>
+            <div id="chat-voice-status" class="voice-recording-status" style="display: none;">
+              <span class="pulse-recording-dot"></span> Écoute en cours...
+            </div>
+            <div class="chat-input-field-wrapper">
+              <input type="text" id="chat-input-text" class="form-input"
+                placeholder="Posez une question à l'IA (ex: Comment dire 'bienvenue' en Fang, les rites Obamba...)">
+            </div>
+            <button id="btn-chat-send" class="btn btn-primary" aria-label="Envoyer">
+              <span>Envoyer</span> ➔
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const IS_DEPLOYED = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const API_CHAT_URL = '/api/chat';
+
+    let isWaiting = false;
+    let autoSpeakTTS = false;
+    let recognition = null;
+    let isVoiceRecording = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.Store) {
+        await window.Store.loadInitialData();
+        renderChat();
+        window.Store.subscribe(renderChat);
+      }
+
+      const btnSend = document.getElementById('btn-chat-send');
+      const input = document.getElementById('chat-input-text');
+      const btnVoice = document.getElementById('btn-chat-voice');
+      const btnClearChat = document.getElementById('btn-clear-chat');
+      const btnToggleTTS = document.getElementById('btn-toggle-tts');
+      const personaSelect = document.getElementById('chat-persona-mode');
+
+      btnSend?.addEventListener('click', handleSend);
+      input?.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) handleSend(); });
+
+      // Suggestions rapides
+      document.querySelectorAll('.suggestion-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const q = chip.getAttribute('data-question');
+          if (q) {
+            document.getElementById('chat-input-text').value = q;
+            handleSend();
+          }
+        });
+      });
+
+      // Effacer la conversation
+      btnClearChat?.addEventListener('click', () => {
+        if (window.Store) {
+          window.Store.chatMessages = [
+            {
+              id: 'init_' + Date.now(),
+              role: 'assistant',
+              text: 'Mbolo ! 🇬🇦 Je suis votre assistant Tradition IA. Posez-moi vos questions sur la grammaire, le vocabulaire ou la culture gabonaise !',
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ];
+          renderChat();
+          if (window.showToast) window.showToast('Discussion réinitialisée.');
+        }
+      });
+
+      // Toggle Synthèse Vocale
+      btnToggleTTS?.addEventListener('click', () => {
+        autoSpeakTTS = !autoSpeakTTS;
+        btnToggleTTS.style.background = autoSpeakTTS ? 'rgba(245, 158, 11, 0.25)' : '';
+        btnToggleTTS.style.borderColor = autoSpeakTTS ? 'var(--gold)' : '';
+        if (window.showToast) {
+          window.showToast(autoSpeakTTS ? 'Lecture vocale automatique ACTIVÉE' : 'Lecture vocale automatique DÉSACTIVÉE');
+        }
+      });
+
+      // Reconnaissance Vocale pour le Chat
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'fr-FR';
+
+        recognition.onstart = () => {
+          isVoiceRecording = true;
+          btnVoice?.classList.add('btn-recording-active');
+          document.getElementById('chat-voice-status').style.display = 'inline-flex';
+          if (window.showToast) window.showToast('Microphone activé : Parlez à l\'IA...');
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (input && transcript) {
+            input.value = transcript;
+          }
+        };
+
+        recognition.onerror = (event) => {
+          stopChatVoice();
+          if (window.showToast) window.showToast('Erreur microphone : ' + event.error, 'error');
+        };
+
+        recognition.onend = () => {
+          stopChatVoice();
+          if (input && input.value.trim()) {
+            handleSend();
+          }
+        };
+      }
+
+      function stopChatVoice() {
+        isVoiceRecording = false;
+        btnVoice?.classList.remove('btn-recording-active');
+        const statusEl = document.getElementById('chat-voice-status');
+        if (statusEl) statusEl.style.display = 'none';
+      }
+
+      btnVoice?.addEventListener('click', () => {
+        if (!SpeechRecognition) {
+          if (window.showToast) window.showToast('Reconnaissance vocale non disponible sur ce navigateur.', 'error');
+          return;
+        }
+        if (isVoiceRecording) {
+          recognition.stop();
+          stopChatVoice();
+        } else {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.error(e);
+            stopChatVoice();
+          }
+        }
+      });
+    });
+
+    // ─── Envoi d'un message ────────────────────────────────────────────────────
+    async function handleSend() {
+      if (isWaiting) return;
+
+      const input = document.getElementById('chat-input-text');
+      const txt = input.value.trim();
+      if (!txt) return;
+
+      isWaiting = true;
+      input.value = '';
+      const btnSend = document.getElementById('btn-chat-send');
+      if (btnSend) btnSend.disabled = true;
+
+      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Ajouter le message utilisateur
+      if (window.Store) {
+        window.Store.addChatMessage('user', txt);
+      }
+
+      showTypingIndicator();
+
+      try {
+        let aiReply;
+        const persona = document.getElementById('chat-persona-mode')?.value || 'tuteur';
+
+        if (IS_DEPLOYED) {
+          aiReply = await fetchAIResponse(txt, persona);
+        } else {
+          aiReply = generateLocalResponse(txt, persona);
+        }
+
+        removeTypingIndicator();
+
+        if (window.Store) {
+          window.Store.addChatMessage('assistant', aiReply);
+        }
+
+        // Lecture vocale si activée
+        if (autoSpeakTTS && window.speechSynthesis) {
+          speakText(aiReply);
+        }
+
+      } catch (error) {
+        removeTypingIndicator();
+        const errMsg = `❌ Erreur : ${error.message || 'Impossible de joindre le serveur IA.'}`;
+        if (window.Store) {
+          window.Store.addChatMessage('assistant', errMsg);
+        }
+        console.error('[AI Chat Error]', error);
+      }
+
+      isWaiting = false;
+      if (btnSend) btnSend.disabled = false;
+      document.getElementById('chat-input-text')?.focus();
+    }
+
+    // ─── Appel à l'API Vercel ──────────────────────────────────────────────────
+    async function fetchAIResponse(message, persona) {
+      const history = (window.Store?.chatMessages || [])
+        .filter(m => m.id !== '1' && !m.id?.startsWith('init_'))
+        .slice(-16)
+        .map(m => ({ role: m.role, text: m.text }));
+
+      const response = await fetch(API_CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history, persona })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `Erreur serveur ${response.status}`);
+      }
+      return data.reply;
+    }
+
+    // ─── Fallback local avec extraction des connaissances PDF ──────────────────
+    function generateLocalResponse(txt, persona) {
+      if (window.generateAIResponseFromPDF) {
+        return window.generateAIResponseFromPDF(txt);
+      }
+      return `Mbolo ! 🇬🇦\n\nJ'ai bien analysé votre demande concernant **"${txt}"**.\n\nEn langues locales du Gabon, chaque mot et expression porte une profonde valeur culturelle.\n\nN'hésitez pas à explorer notre dictionnaire intégré ou à demander d'autres traductions !`;
+    }
+
+    // ─── Indicateur de frappe (typing...) ─────────────────────────────────────
+    function showTypingIndicator() {
+      const container = document.getElementById('chat-messages-list');
+      if (!container) return;
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator-bubble';
+      typingDiv.className = 'chat-msg-row ai-row';
+      typingDiv.innerHTML = `
+        <div class="chat-msg-avatar ai-avatar">
+          <img src="images/tradiia_icon.png" alt="IA">
+        </div>
+        <div class="chat-bubble-wrapper">
+          <div class="chat-bubble chat-bubble-ai">
+            <div class="typing-indicator">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">L'IA consulte la base linguistique...</span>
+        </div>`;
+      container.appendChild(typingDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      document.getElementById('typing-indicator-bubble')?.remove();
+    }
+
+    // ─── Rendu interactif du chat ──────────────────────────────────────────────
+    function renderChat() {
+      const container = document.getElementById('chat-messages-list');
+      if (!container || !window.Store) return;
+
+      const msgs = window.Store.chatMessages || [];
+      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      container.innerHTML = msgs.map((m, index) => {
+        const isUser = m.role === 'user';
+        const msgTime = m.time || currentTime;
+        const rawText = m.text || '';
+        const isError = rawText.startsWith('❌');
+
+        if (isUser) {
+          return `
+            <div class="chat-msg-row user-row">
+              <div class="chat-msg-avatar">
+                ${window.Store.user?.name ? window.Store.user.name.charAt(0).toUpperCase() : '👤'}
+              </div>
+              <div class="chat-bubble-wrapper">
+                <div class="chat-bubble chat-bubble-user">
+                  ${formatMessage(rawText)}
+                </div>
+                <div class="chat-msg-meta">
+                  <span>Vous</span> • <span>${msgTime}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="chat-msg-row ai-row">
+              <div class="chat-msg-avatar ai-avatar">
+                <img src="images/tradiia_icon.png" alt="Tradition IA">
+              </div>
+              <div class="chat-bubble-wrapper">
+                <div class="chat-bubble chat-bubble-ai ${isError ? 'chat-bubble-error' : ''}">
+                  ${formatMessage(rawText)}
+                </div>
+                <div class="chat-msg-meta">
+                  <span>Tradition IA</span> • <span>${msgTime}</span>
+                </div>
+                ${!isError ? `
+                  <div class="chat-msg-actions">
+                    <button class="chat-action-btn btn-copy-msg" data-index="${index}" title="Copier ce message">📋 Copier</button>
+                    <button class="chat-action-btn btn-speak-msg" data-index="${index}" title="Écouter la réponse">🔊 Écouter</button>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+
+      // Événements pour copier et écouter chaque message
+      container.querySelectorAll('.btn-copy-msg').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.getAttribute('data-index');
+          const msg = msgs[idx];
+          if (msg?.text) {
+            navigator.clipboard.writeText(msg.text);
+            if (window.showToast) window.showToast('Réponse copiée dans le presse-papier !');
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-speak-msg').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.getAttribute('data-index');
+          const msg = msgs[idx];
+          if (msg?.text) {
+            speakText(msg.text);
+          }
+        });
+      });
+    }
+
+    function speakText(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      // Nettoyer les balises markdown
+      const cleanText = text.replace(/[\*\#\`\_]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = 'fr-FR';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+      if (window.showToast) window.showToast('Lecture audio de la réponse...');
+    }
+
+    function formatMessage(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code style="background:rgba(245,158,11,0.15);color:var(--gold);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:0.9em;">$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+  </script>
+</body>
+</html>

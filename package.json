@@ -1,0 +1,11 @@
+{
+  "name": "tradition-ia",
+  "version": "1.0.0",
+  "description": "Plateforme de traduction et de préservation des langues gabonaises",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}
