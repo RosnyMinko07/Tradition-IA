@@ -3,20 +3,21 @@
  * ==================================================
  * Vercel Serverless Function — /api/chat
  * Reçoit la question de l'utilisateur + historique de conversation,
- * injecte le contexte des langues gabonaises, appelle DeepSeek API,
+ * injecte le contexte des langues gabonaises, appelle OpenRouter (NVIDIA / Llama),
  * et retourne la réponse.
  *
  * Variable d'environnement requise sur Vercel :
- *   DEEPSEEK_API_KEY — Votre clé API DeepSeek (sk-...)
+ *   OPENROUTER_API_KEY — Votre clé API OpenRouter (sk-or-...)
+ *   OPENROUTER_MODEL   — (Optionnel) Modèle ex: "nvidia/llama-3.1-nemotron-70b-instruct"
  */
 
 const { buildSystemPrompt } = require('./_knowledge');
 
-const DEEPSEEK_MODEL = 'deepseek-chat';
-const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_MODEL = 'nvidia/llama-3.1-nemotron-70b-instruct';
 
 module.exports = async function handler(req, res) {
-  // CORS — autoriser les requêtes du front-end
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,14 +37,15 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Le champ "message" est requis.' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.API_KEY;
     if (!apiKey) {
-      throw new Error('Clé API DeepSeek manquante : ajoutez la variable DEEPSEEK_API_KEY dans les paramètres Vercel.');
+      throw new Error('Clé API OpenRouter manquante : ajoutez la variable OPENROUTER_API_KEY dans les paramètres Vercel.');
     }
 
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
     const systemPrompt = buildSystemPrompt('assistant', persona);
 
-    // Préparer les messages pour DeepSeek
+    // Préparer les messages pour OpenRouter
     const messages = [
       { role: 'system', content: systemPrompt }
     ];
@@ -57,14 +59,16 @@ module.exports = async function handler(req, res) {
 
     messages.push({ role: 'user', content: message });
 
-    const response = await fetch(DEEPSEEK_URL, {
+    const response = await fetch(OPENROUTER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'Authorization': `Bearer ${apiKey.trim()}`,
+        'HTTP-Referer': 'https://tradition-ia.vercel.app',
+        'X-Title': 'Tradition IA Gabon'
       },
       body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
+        model,
         messages,
         temperature: 0.7,
         max_tokens: 1024
@@ -74,11 +78,11 @@ module.exports = async function handler(req, res) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errMsg = errorData.error?.message || errorData.message || response.statusText;
-      throw new Error(`DeepSeek API (${response.status}): ${errMsg}`);
+      throw new Error(`OpenRouter API (${response.status}): ${errMsg}`);
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || 'Pas de réponse reçue de DeepSeek.';
+    const reply = data.choices?.[0]?.message?.content || 'Pas de réponse reçue d\'OpenRouter.';
 
     return res.status(200).json({ reply });
 
@@ -87,12 +91,13 @@ module.exports = async function handler(req, res) {
 
     const friendlyError = error.message?.includes('API_KEY') || error.message?.includes('manquante')
       ? error.message
-      : error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('Insufficient Balance')
-      ? 'Solde ou quota DeepSeek insuffisant. Vérifiez votre compte sur platform.deepseek.com.'
-      : `Erreur DeepSeek : ${error.message || 'Impossible de joindre le serveur IA.'}`;
+      : error.message?.includes('quota') || error.message?.includes('429') || error.message?.includes('credits')
+      ? 'Crédits OpenRouter insuffisants ou quota dépassé. Vérifiez votre compte sur openrouter.ai.'
+      : `Erreur IA OpenRouter : ${error.message || 'Impossible de joindre le serveur IA.'}`;
 
     return res.status(500).json({ error: friendlyError, details: error.message });
   }
 };
+
 
 

@@ -3,16 +3,17 @@
  * =========================================
  * Vercel Serverless Function — /api/translate
  * Traduit un texte du français vers une langue gabonaise
- * en utilisant le dictionnaire local puis DeepSeek AI.
+ * en utilisant le dictionnaire local puis OpenRouter (NVIDIA).
  *
  * Variable d'environnement requise sur Vercel :
- *   DEEPSEEK_API_KEY — Votre clé API DeepSeek (sk-...)
+ *   OPENROUTER_API_KEY — Votre clé API OpenRouter (sk-or-...)
+ *   OPENROUTER_MODEL   — (Optionnel) Modèle ex: "nvidia/llama-3.1-nemotron-70b-instruct"
  */
 
 const { buildSystemPrompt, DICTIONARY_DATA } = require('./_knowledge');
 
-const DEEPSEEK_MODEL = 'deepseek-chat';
-const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_MODEL = 'nvidia/llama-3.1-nemotron-70b-instruct';
 
 module.exports = async function handler(req, res) {
   // CORS
@@ -40,25 +41,28 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // 2. Traduction via DeepSeek
-    const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.API_KEY;
+    // 2. Traduction via OpenRouter (NVIDIA)
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.API_KEY;
     if (!apiKey) {
-      throw new Error('Clé API DeepSeek manquante : ajoutez la variable DEEPSEEK_API_KEY dans les paramètres Vercel.');
+      throw new Error('Clé API OpenRouter manquante : ajoutez la variable OPENROUTER_API_KEY dans les paramètres Vercel.');
     }
 
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
     const systemPrompt = buildSystemPrompt('translate');
     const userMessage = `Traduis ce texte du ${sourceLang} vers la langue ${targetLang} : "${text}"
 
 Réponds UNIQUEMENT avec la traduction. Si tu proposes une approximation, ajoute "(approximation)" après.`;
 
-    const response = await fetch(DEEPSEEK_URL, {
+    const response = await fetch(OPENROUTER_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'Authorization': `Bearer ${apiKey.trim()}`,
+        'HTTP-Referer': 'https://tradition-ia.vercel.app',
+        'X-Title': 'Tradition IA Gabon'
       },
       body: JSON.stringify({
-        model: DEEPSEEK_MODEL,
+        model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
@@ -70,8 +74,8 @@ Réponds UNIQUEMENT avec la traduction. Si tu proposes une approximation, ajoute
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      const msg = err.error?.message || response.statusText;
-      throw new Error(`DeepSeek (${response.status}): ${msg}`);
+      const msg = err.error?.message || err.message || response.statusText;
+      throw new Error(`OpenRouter (${response.status}): ${msg}`);
     }
 
     const data = await response.json();
@@ -128,5 +132,6 @@ function getLangKey(langName) {
   };
   return map[langName] || null;
 }
+
 
 
