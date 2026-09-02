@@ -5,16 +5,22 @@
  * Traduit un texte du français vers une langue gabonaise
  * en utilisant le contexte de la base de connaissances locale.
  *
- * Variables d'environnement Vercel à configurer :
- *   GEMINI_API_KEY  — Clé Google Gemini
- *   OPENAI_API_KEY  — Clé OpenAI (optionnel)
- *   AI_PROVIDER     — "gemini" (défaut) ou "openai"
+ * Variables d'environnement Vercel supportées :
+ *   DEEPSEEK_API_KEY — Clé DeepSeek
+ *   GEMINI_API_KEY   — Clé Google Gemini
+ *   OPENAI_API_KEY   — Clé OpenAI
+ *   AI_PROVIDER      — "deepseek", "gemini", ou "openai" (auto-détecté si omis)
  */
 
 const { buildSystemPrompt, DICTIONARY_DATA } = require('./_knowledge');
 
+const DEEPSEEK_MODEL = 'deepseek-chat';
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+
 const GEMINI_MODEL = 'gemini-1.5-flash';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+const OPENAI_MODEL = 'gpt-4o-mini';
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 
 module.exports = async function handler(req, res) {
@@ -43,8 +49,20 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // 2. Si pas trouvé localement, utiliser l'IA avec le contexte des langues gabonaises
-    const provider = process.env.AI_PROVIDER || 'gemini';
+    // 2. Détection intelligente du fournisseur selon les clés disponibles
+    let provider = (process.env.AI_PROVIDER || '').toLowerCase().trim();
+    if (!provider) {
+      if (process.env.DEEPSEEK_API_KEY) {
+        provider = 'deepseek';
+      } else if (process.env.GEMINI_API_KEY) {
+        provider = 'gemini';
+      } else if (process.env.OPENAI_API_KEY) {
+        provider = 'openai';
+      } else {
+        provider = 'deepseek';
+      }
+    }
+
     const systemPrompt = buildSystemPrompt('translate');
 
     // Construire le message de traduction
@@ -53,7 +71,9 @@ module.exports = async function handler(req, res) {
 Réponds UNIQUEMENT avec la traduction. Si tu proposes une approximation, ajoute "(approximation)" après.`;
 
     let translation;
-    if (provider === 'openai') {
+    if (provider === 'deepseek') {
+      translation = await callDeepSeek(userMessage, systemPrompt);
+    } else if (provider === 'openai') {
       translation = await callOpenAI(userMessage, systemPrompt);
     } else {
       translation = await callGemini(userMessage, systemPrompt);
@@ -69,7 +89,7 @@ Réponds UNIQUEMENT avec la traduction. Si tu proposes une approximation, ajoute
     console.error('[Tradition IA /api/translate ERROR]', error);
 
     const friendlyError = error.message?.includes('API_KEY')
-      ? 'Clé API manquante. Configure GEMINI_API_KEY dans Vercel.'
+      ? error.message
       : 'Erreur de traduction. Réessaie dans quelques instants.';
 
     return res.status(500).json({ error: friendlyError });
@@ -111,19 +131,51 @@ function getLangKey(langName) {
   return map[langName] || null;
 }
 
+// ─── Appel DeepSeek ──────────────────────────────────────────────────────────
+async function callDeepSeek(userMessage, systemPrompt) {
+  const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.API_KEY;
+  if (!apiKey) throw new Error('Clé API DeepSeek manquante : ajoutez DEEPSEEK_API_KEY dans Vercel.');
+
+  const response = await fetch(DEEPSEEK_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey.trim()}`
+    },
+    body: JSON.stringify({
+      model: DEEPSEEK_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0.3,
+      max_tokens: 512
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const msg = err.error?.message || response.statusText;
+    throw new Error(`DeepSeek (${response.status}): ${msg}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || 'Traduction indisponible.';
+}
+
 // ─── Appel Google Gemini ──────────────────────────────────────────────────────
 async function callGemini(userMessage, systemPrompt) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('API_KEY manquante : GEMINI_API_KEY');
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+  if (!apiKey) throw new Error('Clé API Gemini manquante : ajoutez GEMINI_API_KEY dans Vercel.');
 
-  const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+  const response = await fetch(`${GEMINI_URL}?key=${apiKey.trim()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
       generationConfig: {
-        temperature: 0.3, // Plus bas pour les traductions (plus précis)
+        temperature: 0.3,
         maxOutputTokens: 512
       }
     })
@@ -140,17 +192,17 @@ async function callGemini(userMessage, systemPrompt) {
 
 // ─── Appel OpenAI ─────────────────────────────────────────────────────────────
 async function callOpenAI(userMessage, systemPrompt) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('API_KEY manquante : OPENAI_API_KEY');
+  const apiKey = process.env.OPENAI_API_KEY || process.env.API_KEY;
+  if (!apiKey) throw new Error('Clé API OpenAI manquante : ajoutez OPENAI_API_KEY dans Vercel.');
 
   const response = await fetch(OPENAI_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
+      'Authorization': `Bearer ${apiKey.trim()}`
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: OPENAI_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage }
@@ -168,3 +220,4 @@ async function callOpenAI(userMessage, systemPrompt) {
   const data = await response.json();
   return data.choices?.[0]?.message?.content || 'Traduction indisponible.';
 }
+
