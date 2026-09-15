@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traduction - Tradition IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/masks.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/pdf_knowledge.js"></script>
+  <script src="js/common.js"></script>
+</head>
+<body>
+  <div class="bg-glow-container">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <div id="app">
+    <header class="navbar">
+      <a href="index.html" class="navbar-brand">
+        <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
+        <span>Tradition<span style="color: var(--primary);">IA</span></span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Accueil</a>
+        <a href="translate.html" class="nav-link active">Traduction</a>
+        <a href="ai-assistant.html" class="nav-link">Assistant IA</a>
+        <a href="dictionary.html" class="nav-link">Dictionnaire</a>
+        <a href="history.html" class="nav-link">Historique</a>
+        <a href="profile.html" class="nav-link">Mon Profil</a>
+      </nav>
+
+      <div id="nav-user-container">
+        <div class="nav-auth-buttons">
+          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
+          <a href="register.html" class="btn btn-primary" style="padding: 8px 16px;">S'inscrire</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout-container">
+      <main class="main-content">
+        <div class="page-header">
+          <div class="page-title-group">
+            <h1>Traducteur Intelligent</h1>
+            <p class="page-subtitle">Traduisez instantanément entre le Français et les langues gabonaises</p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="overflow: hidden;">
+          <div class="translation-box">
+            <!-- Source Box -->
+            <div style="border-right: 1px solid var(--border-color); padding: 24px;">
+              <div class="lang-select-bar">
+                <span class="badge badge-blue-pro">Langue Source</span>
+                <select id="translate-src-lang" class="form-select" style="width: auto; padding: 6px 12px; font-weight: 600;">
+                  <option value="Français">Français</option>
+                </select>
+              </div>
+              <textarea id="translate-source-text" class="translation-textarea" placeholder="Saisissez votre texte à traduire ici (ex: Bonjour, comment allez-vous ?)..."></textarea>
+              <div class="translation-actions">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button id="btn-voice-input" class="btn btn-secondary btn-icon" title="Parler au micro (Saisie vocale)">🎙️</button>
+                  <div id="voice-recording-status" class="voice-recording-status" style="display: none;">
+                    <span class="pulse-recording-dot"></span> Écoute en cours...
+                  </div>
+                  <span id="voice-recording-hint" style="font-size: 0.8rem; color: var(--text-dim);">Traduction instantanée IA</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <button id="btn-clear-source" class="btn btn-secondary" style="display: none; padding: 8px 14px; font-size: 0.88rem;" title="Effacer le texte">✕ Effacer</button>
+                  <button id="btn-do-translate" class="btn btn-primary">
+                    <span>Traduire</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target Box -->
+            <div style="padding: 24px;">
+              <div class="lang-select-bar">
+                <span class="badge badge-blue">Langue Cible</span>
+                <select id="translate-target-lang" class="form-select" style="width: auto; padding: 6px 12px; font-weight: 600;">
+                  <!-- Options chargées dynamiquement -->
+                </select>
+              </div>
+              <div class="target-box-wrapper">
+                <div id="target-mask-watermark" class="target-mask-watermark" style="background-image: url('images/fang.png');"></div>
+                <textarea id="translate-target-text" class="translation-textarea target-textarea-with-mask" placeholder="La traduction s'affichera ici..." readonly style="color: var(--primary); font-weight: 600;"></textarea>
+              </div>
+              <div class="translation-actions">
+                <div style="display: flex; gap: 8px;">
+                  <button id="btn-copy-translation" class="btn btn-secondary btn-icon" title="Copier">📋</button>
+                  <button id="btn-speak-translation" class="btn btn-secondary btn-icon" title="Écouter">🔊</button>
+                </div>
+                <span class="badge badge-gold">Moteur Tradition IA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const targetSelect = document.getElementById('translate-target-lang');
+      const srcInput = document.getElementById('translate-source-text');
+      const targetOutput = document.getElementById('translate-target-text');
+      const btnClear = document.getElementById('btn-clear-source');
+      const btnTranslate = document.getElementById('btn-do-translate');
+      const btnVoice = document.getElementById('btn-voice-input');
+      const voiceStatus = document.getElementById('voice-recording-status');
+      const voiceHint = document.getElementById('voice-recording-hint');
+      const watermarkEl = document.getElementById('target-mask-watermark');
+
+      // ─── Reconnaissance Vocale (Speech-to-Text) ──────────────────────────
+      let recognition = null;
+      let isRecording = false;
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'fr-FR';
+
+        recognition.onstart = () => {
+          isRecording = true;
+          if (btnVoice) btnVoice.classList.add('btn-recording-active');
+          if (voiceStatus) voiceStatus.style.display = 'inline-flex';
+          if (voiceHint) voiceHint.style.display = 'none';
+          if (window.showToast) window.showToast('Microphone activé : Parlez maintenant...');
+        };
+
+        recognition.onresult = (event) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          if (srcInput && transcript) {
+            srcInput.value = transcript;
+            handleSourceInputChange();
+          }
+        };
+
+        recognition.onerror = (event) => {
+          console.warn('[SpeechRecognition Error]', event.error);
+          stopVoiceRecording();
+          if (window.showToast) {
+            if (event.error === 'not-allowed') {
+              window.showToast('Accès au micro refusé. Veuillez autoriser le microphone.', 'error');
+            } else if (event.error === 'no-speech') {
+              window.showToast('Aucune voix détectée.', 'info');
+            } else {
+              window.showToast('Erreur micro : ' + event.error, 'error');
+            }
+          }
+        };
+
+        recognition.onend = () => {
+          stopVoiceRecording();
+          if (srcInput && srcInput.value.trim()) {
+            handleSourceInputChange();
+            // Optionnel : Déclencher la traduction automatiquement après la parole
+            btnTranslate?.click();
+          }
+        };
+      }
+
+      function stopVoiceRecording() {
+        isRecording = false;
+        if (btnVoice) btnVoice.classList.remove('btn-recording-active');
+        if (voiceStatus) voiceStatus.style.display = 'none';
+        if (voiceHint) voiceHint.style.display = 'inline-block';
+      }
+
+      btnVoice?.addEventListener('click', () => {
+        if (!SpeechRecognition) {
+          if (window.showToast) window.showToast('La reconnaissance vocale n\'est pas supportée sur ce navigateur.', 'error');
+          return;
+        }
+
+        if (isRecording) {
+          recognition.stop();
+          stopVoiceRecording();
+        } else {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.error(e);
+            stopVoiceRecording();
+          }
+        }
+      });
+
+      // ─── Mise à jour du masque en fond de texte ──────────────────────────
+      function updateTargetMask() {
+        if (!watermarkEl) return;
+        const targetLang = targetSelect ? targetSelect.value : 'Fang';
+        const maskUrl = (window.Masks && typeof window.Masks.getImage === 'function')
+          ? window.Masks.getImage(targetLang)
+          : `images/${targetLang.toLowerCase()}.png`;
+        watermarkEl.style.backgroundImage = `url('${maskUrl}')`;
+      }
+
+      targetSelect?.addEventListener('change', updateTargetMask);
+
+      // ─── Application de la langue depuis l'URL ──────────────────────────
+      function applyTargetLangFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetParam = urlParams.get('target') || urlParams.get('to') || urlParams.get('lang');
+        if (!targetParam && window.location.hash.includes('target=')) {
+          const hashQuery = window.location.hash.split('?')[1];
+          if (hashQuery) {
+            const hashParams = new URLSearchParams(hashQuery);
+            targetParam = hashParams.get('target') || hashParams.get('to') || hashParams.get('lang');
+          }
+        }
+
+        if (targetParam && targetSelect && targetSelect.options.length > 0) {
+          const searchVal = decodeURIComponent(targetParam).trim().toLowerCase();
+          for (let i = 0; i < targetSelect.options.length; i++) {
+            const opt = targetSelect.options[i];
+            if (opt.value.toLowerCase() === searchVal || opt.text.toLowerCase() === searchVal) {
+              targetSelect.selectedIndex = i;
+              break;
+            }
+          }
+        }
+        updateTargetMask();
+      }
+
+      // ─── Remplissage des langues disponibles ─────────────────────────────
+      function populateLanguages(languages) {
+        if (!targetSelect || !languages || !languages.length) return;
+        const currentSelected = targetSelect.value;
+        targetSelect.innerHTML = languages.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+        if (currentSelected) {
+          targetSelect.value = currentSelected;
+        }
+        applyTargetLangFromUrl();
+      }
+
+      const initialLangs = (window.Store && window.Store.languages && window.Store.languages.length)
+        ? window.Store.languages
+        : (window.MOCK_LANGUAGES || []);
+      populateLanguages(initialLangs);
+
+      if (window.Store) {
+        await window.Store.loadInitialData();
+        if (window.Store.languages && window.Store.languages.length) {
+          populateLanguages(window.Store.languages);
+        }
+      }
+
+      // ─── Effacement automatique de la langue cible ───────────────────────
+      function handleSourceInputChange() {
+        const text = srcInput.value;
+        if (!text.trim()) {
+          targetOutput.value = '';
+          if (btnClear) btnClear.style.display = 'none';
+        } else {
+          if (btnClear) btnClear.style.display = 'inline-flex';
+        }
+      }
+
+      srcInput?.addEventListener('input', handleSourceInputChange);
+      srcInput?.addEventListener('keyup', handleSourceInputChange);
+      srcInput?.addEventListener('change', handleSourceInputChange);
+      srcInput?.addEventListener('paste', () => setTimeout(handleSourceInputChange, 50));
+
+      // Bouton Effacer
+      btnClear?.addEventListener('click', () => {
+        if (srcInput) srcInput.value = '';
+        if (targetOutput) targetOutput.value = '';
+        if (btnClear) btnClear.style.display = 'none';
+        srcInput?.focus();
+      });
+
+      // ─── Lancement de la traduction ──────────────────────────────────────
+      btnTranslate?.addEventListener('click', async () => {
+        const text = srcInput.value;
+        const targetLang = targetSelect ? targetSelect.value : 'Fang';
+        if (!text.trim()) {
+          targetOutput.value = '';
+          return;
+        }
+
+        btnTranslate.innerHTML = `<span>Traduction...</span>`;
+        btnTranslate.disabled = true;
+
+        try {
+          if (window.Store && typeof window.Store.translateText === 'function') {
+            const res = await window.Store.translateText(text, 'Français', targetLang);
+            targetOutput.value = res;
+          } else {
+            targetOutput.value = `[Traduction ${targetLang}] ${text}`;
+          }
+          if (window.showToast) window.showToast('Traduction effectuée avec succès !');
+        } catch (e) {
+          console.error(e);
+        } finally {
+          btnTranslate.innerHTML = `<span>Traduire</span>`;
+          btnTranslate.disabled = false;
+        }
+      });
+
+      // ─── Copier la traduction ────────────────────────────────────────────
+      document.getElementById('btn-copy-translation')?.addEventListener('click', () => {
+        if (targetOutput.value) {
+          navigator.clipboard.writeText(targetOutput.value);
+          if (window.showToast) window.showToast('Texte copié dans le presse-papier !');
+        }
+      });
+
+      // ─── Écouter la prononciation audio ──────────────────────────────────
+      document.getElementById('btn-speak-translation')?.addEventListener('click', () => {
+        if (targetOutput.value && window.speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(targetOutput.value);
+          utterance.lang = 'fr-FR';
+          window.speechSynthesis.speak(utterance);
+          if (window.showToast) window.showToast('Lecture de la prononciation audio...');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
