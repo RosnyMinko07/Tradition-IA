@@ -73,6 +73,19 @@ body {
   overflow-x: hidden;
 }
 
+/* --- PAGES AUTH : pas de scroll, contenu centré dans l'écran --- */
+html:has(body.auth-body) {
+  overflow: hidden;
+  height: 100%;
+}
+
+body.auth-body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 /* --- PAGE TRANSITION ANIMATION --- */
 .main-content, #app-content, .page-view {
   animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);

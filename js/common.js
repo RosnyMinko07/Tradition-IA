@@ -217,6 +217,8 @@ function initSmoothPageTransitions() {
 }
 
 function initCommonFooter() {
+  // Pas de footer sur les pages d'authentification (login, register, forgot-password)
+  if (document.body.classList.contains('auth-body')) return;
   if (document.querySelector('.site-footer')) return;
 
   const footerHtml = `
