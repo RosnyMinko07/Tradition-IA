@@ -65,8 +65,8 @@
             Explorez les langues gabonaises, traduisez instantanément des phrases et interagissez avec l'assistant IA spécialisé.
           </p>
           <div style="display: flex; gap: 12px;">
-            <a href="translate.html" class="btn btn-primary">🔤 Traduire un texte</a>
-            <a href="ai-assistant.html" class="btn btn-secondary">🤖 Assistant IA</a>
+            <a href="translate.html" class="btn btn-primary">Traduire un texte</a>
+            <a href="ai-assistant.html" class="btn btn-secondary"> Assistant IA</a>
           </div>
         </div>
 
@@ -76,28 +76,28 @@
               <div style="color: var(--text-muted); font-size: 0.85rem;">Traductions Effectuées</div>
               <div class="stat-val" style="color: var(--primary);" id="dash-translations-count">0</div>
             </div>
-            <div class="stat-icon" style="background: rgba(59,130,246,0.15); color: var(--primary);">🔤</div>
+            <div class="stat-icon" style="background: rgba(59,130,246,0.15); color: var(--primary);"></div>
           </div>
           <div class="glass-card stat-card">
             <div>
               <div style="color: var(--text-muted); font-size: 0.85rem;">Langues Disponibles</div>
               <div class="stat-val" style="color: var(--blue);" id="dash-languages-count">8</div>
             </div>
-            <div class="stat-icon" style="background: rgba(14,165,233,0.15); color: var(--blue);">🗣️</div>
+            <div class="stat-icon" style="background: rgba(14,165,233,0.15); color: var(--blue);"></div>
           </div>
           <div class="glass-card stat-card">
             <div>
               <div style="color: var(--text-muted); font-size: 0.85rem;">Langue Préférée</div>
               <div class="stat-val" style="color: var(--gold); font-size: 1.4rem;" id="dash-pref-lang">Fang</div>
             </div>
-            <div class="stat-icon" style="background: rgba(245,158,11,0.15); color: var(--gold);">⭐</div>
+            <div class="stat-icon" style="background: rgba(245,158,11,0.15); color: var(--gold);"></div>
           </div>
           <div class="glass-card stat-card">
             <div>
               <div style="color: var(--text-muted); font-size: 0.85rem;">Niveau d'Apprentissage</div>
               <div class="stat-val" style="color: var(--text-main); font-size: 1.3rem;">Intermédiaire</div>
             </div>
-            <div class="stat-icon" style="background: rgba(255,255,255,0.1); color: var(--text-main);">🎓</div>
+            <div class="stat-icon" style="background: rgba(255,255,255,0.1); color: var(--text-main);"></div>
           </div>
         </div>
 
@@ -136,7 +136,7 @@
         const translations = window.Store.translations || [];
 
         if (user) {
-          document.getElementById('dash-welcome-title').innerText = `Bonjour ${user.name} ! 👋`;
+          document.getElementById('dash-welcome-title').innerText = `Bonjour ${user.name} ! `;
           document.getElementById('dash-pref-lang').innerText = user.preferredLang || 'Fang';
         }
 

@@ -132,26 +132,10 @@
               </div>
             </div>
 
-            <div class="chat-header-actions">
-              <select id="chat-persona-mode" class="chat-mode-select" title="Choisir le rôle de l'assistant">
-                <option value="tuteur">🎓 Mode Tuteur Linguistique</option>
-                <option value="culture">🏛️ Mode Guide Culturel & Rites</option>
-                <option value="traducteur">⚡ Mode Traduction & Vocabulaire</option>
-              </select>
-              <button id="btn-toggle-tts" class="btn btn-secondary btn-icon" title="Activer/Désactiver la lecture vocale automatique" style="font-size: 0.85rem;">🔊</button>
-              <button id="btn-clear-chat" class="btn btn-secondary btn-icon" title="Effacer la conversation" style="font-size: 0.85rem;">🗑️</button>
-            </div>
+            
           </div>
 
-          <!-- Suggestions rapides -->
-          <div class="chat-suggestions" id="chat-suggestions">
-            <button class="suggestion-chip" data-question="Comment dit-on 'Bonjour' et 'Merci' dans les 9 langues du Gabon ?">👋 Salutations 9 langues</button>
-            <button class="suggestion-chip" data-question="Explique-moi les règles de grammaire et prononciation en Fang">📚 Grammaire Fang</button>
-            <button class="suggestion-chip" data-question="Raconte-moi l'histoire et la symbolique du masque Mukudj Punu">🎭 Masque Mukudj Punu</button>
-            <button class="suggestion-chip" data-question="Donne-moi 5 proverbes ancestraux gabonais avec leur signification">📜 Proverbes gabonais</button>
-            <button class="suggestion-chip" data-question="Comment compter de 1 à 10 en Nzébi et en Myènè ?">🔢 Compter en Nzébi/Myènè</button>
-            <button class="suggestion-chip" data-question="Quelles sont les traditions et rites du peuple Téké ?">🏛️ Culture Téké</button>
-          </div>
+          
 
           <!-- Liste des messages -->
           <div id="chat-messages-list" class="chat-messages">
@@ -220,8 +204,8 @@
           window.Store.chatMessages = [
             {
               id: 'init_' + Date.now(),
-              role: 'assistant',
-              text: 'Mbolo ! 🇬🇦 Je suis votre assistant Tradition IA. Posez-moi vos questions sur la grammaire, le vocabulaire ou la culture gabonaise !',
+              role: 'assistant',                                                                   
+              text: '',
               time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             }
           ];
@@ -349,7 +333,7 @@
 
       } catch (error) {
         removeTypingIndicator();
-        const errMsg = `❌ Erreur : ${error.message || 'Impossible de joindre le serveur IA.'}`;
+        const errMsg = `Erreur : ${error.message || 'Impossible de joindre le serveur IA.'}`;
         if (window.Store) {
           window.Store.addChatMessage('assistant', errMsg);
         }
@@ -430,7 +414,7 @@
         const isUser = m.role === 'user';
         const msgTime = m.time || currentTime;
         const rawText = m.text || '';
-        const isError = rawText.startsWith('❌');
+        const isError = rawText.startsWith('Erreur :') || rawText.startsWith('❌');
 
         if (isUser) {
           return `
