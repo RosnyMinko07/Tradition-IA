@@ -26,7 +26,7 @@
       max-width: 960px;
       margin: 12px auto 20px;
       padding: 0 16px;
-      height: calc(100vh - 105px);
+      height: calc(100vh - 110px);
       min-height: 580px;
       display: flex;
       flex-direction: column;
@@ -617,7 +617,9 @@
   </div>
 
   <script>
-    const IS_DEPLOYED = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+    const IS_DEPLOYED = window.location.protocol === 'https:' || 
+                        window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1';
     const API_CHAT_URL = '/api/chat';
 
     let isWaiting = false;
@@ -625,21 +627,20 @@
     let recognition = null;
     let isVoiceRecording = false;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (window.Store) {
-        await window.Store.loadInitialData();
-        renderChat();
-        window.Store.subscribe(renderChat);
-      }
-
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Attacher immédiatement les interactions utilisateur
       const btnSend = document.getElementById('btn-chat-send');
       const input = document.getElementById('chat-input-text');
       const btnVoice = document.getElementById('btn-chat-voice');
       const btnClearChat = document.getElementById('btn-clear-chat');
       const btnToggleTTS = document.getElementById('btn-toggle-tts');
 
-      btnSend?.addEventListener('click', handleSend);
-      input?.addEventListener('keypress', (e) => {
+      btnSend?.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleSend();
+      });
+
+      input?.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSend();
@@ -650,9 +651,9 @@
       btnClearChat?.addEventListener('click', () => {
         if (window.Store) {
           window.Store.chatMessages = [];
-          renderChat();
-          if (window.showToast) window.showToast('Nouvelle discussion démarrée.');
         }
+        renderChat();
+        if (window.showToast) window.showToast('Nouvelle discussion démarrée.');
       });
 
       // Synthèse Vocale Toggle
@@ -663,6 +664,17 @@
           window.showToast(autoSpeakTTS ? 'Lecture vocale ACTIVÉE' : 'Lecture vocale DÉSACTIVÉE');
         }
       });
+
+      // Initialisation du Store en tâche de fond sécurisée
+      if (window.Store) {
+        if (typeof window.Store.subscribe === 'function') {
+          window.Store.subscribe(renderChat);
+        }
+        if (typeof window.Store.loadInitialData === 'function') {
+          window.Store.loadInitialData().then(() => renderChat()).catch(console.error);
+        }
+      }
+      renderChat();
 
       // Reconnaissance Vocale
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -738,17 +750,27 @@
       const btnSend = document.getElementById('btn-chat-send');
       if (btnSend) btnSend.disabled = true;
 
-      // Ajouter le message utilisateur
+      // Ajouter le message utilisateur et mettre à jour la vue immédiatement
       if (window.Store) {
         window.Store.addChatMessage('user', txt);
       }
+      renderChat();
 
       showTypingIndicator();
 
       try {
         let aiReply;
         if (IS_DEPLOYED) {
-          aiReply = await fetchAIResponse(txt);
+          try {
+            aiReply = await fetchAIResponse(txt);
+          } catch (fetchErr) {
+            // Si l'API renvoie une erreur ou est injoignable, vérifier si fallback local dispo
+            if (window.location.protocol === 'file:' || fetchErr.message?.includes('Failed to fetch')) {
+              aiReply = generateLocalResponse(txt);
+            } else {
+              throw fetchErr;
+            }
+          }
         } else {
           aiReply = generateLocalResponse(txt);
         }
@@ -758,6 +780,7 @@
         if (window.Store) {
           window.Store.addChatMessage('assistant', aiReply);
         }
+        renderChat();
 
         if (autoSpeakTTS && window.speechSynthesis) {
           speakText(aiReply);
@@ -769,6 +792,7 @@
         if (window.Store) {
           window.Store.addChatMessage('assistant', errMsg);
         }
+        renderChat();
         console.error('[AI Chat Error]', error);
       }
 

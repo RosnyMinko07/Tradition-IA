@@ -13,6 +13,19 @@ class AppStore {
     this.aiSuggestions = [];
     this.usersList = [];
     this.chatMessages = [];
+    this.listeners = [];
+  }
+
+  subscribe(listener) {
+    if (typeof listener === 'function') {
+      this.listeners.push(listener);
+    }
+  }
+
+  notify() {
+    this.listeners.forEach(fn => {
+      try { fn(); } catch(e) { console.error('[Store Notify Error]', e); }
+    });
   }
 
   async loadInitialData() {
@@ -56,6 +69,7 @@ class AppStore {
   addChatMessage(role, text) {
     const msg = { id: Date.now().toString(), role, text };
     this.chatMessages.push(msg);
+    this.notify();
     return msg;
   }
 
