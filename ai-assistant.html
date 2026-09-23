@@ -617,9 +617,8 @@
   </div>
 
   <script>
-    const IS_DEPLOYED = window.location.protocol === 'https:' || 
-                        window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1';
+    // Utilise l'API serveur dès qu'on est sur un vrai serveur (pas ouvert en file://)
+    const IS_DEPLOYED = window.location.protocol !== 'file:';
     const API_CHAT_URL = '/api/chat';
 
     let isWaiting = false;
@@ -761,17 +760,10 @@
       try {
         let aiReply;
         if (IS_DEPLOYED) {
-          try {
-            aiReply = await fetchAIResponse(txt);
-          } catch (fetchErr) {
-            // Si l'API renvoie une erreur ou est injoignable, vérifier si fallback local dispo
-            if (window.location.protocol === 'file:' || fetchErr.message?.includes('Failed to fetch')) {
-              aiReply = generateLocalResponse(txt);
-            } else {
-              throw fetchErr;
-            }
-          }
+          // Sur le serveur : appel direct à l'API Gemini via /api/chat
+          aiReply = await fetchAIResponse(txt);
         } else {
+          // En local (file://) : réponse de secours
           aiReply = generateLocalResponse(txt);
         }
 

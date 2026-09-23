@@ -14,7 +14,7 @@
 const { buildSystemPrompt } = require('./_knowledge');
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+const DEFAULT_MODEL = 'gemini-2.0-flash';
 
 module.exports = async function handler(req, res) {
   // CORS
