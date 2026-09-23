@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assistant IA - Tradition IA</title>
-  <meta name="description" content="Assistant virtuel intelligent pour les langues gabonaises. Posez vos questions sur la grammaire, la culture et le vocabulaire Fang, Punu, Myènè et plus.">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <title>Mbolo IA — Assistant Virtuel du Gabon</title>
+  <meta name="description" content="Assistant virtuel intelligent pour les langues gabonaises. Échangez sur la grammaire, la culture et le vocabulaire du Gabon.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
@@ -16,63 +18,514 @@
   <script src="js/common.js"></script>
 
   <style>
-    /* ── Typing animation ── */
-    .typing-indicator {
+    /* ═══════════════════════════════════════════════════════════════
+       ASSISTANT IA — MODERN MINIMALIST DESIGN (Claude / Gemini Style)
+       ═══════════════════════════════════════════════════════════════ */
+    
+    .chat-layout {
+      max-width: 960px;
+      margin: 12px auto 20px;
+      padding: 0 16px;
+      height: calc(100vh - 105px);
+      min-height: 580px;
       display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 12px 16px;
-    }
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-      animation: typingBounce 1.2s infinite ease-in-out;
-    }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-      30% { transform: translateY(-8px); opacity: 1; }
+      flex-direction: column;
     }
 
-    /* ── Suggestions rapides ── */
-    .chat-suggestions {
+    .chat-shell {
+      flex: 1;
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px 16px 0;
+      flex-direction: column;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      position: relative;
     }
-    .suggestion-chip {
-      background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: var(--primary);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+
+    [data-theme="light"] .chat-shell {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    /* ── Header épuré ── */
+    .chat-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(11, 14, 20, 0.45);
+      gap: 12px;
+    }
+
+    [data-theme="light"] .chat-nav-header {
+      background: rgba(248, 250, 252, 0.8);
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+    }
+
+    .chat-header-identity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header-avatar {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(59, 130, 246, 0.2));
+      border: 1.5px solid rgba(245, 158, 11, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .chat-header-avatar img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .status-dot-pulse {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10B981;
+      border: 2px solid #0b0e14;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    [data-theme="light"] .status-dot-pulse {
+      border-color: #ffffff;
+    }
+
+    .chat-header-meta h2 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .chat-header-meta p {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .chat-top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      white-space: nowrap;
+      outline: none;
     }
-    .suggestion-chip:hover {
-      background: rgba(59, 130, 246, 0.25);
+
+    [data-theme="light"] .chat-icon-btn {
+      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .chat-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
       transform: translateY(-1px);
     }
 
-    /* ── Chat bubble source badge ── */
-    .chat-badge {
-      font-size: 0.68rem;
-      opacity: 0.6;
-      margin-top: 4px;
-      display: block;
+    .chat-icon-btn.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--gold);
+      color: var(--gold);
     }
 
-    /* ── Error bubble ── */
-    .chat-bubble-error {
-      background: rgba(239, 68, 68, 0.1) !important;
-      border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    /* ── Zone centrale des messages ── */
+    .chat-messages-container {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    /* ── Écran d'accueil quand chat vide (Zero clutter) ── */
+    .chat-welcome-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 20px;
+      animation: fadeIn 0.4s ease;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .welcome-emblem {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(59, 130, 246, 0.15));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.2);
+    }
+
+    .welcome-emblem img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+
+    .welcome-heading {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .welcome-subheading {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+
+    /* ── Bulles de conversation ── */
+    .msg-row {
+      display: flex;
+      gap: 12px;
+      max-width: 82%;
+      animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @media (max-width: 640px) {
+      .msg-row { max-width: 94%; }
+    }
+
+    .msg-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-row.ai {
+      align-self: flex-start;
+    }
+
+    .msg-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .msg-avatar.user-av {
+      background: linear-gradient(135deg, #334155, #1e293b);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .msg-avatar.ai-av {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .msg-avatar.ai-av img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .msg-bubble-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .msg-bubble {
+      padding: 13px 18px;
+      border-radius: 18px;
+      font-size: 0.94rem;
+      line-height: 1.6;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .msg-row.user .msg-bubble {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+    }
+
+    .msg-row.ai .msg-bubble {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-bottom-left-radius: 4px;
+      backdrop-filter: blur(10px);
+    }
+
+    [data-theme="light"] .msg-row.ai .msg-bubble {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    }
+
+    .msg-bubble strong {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    [data-theme="light"] .msg-bubble strong {
+      color: #b45309;
+    }
+
+    .msg-bubble-error {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
       color: #fca5a5 !important;
+    }
+
+    /* Actions discrètes sous la bulle */
+    .msg-micro-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 4px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .msg-row.user .msg-micro-meta {
+      justify-content: flex-end;
+    }
+
+    .msg-inline-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .msg-row.ai:hover .msg-inline-actions {
+      opacity: 1;
+    }
+
+    .msg-action-link {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .msg-action-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="light"] .msg-action-link:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* ── Indicateur de frappe ── */
+    .typing-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 14px;
+    }
+
+    .typing-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: dotPulse 1.3s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dotPulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Barre de saisie type ChatGPT / Gemini ── */
+    .chat-bottom-dock {
+      padding: 14px 20px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(11, 14, 20, 0.45);
+    }
+
+    [data-theme="light"] .chat-bottom-dock {
+      background: rgba(248, 250, 252, 0.85);
+      border-top-color: rgba(0, 0, 0, 0.06);
+    }
+
+    .chat-input-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 30px;
+      padding: 6px 8px 6px 14px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    [data-theme="light"] .chat-input-pill {
+      background: #ffffff;
+      border-color: rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+
+    .chat-input-pill:focus-within {
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15), 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    [data-theme="light"] .chat-input-pill:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-voice-pill {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-voice-pill:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-voice-pill.recording {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.15);
+      animation: pulseRecord 1.2s infinite;
+    }
+
+    @keyframes pulseRecord {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .chat-text-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.94rem;
+      outline: none;
+      padding: 8px 4px;
+      font-family: inherit;
+    }
+
+    .chat-text-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .btn-send-pill {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
+      color: #0b0e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-send-pill:hover:not(:disabled) {
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-send-pill:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .chat-footer-disclaimer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -83,6 +536,7 @@
   </div>
 
   <div id="app">
+    <!-- Navbar globale -->
     <header class="navbar">
       <a href="index.html" class="navbar-brand">
         <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
@@ -100,7 +554,7 @@
 
       <div id="nav-user-container">
         <div class="nav-auth-buttons">
-          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
+          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Changer de thème" aria-label="Changer de thème">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </button>
           <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
@@ -109,55 +563,56 @@
       </div>
     </header>
 
-    <div class="layout-container">
-      <main class="main-content" style="max-width: 1000px; margin: 0 auto; width: 100%;">
-        <div class="page-header">
-          <div class="page-title-group">
-            <h1>Assistant Virtuel IA</h1>
-            <p class="page-subtitle">Posez vos questions sur la grammaire, la culture et le vocabulaire des langues gabonaises. Propulsé par IA avec connaissance des langues locales.</p>
-          </div>
-        </div>
+    <!-- Shell Conversationnel -->
+    <div class="chat-layout">
+      <div class="chat-shell">
 
-        <div class="glass-card chat-container">
-          <!-- Chat Header Bar -->
-          <div class="chat-header-bar">
-            <div class="chat-header-left">
-              <div class="chat-avatar-wrapper">
-                <img src="images/tradiia_icon.png" alt="Assistant Tradition IA" class="chat-avatar-img">
-                <div class="chat-status-indicator" title="En ligne"></div>
-              </div>
-              <div class="chat-header-info">
-                <h3>Assistant Tradition IA <span class="badge badge-gold" style="font-size: 0.7rem; padding: 2px 7px;">v2.0 Pro</span></h3>
-                <p>Spécialiste du patrimoine linguistique & culturel du Gabon</p>
-              </div>
+        <!-- En-tête épuré -->
+        <div class="chat-nav-header">
+          <div class="chat-header-identity">
+            <div class="chat-header-avatar">
+              <img src="images/tradiia_icon.png" alt="Mbolo IA" />
+              <div class="status-dot-pulse" title="Mbolo IA est disponible"></div>
             </div>
-
-            
+            <div class="chat-header-meta">
+              <h2>Mbolo IA</h2>
+              <p>Assistant du patrimoine gabonais</p>
+            </div>
           </div>
 
-          
-
-          <!-- Liste des messages -->
-          <div id="chat-messages-list" class="chat-messages">
-            <!-- Messages chargés par script -->
-          </div>
-
-          <!-- Barre de saisie -->
-          <div class="chat-input-bar">
-            <button id="btn-chat-voice" class="btn btn-secondary btn-icon" title="Parler au micro (Saisie vocale)">🎙️</button>
-            <div id="chat-voice-status" class="voice-recording-status" style="display: none;">
-              <span class="pulse-recording-dot"></span> Écoute en cours...
-            </div>
-            <div class="chat-input-field-wrapper">
-              <input type="text" id="chat-input-text" class="form-input"
-                placeholder="Posez une question à l'IA (ex: Comment dire 'bienvenue' en Fang, les rites Obamba...)">
-            </div>
-            <button id="btn-chat-send" class="btn btn-primary" aria-label="Envoyer">
-              <span>Envoyer</span> ➔
+          <div class="chat-top-actions">
+            <button id="btn-toggle-tts" class="chat-icon-btn" title="Lecture audio automatique" aria-label="Lecture audio automatique">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <button id="btn-clear-chat" class="chat-icon-btn" title="Nouvelle discussion" aria-label="Nouvelle discussion">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
             </button>
           </div>
         </div>
-      </main>
+
+        <!-- Zone des messages ou accueil -->
+        <div id="chat-messages-list" class="chat-messages-container">
+          <!-- Dynamique via JS -->
+        </div>
+
+        <!-- Barre de prompt moderne -->
+        <div class="chat-bottom-dock">
+          <div class="chat-input-pill">
+            <button id="btn-chat-voice" class="btn-voice-pill" title="Saisie vocale au micro" aria-label="Saisie vocale">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+
+            <input type="text" id="chat-input-text" class="chat-text-input"
+              placeholder="Posez une question sur les langues gabonaises..." autocomplete="off">
+
+            <button id="btn-chat-send" class="btn-send-pill" title="Envoyer le message" aria-label="Envoyer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
+          <p class="chat-footer-disclaimer">Mbolo IA est propulsé par Gemini & la base de connaissances du Gabon.</p>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -182,49 +637,34 @@
       const btnVoice = document.getElementById('btn-chat-voice');
       const btnClearChat = document.getElementById('btn-clear-chat');
       const btnToggleTTS = document.getElementById('btn-toggle-tts');
-      const personaSelect = document.getElementById('chat-persona-mode');
 
       btnSend?.addEventListener('click', handleSend);
-      input?.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) handleSend(); });
-
-      // Suggestions rapides
-      document.querySelectorAll('.suggestion-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          const q = chip.getAttribute('data-question');
-          if (q) {
-            document.getElementById('chat-input-text').value = q;
-            handleSend();
-          }
-        });
+      input?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
       });
 
-      // Effacer la conversation
+      // Bouton effacer / nouvelle discussion
       btnClearChat?.addEventListener('click', () => {
         if (window.Store) {
-          window.Store.chatMessages = [
-            {
-              id: 'init_' + Date.now(),
-              role: 'assistant',                                                                   
-              text: '',
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ];
+          window.Store.chatMessages = [];
           renderChat();
-          if (window.showToast) window.showToast('Discussion réinitialisée.');
+          if (window.showToast) window.showToast('Nouvelle discussion démarrée.');
         }
       });
 
-      // Toggle Synthèse Vocale
+      // Synthèse Vocale Toggle
       btnToggleTTS?.addEventListener('click', () => {
         autoSpeakTTS = !autoSpeakTTS;
-        btnToggleTTS.style.background = autoSpeakTTS ? 'rgba(245, 158, 11, 0.25)' : '';
-        btnToggleTTS.style.borderColor = autoSpeakTTS ? 'var(--gold)' : '';
+        btnToggleTTS.classList.toggle('active', autoSpeakTTS);
         if (window.showToast) {
-          window.showToast(autoSpeakTTS ? 'Lecture vocale automatique ACTIVÉE' : 'Lecture vocale automatique DÉSACTIVÉE');
+          window.showToast(autoSpeakTTS ? 'Lecture vocale ACTIVÉE' : 'Lecture vocale DÉSACTIVÉE');
         }
       });
 
-      // Reconnaissance Vocale pour le Chat
+      // Reconnaissance Vocale
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         recognition = new SpeechRecognition();
@@ -234,9 +674,8 @@
 
         recognition.onstart = () => {
           isVoiceRecording = true;
-          btnVoice?.classList.add('btn-recording-active');
-          document.getElementById('chat-voice-status').style.display = 'inline-flex';
-          if (window.showToast) window.showToast('Microphone activé : Parlez à l\'IA...');
+          btnVoice?.classList.add('recording');
+          if (window.showToast) window.showToast('Microphone actif : parlez...');
         };
 
         recognition.onresult = (event) => {
@@ -251,7 +690,7 @@
 
         recognition.onerror = (event) => {
           stopChatVoice();
-          if (window.showToast) window.showToast('Erreur microphone : ' + event.error, 'error');
+          if (window.showToast) window.showToast('Erreur micro : ' + event.error, 'error');
         };
 
         recognition.onend = () => {
@@ -264,14 +703,12 @@
 
       function stopChatVoice() {
         isVoiceRecording = false;
-        btnVoice?.classList.remove('btn-recording-active');
-        const statusEl = document.getElementById('chat-voice-status');
-        if (statusEl) statusEl.style.display = 'none';
+        btnVoice?.classList.remove('recording');
       }
 
       btnVoice?.addEventListener('click', () => {
         if (!SpeechRecognition) {
-          if (window.showToast) window.showToast('Reconnaissance vocale non disponible sur ce navigateur.', 'error');
+          if (window.showToast) window.showToast('Reconnaissance vocale non supportée par votre navigateur.', 'error');
           return;
         }
         if (isVoiceRecording) {
@@ -289,19 +726,17 @@
     });
 
     // ─── Envoi d'un message ────────────────────────────────────────────────────
-    async function handleSend() {
+    async function handleSend(customText) {
       if (isWaiting) return;
 
       const input = document.getElementById('chat-input-text');
-      const txt = input.value.trim();
+      const txt = (typeof customText === 'string' ? customText : (input?.value || '')).trim();
       if (!txt) return;
 
       isWaiting = true;
-      input.value = '';
+      if (input) input.value = '';
       const btnSend = document.getElementById('btn-chat-send');
       if (btnSend) btnSend.disabled = true;
-
-      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       // Ajouter le message utilisateur
       if (window.Store) {
@@ -312,12 +747,10 @@
 
       try {
         let aiReply;
-        const persona = document.getElementById('chat-persona-mode')?.value || 'tuteur';
-
         if (IS_DEPLOYED) {
-          aiReply = await fetchAIResponse(txt, persona);
+          aiReply = await fetchAIResponse(txt);
         } else {
-          aiReply = generateLocalResponse(txt, persona);
+          aiReply = generateLocalResponse(txt);
         }
 
         removeTypingIndicator();
@@ -326,7 +759,6 @@
           window.Store.addChatMessage('assistant', aiReply);
         }
 
-        // Lecture vocale si activée
         if (autoSpeakTTS && window.speechSynthesis) {
           speakText(aiReply);
         }
@@ -345,17 +777,17 @@
       document.getElementById('chat-input-text')?.focus();
     }
 
-    // ─── Appel à l'API Vercel ──────────────────────────────────────────────────
-    async function fetchAIResponse(message, persona) {
+    // ─── Appel à l'API /api/chat ──────────────────────────────────────────────
+    async function fetchAIResponse(message) {
       const history = (window.Store?.chatMessages || [])
-        .filter(m => m.id !== '1' && !m.id?.startsWith('init_'))
-        .slice(-16)
+        .filter(m => m.text?.trim() && !m.text.startsWith('Erreur :'))
+        .slice(-12)
         .map(m => ({ role: m.role, text: m.text }));
 
       const response = await fetch(API_CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history, persona })
+        body: JSON.stringify({ message, history, persona: 'tuteur' })
       });
 
       const data = await response.json();
@@ -365,34 +797,33 @@
       return data.reply;
     }
 
-    // ─── Fallback local avec extraction des connaissances PDF ──────────────────
-    function generateLocalResponse(txt, persona) {
+    // ─── Fallback local si offline ─────────────────────────────────────────────
+    function generateLocalResponse(txt) {
       if (window.generateAIResponseFromPDF) {
         return window.generateAIResponseFromPDF(txt);
       }
-      return `Mbolo ! 🇬🇦\n\nJ'ai bien analysé votre demande concernant **"${txt}"**.\n\nEn langues locales du Gabon, chaque mot et expression porte une profonde valeur culturelle.\n\nN'hésitez pas à explorer notre dictionnaire intégré ou à demander d'autres traductions !`;
+      return `Mbolo ! 🇬🇦 Concernant **"${txt}"** : nos 9 langues gabonaises (Fang, Punu, Myènè, Nzébi, Téké, Vili, Guisir, Kota, Obamba) expriment toutes une grande sagesse.\n\nPosez-moi une question sur le vocabulaire ou la prononciation !`;
     }
 
-    // ─── Indicateur de frappe (typing...) ─────────────────────────────────────
+    // ─── Indicateur de frappe ──────────────────────────────────────────────────
     function showTypingIndicator() {
       const container = document.getElementById('chat-messages-list');
       if (!container) return;
       const typingDiv = document.createElement('div');
       typingDiv.id = 'typing-indicator-bubble';
-      typingDiv.className = 'chat-msg-row ai-row';
+      typingDiv.className = 'msg-row ai';
       typingDiv.innerHTML = `
-        <div class="chat-msg-avatar ai-avatar">
-          <img src="images/tradiia_icon.png" alt="IA">
+        <div class="msg-avatar ai-av">
+          <img src="images/tradiia_icon.png" alt="Mbolo IA">
         </div>
-        <div class="chat-bubble-wrapper">
-          <div class="chat-bubble chat-bubble-ai">
-            <div class="typing-indicator">
+        <div class="msg-bubble-box">
+          <div class="msg-bubble">
+            <div class="typing-pill">
               <div class="typing-dot"></div>
               <div class="typing-dot"></div>
               <div class="typing-dot"></div>
             </div>
           </div>
-          <span style="font-size: 0.72rem; color: var(--text-dim);">L'IA consulte la base linguistique...</span>
         </div>`;
       container.appendChild(typingDiv);
       container.scrollTop = container.scrollHeight;
@@ -402,12 +833,28 @@
       document.getElementById('typing-indicator-bubble')?.remove();
     }
 
-    // ─── Rendu interactif du chat ──────────────────────────────────────────────
+    // ─── Rendu principal ───────────────────────────────────────────────────────
     function renderChat() {
       const container = document.getElementById('chat-messages-list');
       if (!container || !window.Store) return;
 
       const msgs = window.Store.chatMessages || [];
+
+      // Si aucun message : afficher un accueil minimaliste et épuré
+      if (msgs.length === 0) {
+        container.innerHTML = `
+          <div class="chat-welcome-screen">
+            <div class="welcome-emblem">
+              <img src="images/tradiia_icon.png" alt="Tradition IA" />
+            </div>
+            <h1 class="welcome-heading">Mbolo !</h1>
+            <p class="welcome-subheading">Posez directement votre question sur les langues du Gabon.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Si des messages existent : afficher les bulles
       const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       container.innerHTML = msgs.map((m, index) => {
@@ -417,40 +864,45 @@
         const isError = rawText.startsWith('Erreur :') || rawText.startsWith('❌');
 
         if (isUser) {
+          const userInitial = window.Store.user?.name ? window.Store.user.name.charAt(0).toUpperCase() : '👤';
           return `
-            <div class="chat-msg-row user-row">
-              <div class="chat-msg-avatar">
-                ${window.Store.user?.name ? window.Store.user.name.charAt(0).toUpperCase() : '👤'}
-              </div>
-              <div class="chat-bubble-wrapper">
-                <div class="chat-bubble chat-bubble-user">
+            <div class="msg-row user">
+              <div class="msg-avatar user-av">${userInitial}</div>
+              <div class="msg-bubble-box">
+                <div class="msg-bubble">
                   ${formatMessage(rawText)}
                 </div>
-                <div class="chat-msg-meta">
-                  <span>Vous</span> • <span>${msgTime}</span>
+                <div class="msg-micro-meta">
+                  <span>${msgTime}</span>
                 </div>
               </div>
             </div>
           `;
         } else {
           return `
-            <div class="chat-msg-row ai-row">
-              <div class="chat-msg-avatar ai-avatar">
-                <img src="images/tradiia_icon.png" alt="Tradition IA">
+            <div class="msg-row ai">
+              <div class="msg-avatar ai-av">
+                <img src="images/tradiia_icon.png" alt="Mbolo IA">
               </div>
-              <div class="chat-bubble-wrapper">
-                <div class="chat-bubble chat-bubble-ai ${isError ? 'chat-bubble-error' : ''}">
+              <div class="msg-bubble-box">
+                <div class="msg-bubble ${isError ? 'msg-bubble-error' : ''}">
                   ${formatMessage(rawText)}
                 </div>
-                <div class="chat-msg-meta">
-                  <span>Tradition IA</span> • <span>${msgTime}</span>
+                <div class="msg-micro-meta">
+                  <span>${msgTime}</span>
+                  ${!isError ? `
+                    <div class="msg-inline-actions">
+                      <button class="msg-action-link btn-copy-msg" data-index="${index}" title="Copier">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Copier</span>
+                      </button>
+                      <button class="msg-action-link btn-speak-msg" data-index="${index}" title="Écouter">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        <span>Écouter</span>
+                      </button>
+                    </div>
+                  ` : ''}
                 </div>
-                ${!isError ? `
-                  <div class="chat-msg-actions">
-                    <button class="chat-action-btn btn-copy-msg" data-index="${index}" title="Copier ce message">📋 Copier</button>
-                    <button class="chat-action-btn btn-speak-msg" data-index="${index}" title="Écouter la réponse">🔊 Écouter</button>
-                  </div>
-                ` : ''}
               </div>
             </div>
           `;
@@ -459,14 +911,14 @@
 
       container.scrollTop = container.scrollHeight;
 
-      // Événements pour copier et écouter chaque message
+      // Événements pour copier / écouter
       container.querySelectorAll('.btn-copy-msg').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = btn.getAttribute('data-index');
           const msg = msgs[idx];
           if (msg?.text) {
             navigator.clipboard.writeText(msg.text);
-            if (window.showToast) window.showToast('Réponse copiée dans le presse-papier !');
+            if (window.showToast) window.showToast('Copié dans le presse-papier !');
           }
         });
       });
@@ -485,13 +937,11 @@
     function speakText(text) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
-      // Nettoyer les balises markdown
       const cleanText = text.replace(/[\*\#\`\_]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'fr-FR';
       utterance.rate = 1.0;
       window.speechSynthesis.speak(utterance);
-      if (window.showToast) window.showToast('Lecture audio de la réponse...');
     }
 
     function formatMessage(text) {

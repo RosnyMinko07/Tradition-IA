@@ -12,9 +12,7 @@ class AppStore {
     this.translations = [];
     this.aiSuggestions = [];
     this.usersList = [];
-    this.chatMessages = [
-      { id: '1', role: 'assistant', text: "Mbolo ! Je suis votre assistant Tradition IA. Posez-moi vos questions sur le Fang, le Punu, le Nzébi, le Myènè, le Téké, le Vili, le Guisir, le Kota et l'Obamba !" }
-    ];
+    this.chatMessages = [];
   }
 
   async loadInitialData() {
