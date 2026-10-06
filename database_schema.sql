@@ -1,222 +1,262 @@
 -- =============================================================================
 -- TRADITION IA — SCRIPT DDL COMPLET DE BASE DE DONNÉES (POSTGRESQL / SUPABASE)
 -- =============================================================================
--- Permet de créer l'intégralité des tables, relations, index et données initiales.
--- Compatible PostgreSQL 13+, Supabase, Google Cloud SQL, Neon, Render.
+-- Schéma 100% francisé : Noms des tables et champs traduits en français
+-- Compatible : PostgreSQL 13+, Supabase, Neon, Render, Google Cloud SQL
 -- =============================================================================
 
--- 1. EXTENSIONS
+-- 1. EXTENSIONS REQUISES
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- =============================================================================
 -- 2. GROUPES ETHNIQUES & LANGUES GABONAISES
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS ethnic_groups (
+
+-- Table : groupes_ethniques
+CREATE TABLE IF NOT EXISTS groupes_ethniques (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(80) NOT NULL UNIQUE,
+    nom VARCHAR(80) NOT NULL UNIQUE,
     region VARCHAR(150) NOT NULL,
-    cultural_summary TEXT,
-    mask_name VARCHAR(100) NOT NULL,
-    mask_image_url VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    resume_culturel TEXT,
+    nom_masque VARCHAR(100) NOT NULL,
+    url_image_masque VARCHAR(255) NOT NULL,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS languages (
+-- Table : langues
+CREATE TABLE IF NOT EXISTS langues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ethnic_group_id UUID REFERENCES ethnic_groups(id) ON DELETE SET NULL,
+    groupe_ethnique_id UUID REFERENCES groupes_ethniques(id) ON DELETE SET NULL,
     code VARCHAR(10) NOT NULL UNIQUE,
-    name VARCHAR(80) NOT NULL,
-    native_name VARCHAR(100) NOT NULL,
-    family VARCHAR(100) DEFAULT 'Bantoue',
-    speakers_estimate VARCHAR(50),
+    nom VARCHAR(80) NOT NULL,
+    nom_natif VARCHAR(100) NOT NULL,
+    famille VARCHAR(100) DEFAULT 'Bantoue',
+    estimation_locuteurs VARCHAR(50),
     region VARCHAR(200),
-    tonal_system TEXT,
-    grammar_rules TEXT,
-    mask_image_url VARCHAR(255) NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    display_order INT DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    systeme_tonal TEXT,
+    regles_grammaticales TEXT,
+    url_image_masque VARCHAR(255) NOT NULL,
+    est_actif BOOLEAN DEFAULT TRUE,
+    ordre_affichage INT DEFAULT 0,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 3. UTILISATEURS & AUTHENTIFICATION
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS users (
+
+-- Table : utilisateurs
+CREATE TABLE IF NOT EXISTS utilisateurs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(120) NOT NULL,
-    avatar_url VARCHAR(500),
-    role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'contributor', 'linguist', 'admin')),
-    preferred_lang_id UUID REFERENCES languages(id) ON DELETE SET NULL,
-    theme_preference VARCHAR(10) DEFAULT 'dark' CHECK (theme_preference IN ('dark', 'light')),
-    is_verified BOOLEAN DEFAULT FALSE,
-    api_key VARCHAR(64) UNIQUE,
-    daily_quota INT DEFAULT 50,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    last_login_at TIMESTAMPTZ
+    courriel VARCHAR(255) NOT NULL UNIQUE,
+    mot_de_passe_hache VARCHAR(255) NOT NULL,
+    nom_complet VARCHAR(120) NOT NULL,
+    url_avatar VARCHAR(500),
+    role VARCHAR(20) DEFAULT 'utilisateur' CHECK (role IN ('utilisateur', 'contributeur', 'linguiste', 'administrateur')),
+    langue_preferee_id UUID REFERENCES langues(id) ON DELETE SET NULL,
+    preference_theme VARCHAR(10) DEFAULT 'sombre' CHECK (preference_theme IN ('sombre', 'clair')),
+    est_verifie BOOLEAN DEFAULT FALSE,
+    cle_api VARCHAR(64) UNIQUE,
+    quota_journalier INT DEFAULT 50,
+    date_creation TIMESTAMPTZ DEFAULT NOW(),
+    date_mise_a_jour TIMESTAMPTZ DEFAULT NOW(),
+    derniere_connexion TIMESTAMPTZ
 );
 
-CREATE TABLE IF NOT EXISTS user_sessions (
+-- Table : sessions_utilisateurs
+CREATE TABLE IF NOT EXISTS sessions_utilisateurs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    refresh_token TEXT NOT NULL,
-    user_agent VARCHAR(255),
-    ip_address VARCHAR(45),
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    utilisateur_id UUID NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
+    jeton_rafraichissement TEXT NOT NULL,
+    agent_utilisateur VARCHAR(255),
+    adresse_ip VARCHAR(45),
+    date_expiration TIMESTAMPTZ NOT NULL,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 4. DICTIONNAIRE & PRONONCIATIONS AUDIO
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS dictionary_entries (
+
+-- Table : entrees_dictionnaire
+CREATE TABLE IF NOT EXISTS entrees_dictionnaire (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    language_id UUID NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
-    french_word VARCHAR(150) NOT NULL,
-    local_translation VARCHAR(150) NOT NULL,
-    phonetic VARCHAR(150),
-    category VARCHAR(50) DEFAULT 'nom',
+    langue_id UUID NOT NULL REFERENCES langues(id) ON DELETE CASCADE,
+    mot_francais VARCHAR(150) NOT NULL,
+    traduction_locale VARCHAR(150) NOT NULL,
+    phonetique VARCHAR(150),
+    categorie VARCHAR(50) DEFAULT 'nom',
     definition TEXT,
-    example_fr TEXT,
-    example_local TEXT,
-    cultural_notes TEXT,
-    is_validated BOOLEAN DEFAULT TRUE,
-    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    exemple_francais TEXT,
+    exemple_local TEXT,
+    notes_culturelles TEXT,
+    est_valide BOOLEAN DEFAULT TRUE,
+    cree_par UUID REFERENCES utilisateurs(id) ON DELETE SET NULL,
+    date_creation TIMESTAMPTZ DEFAULT NOW(),
+    date_mise_a_jour TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS audio_pronunciations (
+-- Table : prononciations_audio
+CREATE TABLE IF NOT EXISTS prononciations_audio (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    dictionary_entry_id UUID NOT NULL REFERENCES dictionary_entries(id) ON DELETE CASCADE,
-    audio_url VARCHAR(500) NOT NULL,
-    speaker_gender VARCHAR(10) CHECK (speaker_gender IN ('M', 'F', 'Other')),
-    accent_province VARCHAR(80),
-    is_verified BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    entree_dictionnaire_id UUID NOT NULL REFERENCES entrees_dictionnaire(id) ON DELETE CASCADE,
+    url_audio VARCHAR(500) NOT NULL,
+    genre_locuteur VARCHAR(10) CHECK (genre_locuteur IN ('Homme', 'Femme', 'Autre')),
+    province_accent VARCHAR(80),
+    est_verifie BOOLEAN DEFAULT TRUE,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 5. EXPRESSIONS, PROVERBES ET CONTES
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS cultural_expressions (
+
+-- Table : expressions_culturelles
+CREATE TABLE IF NOT EXISTS expressions_culturelles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    language_id UUID NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
+    langue_id UUID NOT NULL REFERENCES langues(id) ON DELETE CASCADE,
     type VARCHAR(30) NOT NULL CHECK (type IN ('proverbe', 'conte', 'expression', 'salutation', 'dialogue')),
-    content_local TEXT NOT NULL,
-    content_french TEXT NOT NULL,
-    literal_meaning TEXT,
-    philosophical_meaning TEXT,
-    context_of_use TEXT,
-    audio_url VARCHAR(500),
-    is_validated BOOLEAN DEFAULT TRUE,
-    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    contenu_local TEXT NOT NULL,
+    contenu_francais TEXT NOT NULL,
+    sens_litteral TEXT,
+    sens_philosophique TEXT,
+    contexte_utilisation TEXT,
+    url_audio VARCHAR(500),
+    est_valide BOOLEAN DEFAULT TRUE,
+    cree_par UUID REFERENCES utilisateurs(id) ON DELETE SET NULL,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 6. HISTORIQUE DES TRADUCTIONS
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS translations_history (
+
+-- Table : historique_traductions
+CREATE TABLE IF NOT EXISTS historique_traductions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    source_lang_id UUID NOT NULL REFERENCES languages(id),
-    target_lang_id UUID NOT NULL REFERENCES languages(id),
-    source_text TEXT NOT NULL,
-    translated_text TEXT NOT NULL,
-    engine VARCHAR(50) DEFAULT 'tradition_ia_v2',
-    confidence_score DECIMAL(4, 2) DEFAULT 0.95,
-    latency_ms INT,
-    is_favorite BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    utilisateur_id UUID REFERENCES utilisateurs(id) ON DELETE CASCADE,
+    langue_source_id UUID NOT NULL REFERENCES langues(id),
+    langue_cible_id UUID NOT NULL REFERENCES langues(id),
+    texte_source TEXT NOT NULL,
+    texte_traduit TEXT NOT NULL,
+    moteur_ia VARCHAR(50) DEFAULT 'tradition_ia_v2',
+    score_confiance DECIMAL(4, 2) DEFAULT 0.95,
+    latence_ms INT,
+    est_favori BOOLEAN DEFAULT FALSE,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 7. ASSISTANT IA & CONVERSATIONS
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS ai_conversations (
+
+-- Table : conversations_ia
+CREATE TABLE IF NOT EXISTS conversations_ia (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(150) DEFAULT 'Nouvelle discussion',
-    context_language_id UUID REFERENCES languages(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    utilisateur_id UUID NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
+    titre VARCHAR(150) DEFAULT 'Nouvelle discussion',
+    langue_contexte_id UUID REFERENCES langues(id) ON DELETE SET NULL,
+    date_creation TIMESTAMPTZ DEFAULT NOW(),
+    date_mise_a_jour TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS ai_messages (
+-- Table : messages_ia
+CREATE TABLE IF NOT EXISTS messages_ia (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    conversation_id UUID NOT NULL REFERENCES ai_conversations(id) ON DELETE CASCADE,
-    sender_role VARCHAR(20) NOT NULL CHECK (sender_role IN ('user', 'assistant', 'system')),
-    content TEXT NOT NULL,
-    cultural_references JSONB DEFAULT '{}'::jsonb,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    conversation_id UUID NOT NULL REFERENCES conversations_ia(id) ON DELETE CASCADE,
+    role_expediteur VARCHAR(20) NOT NULL CHECK (role_expediteur IN ('utilisateur', 'assistant', 'systeme')),
+    contenu TEXT NOT NULL,
+    references_culturelles JSONB DEFAULT '{}'::jsonb,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 8. VALIDATION IA & CONTRIBUTIONS COMMUNAUTAIRES
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS ai_validations (
+
+-- Table : validations_ia
+CREATE TABLE IF NOT EXISTS validations_ia (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    language_id UUID NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
-    source_french TEXT NOT NULL,
-    suggested_translation TEXT NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-    reviewer_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    reviewer_notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    reviewed_at TIMESTAMPTZ
+    utilisateur_id UUID REFERENCES utilisateurs(id) ON DELETE SET NULL,
+    langue_id UUID NOT NULL REFERENCES langues(id) ON DELETE CASCADE,
+    francais_source TEXT NOT NULL,
+    traduction_suggeree TEXT NOT NULL,
+    statut VARCHAR(20) DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'approuve', 'rejete')),
+    relecteur_id UUID REFERENCES utilisateurs(id) ON DELETE SET NULL,
+    notes_relecteur TEXT,
+    date_creation TIMESTAMPTZ DEFAULT NOW(),
+    date_relecture TIMESTAMPTZ
 );
 
 -- =============================================================================
 -- 9. FAVORIS UTILISATEURS
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS user_favorites (
+
+-- Table : favoris_utilisateurs
+CREATE TABLE IF NOT EXISTS favoris_utilisateurs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    item_type VARCHAR(30) NOT NULL CHECK (item_type IN ('translation', 'dictionary_word', 'expression')),
-    item_id UUID NOT NULL,
-    custom_notes TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    utilisateur_id UUID NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
+    type_element VARCHAR(30) NOT NULL CHECK (type_element IN ('traduction', 'mot_dictionnaire', 'expression')),
+    element_id UUID NOT NULL,
+    notes_personnalisees TEXT,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
--- 10. ANALYTICS & PARAMÈTRES SYSTÈME
+-- 10. STATISTIQUES & PARAMÈTRES SYSTÈME
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS analytics_events (
+
+-- Table : evenements_analytiques
+CREATE TABLE IF NOT EXISTS evenements_analytiques (
     id BIGSERIAL PRIMARY KEY,
-    event_name VARCHAR(50) NOT NULL,
-    language_code VARCHAR(10),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    duration_ms INT DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    nom_evenement VARCHAR(50) NOT NULL,
+    code_langue VARCHAR(10),
+    utilisateur_id UUID REFERENCES utilisateurs(id) ON DELETE SET NULL,
+    duree_ms INT DEFAULT 0,
+    date_creation TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS system_settings (
-    setting_key VARCHAR(80) PRIMARY KEY,
-    setting_value TEXT NOT NULL,
+-- Table : parametres_systeme
+CREATE TABLE IF NOT EXISTS parametres_systeme (
+    cle_parametre VARCHAR(80) PRIMARY KEY,
+    valeur_parametre TEXT NOT NULL,
     description VARCHAR(255),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    date_mise_a_jour TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 11. INDEX D'OPTIMISATION DES PERFORMANCES
 -- =============================================================================
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_languages_code ON languages(code);
-CREATE INDEX IF NOT EXISTS idx_dictionary_search ON dictionary_entries(french_word, language_id);
-CREATE INDEX IF NOT EXISTS idx_translations_user ON translations_history(user_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_ai_messages_conv ON ai_messages(conversation_id, created_at ASC);
-CREATE INDEX IF NOT EXISTS idx_validations_status ON ai_validations(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_courriel ON utilisateurs(courriel);
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_role ON utilisateurs(role);
+CREATE INDEX IF NOT EXISTS idx_langues_code ON langues(code);
+CREATE INDEX IF NOT EXISTS idx_dictionnaire_recherche ON entrees_dictionnaire(mot_francais, langue_id);
+CREATE INDEX IF NOT EXISTS idx_traductions_utilisateur ON historique_traductions(utilisateur_id, date_creation DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_ia_conv ON messages_ia(conversation_id, date_creation ASC);
+CREATE INDEX IF NOT EXISTS idx_validations_statut ON validations_ia(statut, date_creation DESC);
+CREATE INDEX IF NOT EXISTS idx_favoris_utilisateur ON favoris_utilisateurs(utilisateur_id);
 
 -- =============================================================================
--- 12. SEEDING INITIAL : INSERTION DES LANGUES GABONAISES ET MASQUES
+-- 12. DONNÉES INITIALES (SEEDING) : LANGUES GABONAISES ET GROUPES ETHNIQUES
 -- =============================================================================
-INSERT INTO languages (code, name, native_name, family, region, speakers_estimate, mask_image_url, display_order)
+
+-- Insertion des 9 provinces / groupes ethniques emblématiques
+INSERT INTO groupes_ethniques (nom, region, resume_culturel, nom_masque, url_image_masque)
+VALUES
+    ('Fang', 'Woleu-Ntem, Estuaire, Ogooué-Ivindo', 'Peuple du Grand Nord gabonais, gardiens du culte du Byeri et de l’épopée du Mvet.', 'Ngil / Byeri', 'images/fang.png'),
+    ('Punu', 'Nyanga, Ngounié', 'Peuple du Sud gabonais, célèbre pour le masque blanc Mukudji symbolisant la beauté et la paix.', 'Mukudji (Okuyi)', 'images/punu.png'),
+    ('Myènè', 'Ogooué-Maritime, Moyen-Ogooué, Estuaire', 'Peuple côtier réputé pour ses rites maritimes et le masque Okukwé de l’Ogooué.', 'Okukwé', 'images/myene.png'),
+    ('Nzébi', 'Ogooué-Lolo, Ngounié', 'Peuple des monts Chaillu, maîtres du travail du fer et des danses traditionnelles.', 'Bwiti Nzebi', 'images/nzebi.png'),
+    ('Téké', 'Haut-Ogooué', 'Gardiens des plateaux Batéké, créateurs du célèbre masque rond lunaire Téké.', 'Masque Plat Téké', 'images/teke.png'),
+    ('Vili', 'Nyanga', 'Peuple maritime du Sud, héritiers du grand royaume de Loango.', 'Nkisi Vili', 'images/vili.png'),
+    ('Obamba', 'Haut-Ogooué', 'Peuple réputé pour ses figures de reliquaires en cuivre et laiton Mbulu-Ngulu.', 'Mbulu-Ngulu', 'images/obamba.png'),
+    ('Guisir', 'Ngounié', 'Peuple forestier voisin des Punu, perpétuant le culte de l’Okuyi et les traditions Bwiti.', 'Okuyi Guisir', 'images/guisir.png'),
+    ('Kota', 'Ogooué-Ivindo', 'Gardiens de la grande forêt équatoriale, célèbres mondialement pour leurs reliquaires en cuivre poli.', 'Reliquaire Kota', 'images/kota.png')
+ON CONFLICT (nom) DO NOTHING;
+
+-- Insertion des langues gabonaises
+INSERT INTO langues (code, nom, nom_natif, famille, region, estimation_locuteurs, url_image_masque, ordre_affichage)
 VALUES
     ('fan', 'Fang', 'Fang-Beti', 'Bantoue du Nord-Ouest', 'Estuaire (Libreville), Woleu-Ntem (Oyem), Ogooué-Ivindo (Makokou)', '~800 000 locuteurs', 'images/fang.png', 1),
     ('puu', 'Punu', 'Yipunu', 'Bantoue (B40)', 'Nyanga (Tchibanga), Ngounié (Mouila)', '~300 000 locuteurs', 'images/punu.png', 2),
@@ -227,5 +267,16 @@ VALUES
     ('obb', 'Obamba', 'Lembaama', 'Bantoue (B60)', 'Haut-Ogooué (Okondja)', '~40 000 locuteurs', 'images/obamba.png', 7),
     ('gsi', 'Guisir', 'Yigisir', 'Bantoue (B40)', 'Ngounié (Fougamou, Mandji)', '~40 000 locuteurs', 'images/guisir.png', 8),
     ('kto', 'Kota', 'Ikota', 'Bantoue (B20)', 'Ogooué-Ivindo (Makokou, Booué)', '~50 000 locuteurs', 'images/kota.png', 9),
-    ('eng', 'Anglais', 'English', 'Germanique', 'International / Traduction globale', 'Global', 'images/anglais.png', 10)
+    ('fra', 'Français', 'Français', 'Romane', 'Langue officielle du Gabon / Internationale', '~2 000 000 locuteurs', 'images/gabon_flag.png', 10),
+    ('eng', 'Anglais', 'English', 'Germanique', 'Deuxième langue officielle / Internationale', 'Global', 'images/anglais.png', 11)
 ON CONFLICT (code) DO NOTHING;
+
+-- Insertion des paramètres système
+INSERT INTO parametres_systeme (cle_parametre, valeur_parametre, description)
+VALUES
+    ('nom_plateforme', 'Tradition IA', 'Nom officiel de l''application'),
+    ('version_moteur_ia', 'tradition_ia_v2.5', 'Version du moteur d''inférence linguistique'),
+    ('quota_gratuit_journalier', '50', 'Nombre de traductions gratuites par jour pour un membre standard'),
+    ('validation_communautaire_activee', 'true', 'Permettre aux locuteurs natifs de proposer des corrections'),
+    ('mode_maintenance', 'false', 'Activation ou désactivation du mode maintenance')
+ON CONFLICT (cle_parametre) DO NOTHING;

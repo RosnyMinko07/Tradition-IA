@@ -1,9 +1,10 @@
-# 🏛️ TRADITION IA — ARCHITECTURE & SCHÉMA DE LA BASE DE DONNÉES
+# 🏛️ TRADITION IA — ARCHITECTURE & SCHÉMA DE LA BASE DE DONNÉES (100% EN FRANÇAIS)
 
 > **Projet** : Tradition IA — Plateforme d'IA & Préservation des Langues et Traditions Gabonaises  
 > **Auteur** : Tradition IA Core Team  
-> **Format SGBD Recommandé** : **PostgreSQL 15+** (ou **Supabase**) / Compatible MySQL 8+  
-> **Fichier SQL prêt à exécuter** : [`database_schema.sql`](file:///c:/Users/Rosny%20Minlo/Desktop/Tradition%20IA/database_schema.sql)
+> **Format SGBD Recommandé** : **PostgreSQL 14+** (ou **Supabase**) / Compatible Neon, Render, Google Cloud SQL  
+> **Fichier SQL prêt à exécuter** : [`database_schema.sql`](file:///c:/Users/LENOVO/OneDrive/Desktop/Tradition-IA/database_schema.sql)  
+> **Norme de nommage** : 100% en français (tables et champs)
 
 ---
 
@@ -11,34 +12,37 @@
 1. [Vue d'ensemble & Architecture Globale](#1-vue-densemble--architecture-globale)
 2. [Diagramme Entité-Relation (ERD Mermaid)](#2-diagramme-entité-relation-erd-mermaid)
 3. [Détail des Tables & Colonnes](#3-détail-des-tables--colonnes)
-   - 3.1. Gestion des Utilisateurs & Authentification (`users`, `user_sessions`)
-   - 3.2. Langues Gabonaises & Groupes Ethniques (`ethnic_groups`, `languages`)
-   - 3.3. Dictionnaire & Prononciations Audio (`dictionary_entries`, `audio_pronunciations`)
-   - 3.4. Expressions, Proverbes & Contes (`cultural_expressions`)
-   - 3.5. Historique & Moteur de Traduction (`translations_history`)
-   - 3.6. Assistant IA & Conversations (`ai_conversations`, `ai_messages`)
-   - 3.7. Validation IA & Contribution Communautaire (`ai_validations`)
-   - 3.8. Favoris Utilisateurs (`user_favorites`)
-   - 3.9. Analytics & Paramètres Système (`analytics_events`, `system_settings`)
-4. [Déroulement Pas à Pas (Guide de Déploiement)](#4-déroulement-pas-à-pas-guide-de-déploiement)
-5. [Script d'Initialisation des Données (Seeding)](#5-script-dinitialisation-des-données-seeding)
+   - 3.1. [Groupes Ethniques & Langues Gabonaises (`groupes_ethniques`, `langues`)](#31-groupes-ethniques--langues-gabonaises)
+   - 3.2. [Gestion des Utilisateurs & Sessions (`utilisateurs`, `sessions_utilisateurs`)](#32-gestion-des-utilisateurs--sessions)
+   - 3.3. [Dictionnaire & Prononciations Audio (`entrees_dictionnaire`, `prononciations_audio`)](#33-dictionnaire--prononciations-audio)
+   - 3.4. [Expressions, Proverbes & Contes (`expressions_culturelles`)](#34-expressions-proverbes--contes)
+   - 3.5. [Historique des Traductions (`historique_traductions`)](#35-historique-des-traductions)
+   - 3.6. [Assistant IA & Conversations (`conversations_ia`, `messages_ia`)](#36-assistant-ia--conversations)
+   - 3.7. [Validation IA & Contribution Communautaire (`validations_ia`)](#37-validation-ia--contribution-communautaire)
+   - 3.8. [Favoris Utilisateurs (`favoris_utilisateurs`)](#38-favoris-utilisateurs)
+   - 3.9. [Statistiques & Paramètres Système (`evenements_analytiques`, `parametres_systeme`)](#39-statistiques--paramètres-système)
+4. [Guide de Déploiement & Bonnes Pratiques](#4-guide-de-déploiement--bonnes-pratiques)
 
 ---
 
 ## 1. Vue d'ensemble & Architecture Globale
 
-La base de données de **Tradition IA** est structurée en **4 pôles majeurs** :
+La base de données de **Tradition IA** est structurée en **4 pôles majeurs**, tous nommés et documentés en langue française :
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        TRADITION IA DATABASE                           │
+│                   BASE DE DONNÉES — TRADITION IA                       │
 ├───────────────────┬───────────────────┬────────────────────────────────┤
 │ 👤 UTILISATEURS   │ 🌍 PATRIMOINE     │ 🤖 IA & TRADUCTION             │
-│ • users           │ • ethnic_groups   │ • translations_history         │
-│ • user_sessions   │ • languages       │ • ai_conversations             │
-│ • user_favorites  │ • dictionary      │ • ai_messages                  │
-│                   │ • audio_recordings│ • ai_validations               │
-│                   │ • expressions     │ • analytics_events             │
+│ • utilisateurs    │ • groupes_        │ • historique_traductions       │
+│ • sessions_       │   ethniques       │ • conversations_ia             │
+│   utilisateurs    │ • langues         │ • messages_ia                  │
+│ • favoris_        │ • entrees_        │ • validations_ia               │
+│   utilisateurs    │   dictionnaire    │ • evenements_analytiques       │
+│                   │ • prononciations_ │ • parametres_systeme           │
+│                   │   audio           │                                │
+│                   │ • expressions_    │                                │
+│                   │   culturelles     │                                │
 └───────────────────┴───────────────────┴────────────────────────────────┘
 ```
 
@@ -48,105 +52,105 @@ La base de données de **Tradition IA** est structurée en **4 pôles majeurs** 
 
 ```mermaid
 erDiagram
-    USERS ||--o{ TRANSLATIONS_HISTORY : "effectue"
-    USERS ||--o{ AI_CONVERSATIONS : "possede"
-    USERS ||--o{ USER_FAVORITES : "enregistre"
-    USERS ||--o{ AI_VALIDATIONS : "contribue/valide"
-    USERS }o--|| LANGUAGES : "langue preferee"
+    UTILISATEURS ||--o{ HISTORIQUE_TRADUCTIONS : "effectue"
+    UTILISATEURS ||--o{ CONVERSATIONS_IA : "possede"
+    UTILISATEURS ||--o{ FAVORIS_UTILISATEURS : "enregistre"
+    UTILISATEURS ||--o{ VALIDATIONS_IA : "propose/valide"
+    UTILISATEURS }o--|| LANGUES : "langue preferee"
     
-    ETHNIC_GROUPS ||--o{ LANGUAGES : "regroupe"
-    LANGUAGES ||--o{ DICTIONARY_ENTRIES : "contient"
-    LANGUAGES ||--o{ CULTURAL_EXPRESSIONS : "possede"
-    LANGUAGES ||--o{ TRANSLATIONS_HISTORY : "source/cible"
+    GROUPES_ETHNIQUES ||--o{ LANGUES : "regroupe"
+    LANGUES ||--o{ ENTREES_DICTIONNAIRE : "contient"
+    LANGUES ||--o{ EXPRESSIONS_CULTURELLES : "possede"
+    LANGUES ||--o{ HISTORIQUE_TRADUCTIONS : "source/cible"
     
-    DICTIONARY_ENTRIES ||--o{ AUDIO_PRONUNCIATIONS : "dispose de"
-    DICTIONARY_ENTRIES ||--o{ AI_VALIDATIONS : "soumis a"
+    ENTREES_DICTIONNAIRE ||--o{ PRONONCIATIONS_AUDIO : "dispose de"
     
-    AI_CONVERSATIONS ||--o{ AI_MESSAGES : "contient"
+    CONVERSATIONS_IA ||--o{ MESSAGES_IA : "contient"
     
-    USERS {
+    UTILISATEURS {
         uuid id PK
-        string email UK
-        string password_hash
-        string full_name
-        string role "user|contributor|linguist|admin"
-        string theme_preference "dark|light"
-        uuid preferred_lang_id FK
-        timestamp created_at
+        string courriel UK
+        string mot_de_passe_hache
+        string nom_complet
+        string role "utilisateur|contributeur|linguiste|administrateur"
+        string preference_theme "sombre|clair"
+        uuid langue_preferee_id FK
+        timestamp date_creation
     }
 
-    LANGUAGES {
+    LANGUES {
         uuid id PK
+        uuid groupe_ethnique_id FK
         string code UK "fan|puu|mye|nzb|..."
-        string name "Fang|Punu|Myènè|..."
-        string native_name
+        string nom "Fang|Punu|Myènè|..."
+        string nom_natif
         string region
-        string mask_image_url
-        boolean is_active
+        string url_image_masque
+        boolean est_actif
     }
 
-    DICTIONARY_ENTRIES {
+    ENTREES_DICTIONNAIRE {
         uuid id PK
-        uuid language_id FK
-        string french_word
-        string local_translation
-        string phonetic
-        string category "nom|verbe|salutation..."
+        uuid langue_id FK
+        string mot_francais
+        string traduction_locale
+        string phonetique
+        string categorie
         text definition
-        text example_fr
-        text example_local
-        boolean is_validated
+        text exemple_francais
+        text exemple_local
+        boolean est_valide
     }
 
-    CULTURAL_EXPRESSIONS {
+    EXPRESSIONS_CULTURELLES {
         uuid id PK
-        uuid language_id FK
-        string type "proverbe|conte|expression"
-        text content_local
-        text content_french
-        text literal_meaning
-        text philosophical_meaning
-        text context_of_use
+        uuid langue_id FK
+        string type "proverbe|conte|expression|salutation"
+        text contenu_local
+        text contenu_francais
+        text sens_litteral
+        text sens_philosophique
+        text contexte_utilisation
     }
 
-    TRANSLATIONS_HISTORY {
+    HISTORIQUE_TRADUCTIONS {
         uuid id PK
-        uuid user_id FK
-        uuid source_lang_id FK
-        uuid target_lang_id FK
-        text source_text
-        text translated_text
-        string engine "tradition_ia_v2|gemini"
-        boolean is_favorite
-        timestamp created_at
+        uuid utilisateur_id FK
+        uuid langue_source_id FK
+        uuid langue_cible_id FK
+        text texte_source
+        text texte_traduit
+        string moteur_ia
+        boolean est_favori
+        timestamp date_creation
     }
 
-    AI_CONVERSATIONS {
+    CONVERSATIONS_IA {
         uuid id PK
-        uuid user_id FK
-        string title
-        uuid context_language_id FK
-        timestamp updated_at
+        uuid utilisateur_id FK
+        string titre
+        uuid langue_contexte_id FK
+        timestamp date_creation
     }
 
-    AI_MESSAGES {
+    MESSAGES_IA {
         uuid id PK
         uuid conversation_id FK
-        string sender_role "user|assistant|system"
-        text content
-        jsonb metadata
-        timestamp created_at
+        string role_expediteur "utilisateur|assistant|systeme"
+        text contenu
+        jsonb references_culturelles
+        timestamp date_creation
     }
 
-    AI_VALIDATIONS {
+    VALIDATIONS_IA {
         uuid id PK
-        uuid language_id FK
-        uuid user_id FK
-        string type "translation|word|expression"
-        text suggested_translation
-        string status "pending|approved|rejected"
-        uuid reviewer_id FK
-        text reviewer_notes
+        uuid utilisateur_id FK
+        uuid langue_id FK
+        text francais_source
+        text traduction_suggeree
+        string statut "en_attente|approuve|rejete"
+        uuid relecteur_id FK
+        text notes_relecteur
     }
 ```
 
@@ -154,270 +158,250 @@ erDiagram
 
 ## 3. Détail des Tables & Colonnes
 
-### 3.1. Utilisateurs & Authentification
+### 3.1. Groupes Ethniques & Langues Gabonaises
 
-#### Table `users`
-Stocke les comptes utilisateurs, rôles (Admin, Linguiste, Contributeur, Visiteur) et préférences.
+#### Table `groupes_ethniques`
+Stocke les grandes familles culturelles et ethniques du Gabon.
+
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique du groupe |
+| `nom` | `VARCHAR(80)` | `UNIQUE, NOT NULL` | Nom du groupe (Fang, Punu, Nzébi...) |
+| `region` | `VARCHAR(150)` | `NOT NULL` | Provinces / Régions géographiques |
+| `resume_culturel` | `TEXT` | `NULL` | Synthèse historique et traditions |
+| `nom_masque` | `VARCHAR(100)` | `NOT NULL` | Nom du masque traditionnel associé |
+| `url_image_masque`| `VARCHAR(255)` | `NOT NULL` | Chemin ou URL de l'illustration |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'enregistrement |
+
+#### Table `langues`
+Détaille l'ensemble des idiomes et langues gabonaises répertoriés.
+
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique de la langue |
+| `groupe_ethnique_id` | `UUID` | `REFERENCES groupes_ethniques(id)` | Lien vers le groupe ethnique |
+| `code` | `VARCHAR(10)` | `UNIQUE, NOT NULL` | Code ISO/interne (`fan`, `puu`, `mye`...) |
+| `nom` | `VARCHAR(80)` | `NOT NULL` | Nom usuel en français |
+| `nom_natif` | `VARCHAR(100)` | `NOT NULL` | Nom de la langue dans son propre parler |
+| `famille` | `VARCHAR(100)` | `DEFAULT 'Bantoue'` | Branche linguistique (Bantoue, etc.) |
+| `estimation_locuteurs` | `VARCHAR(50)` | `NULL` | Nombre approximatif de locuteurs |
+| `region` | `VARCHAR(200)` | `NULL` | Localisation principale |
+| `systeme_tonal` | `TEXT` | `NULL` | Spécificités des tons (haut, bas, moyen) |
+| `regles_grammaticales` | `TEXT` | `NULL` | Règles clés (classes nominales, accords) |
+| `url_image_masque` | `VARCHAR(255)` | `NOT NULL` | Masque emblématique de la langue |
+| `est_actif` | `BOOLEAN` | `DEFAULT TRUE` | Langue activée dans l'interface |
+| `ordre_affichage` | `INT` | `DEFAULT 0` | Ordre dans les sélecteurs |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ajout |
+
+---
+
+### 3.2. Gestion des Utilisateurs & Sessions
+
+#### Table `utilisateurs`
+Gère les comptes, rôles de permissions, quotas et personnalisation.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique de l'utilisateur |
-| `email` | `VARCHAR(255)` | `UNIQUE, NOT NULL` | Adresse email de connexion |
-| `password_hash` | `VARCHAR(255)` | `NOT NULL` | Mot de passe chiffré (Bcrypt / Argon2) |
-| `full_name` | `VARCHAR(120)` | `NOT NULL` | Nom et prénom |
-| `avatar_url` | `VARCHAR(500)` | `NULL` | Photo de profil ou avatar masque |
-| `role` | `VARCHAR(20)` | `DEFAULT 'user'` | `'user'`, `'contributor'`, `'linguist'`, `'admin'` |
-| `preferred_lang_id`| `UUID` | `REFERENCES languages(id)` | Langue gabonaise favorite par défaut |
-| `theme_preference` | `VARCHAR(10)` | `DEFAULT 'dark'` | `'dark'` ou `'light'` |
-| `is_verified` | `BOOLEAN` | `DEFAULT FALSE` | Email validé |
-| `api_key` | `VARCHAR(64)` | `UNIQUE, NULL` | Clé d'accès API développeur |
-| `daily_quota` | `INT` | `DEFAULT 50` | Limite journalière de requêtes IA |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'inscription |
-| `last_login_at` | `TIMESTAMPTZ` | `NULL` | Dernier accès |
+| `courriel` | `VARCHAR(255)` | `UNIQUE, NOT NULL` | Adresse email de connexion |
+| `mot_de_passe_hache` | `VARCHAR(255)` | `NOT NULL` | Mot de passe chiffré (Bcrypt / Argon2) |
+| `nom_complet` | `VARCHAR(120)` | `NOT NULL` | Prénom et Nom |
+| `url_avatar` | `VARCHAR(500)` | `NULL` | Photo de profil ou icône de masque |
+| `role` | `VARCHAR(20)` | `DEFAULT 'utilisateur'` | `'utilisateur'`, `'contributeur'`, `'linguiste'`, `'administrateur'` |
+| `langue_preferee_id` | `UUID` | `REFERENCES langues(id)` | Langue gabonaise favorite par défaut |
+| `preference_theme` | `VARCHAR(10)` | `DEFAULT 'sombre'` | `'sombre'` ou `'clair'` |
+| `est_verifie` | `BOOLEAN` | `DEFAULT FALSE` | Compte vérifié par confirmation |
+| `cle_api` | `VARCHAR(64)` | `UNIQUE, NULL` | Clé pour accès API développeur |
+| `quota_journalier` | `INT` | `DEFAULT 50` | Limite de requêtes IA par 24h |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'inscription |
+| `date_mise_a_jour` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Dernière mise à jour |
+| `derniere_connexion` | `TIMESTAMPTZ` | `NULL` | Date et heure de dernière connexion |
 
----
-
-### 3.2. Langues Gabonaises & Groupes Ethniques
-
-#### Table `ethnic_groups`
-Représente les 9 provinces et ethnies du Gabon associées aux traditions.
+#### Table `sessions_utilisateurs`
+Gère les jetons d'authentification et les connexions actives.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique |
-| `name` | `VARCHAR(80)` | `NOT NULL, UNIQUE` | Nom de l'ethnie (Fang, Punu, Nzébi, Kota...) |
-| `region` | `VARCHAR(150)` | `NOT NULL` | Provinces d'origine au Gabon |
-| `cultural_summary`| `TEXT` | `NULL` | Histoire, traditions, rites (Bwiti, Mwiri, Ndjembe) |
-| `mask_name` | `VARCHAR(100)` | `NOT NULL` | Nom du masque (ex: Ngil, Mukudj, Bwete) |
-| `mask_image_url` | `VARCHAR(255)` | `NOT NULL` | Chemin image PNG transparent (ex: `images/fang.png`) |
-
-#### Table `languages`
-Catalogue des langues vivantes intégrées au moteur de traduction.
-
-| Colonne | Type | Contraintes | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique |
-| `ethnic_group_id` | `UUID` | `REFERENCES ethnic_groups(id)` | Lien vers le groupe ethnique |
-| `code` | `VARCHAR(10)` | `NOT NULL, UNIQUE` | Code court : `fan`, `puu`, `mye`, `nzb`, `tek`, etc. |
-| `name` | `VARCHAR(80)` | `NOT NULL` | Nom français : Fang, Punu, Myènè, Nzébi, Téké, etc. |
-| `native_name` | `VARCHAR(100)` | `NOT NULL` | Nom vernaculaire : Fang-Beti, Yipunu, Omyènè, Inzébi |
-| `family` | `VARCHAR(100)` | `DEFAULT 'Bantoue'` | Branche linguistique (ex: Bantoue Nord-Ouest) |
-| `speakers_estimate`| `VARCHAR(50)` | `NULL` | Nombre approximatif de locuteurs (ex: ~800 000) |
-| `tonal_system` | `TEXT` | `NULL` | Règles tonales (tons Haut, Bas, Modulé) |
-| `grammar_rules` | `TEXT` | `NULL` | Préfixes de classes nominales, conjugaisons |
-| `mask_image_url` | `VARCHAR(255)` | `NOT NULL` | URL du masque pour l'UI |
-| `is_active` | `BOOLEAN` | `DEFAULT TRUE` | Disponible pour la traduction |
-| `display_order` | `INT` | `DEFAULT 0` | Ordre d'affichage dans les sélecteurs |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant de session |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id) ON DELETE CASCADE` | Utilisateur lié |
+| `jeton_rafraichissement` | `TEXT` | `NOT NULL` | Token JWT de rafraîchissement |
+| `agent_utilisateur` | `VARCHAR(255)` | `NULL` | Navigateur / appareil |
+| `adresse_ip` | `VARCHAR(45)` | `NULL` | Adresse IP cliente |
+| `date_expiration` | `TIMESTAMPTZ` | `NOT NULL` | Date de fin de validité |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de création |
 
 ---
 
 ### 3.3. Dictionnaire & Prononciations Audio
 
-#### Table `dictionary_entries`
-Lexique complet enrichi de chaque langue.
+#### Table `entrees_dictionnaire`
+Vocabulaire bilingue complet avec exemples et transcriptions phonétiques.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant du mot |
-| `language_id` | `UUID` | `REFERENCES languages(id), NOT NULL` | Langue du mot |
-| `french_word` | `VARCHAR(150)` | `NOT NULL` | Mot en français (recherche) |
-| `local_translation`| `VARCHAR(150)` | `NOT NULL` | Traduction en langue locale |
-| `phonetic` | `VARCHAR(150)` | `NULL` | Transcription phonétique simplifiée (ex: [mbo-lo]) |
-| `category` | `VARCHAR(50)` | `DEFAULT 'nom'` | Nom, Verbe, Adjectif, Salutation, Chiffre |
-| `definition` | `TEXT` | `NULL` | Définition ou nuances d'usage |
-| `example_fr` | `TEXT` | `NULL` | Exemple de phrase en français |
-| `example_local` | `TEXT` | `NULL` | Exemple traduit dans la langue locale |
-| `cultural_notes` | `TEXT` | `NULL` | Signification spirituelle ou coutumière |
-| `is_validated` | `BOOLEAN` | `DEFAULT TRUE` | Validé par un comité de linguistes |
-| `created_by` | `UUID` | `REFERENCES users(id)` | Auteur de la contribution |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ajout |
+| `langue_id` | `UUID` | `REFERENCES langues(id) ON DELETE CASCADE` | Langue du terme |
+| `mot_francais` | `VARCHAR(150)` | `NOT NULL` | Terme en français |
+| `traduction_locale` | `VARCHAR(150)` | `NOT NULL` | Équivalent en langue gabonaise |
+| `phonetique` | `VARCHAR(150)` | `NULL` | Guide API / phonétique |
+| `categorie` | `VARCHAR(50)` | `DEFAULT 'nom'` | Type grammatical (`nom`, `verbe`, `salutation`...) |
+| `definition` | `TEXT` | `NULL` | Définition détaillée |
+| `exemple_francais` | `TEXT` | `NULL` | Phrase exemple en français |
+| `exemple_local` | `TEXT` | `NULL` | Phrase exemple en langue gabonaise |
+| `notes_culturelles` | `TEXT` | `NULL` | Contexte ethnologique ou tabous associés |
+| `est_valide` | `BOOLEAN` | `DEFAULT TRUE` | Validation par un linguiste |
+| `cree_par` | `UUID` | `REFERENCES utilisateurs(id)` | Contributeur |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de création |
+| `date_mise_a_jour` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Dernière modification |
 
-#### Table `audio_pronunciations`
-Enregistrements vocaux des mots par des locuteurs natifs.
+#### Table `prononciations_audio`
+Enregistrements vocaux haute fidélité pour chaque terme.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant audio |
-| `dictionary_entry_id`| `UUID` | `REFERENCES dictionary_entries(id)` | Mot associé |
-| `audio_url` | `VARCHAR(500)` | `NOT NULL` | Fichier MP3 / WebM (Stockage Cloud/S3) |
-| `speaker_gender` | `VARCHAR(10)` | `NULL` | `'M'`, `'F'` |
-| `accent_province`| `VARCHAR(80)` | `NULL` | Région du locuteur (ex: Woleu-Ntem) |
-| `is_verified` | `BOOLEAN` | `DEFAULT TRUE` | Qualité vocale approuvée |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant de l'audio |
+| `entree_dictionnaire_id` | `UUID` | `REFERENCES entrees_dictionnaire(id) ON DELETE CASCADE` | Mot associé |
+| `url_audio` | `VARCHAR(500)` | `NOT NULL` | Fichier MP3/WAV (Supabase Storage/CDN) |
+| `genre_locuteur` | `VARCHAR(10)` | `CHECK ('Homme', 'Femme', 'Autre')` | Genre de la voix |
+| `province_accent` | `VARCHAR(80)` | `NULL` | Province d'origine de l'accent |
+| `est_verifie` | `BOOLEAN` | `DEFAULT TRUE` | Vérifié conforme |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'enregistrement |
 
 ---
 
 ### 3.4. Expressions, Proverbes & Contes
 
-#### Table `cultural_expressions`
-Conservation des proverbes, contes, récits d'anciens et sagesses orales.
+#### Table `expressions_culturelles`
+Patrimoine oral : maximes ancestrales, contes, salutations et sagesses.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant |
-| `language_id` | `UUID` | `REFERENCES languages(id), NOT NULL` | Langue de l'expression |
-| `type` | `VARCHAR(30)` | `NOT NULL` | `'proverbe'`, `'conte'`, `'expression'`, `'salutation'` |
-| `content_local` | `TEXT` | `NOT NULL` | Texte dans la langue gabonaise |
-| `content_french` | `TEXT` | `NOT NULL` | Traduction française fluide |
-| `literal_meaning` | `TEXT` | `NULL` | Traduction mot-à-mot |
-| `philosophical_meaning`| `TEXT` | `NULL` | Sagesse, morale ou leçon philosophique |
-| `context_of_use` | `TEXT` | `NULL` | Circonstance coutumière (ex: mariage, palabre, deuil) |
-| `audio_url` | `VARCHAR(500)` | `NULL` | Enregistrement vocal |
-| `is_validated` | `BOOLEAN` | `DEFAULT TRUE` | Validation linguistique |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant de l'expression |
+| `langue_id` | `UUID` | `REFERENCES langues(id) ON DELETE CASCADE` | Langue d'origine |
+| `type` | `VARCHAR(30)` | `CHECK ('proverbe', 'conte', 'expression', 'salutation', 'dialogue')` | Catégorie |
+| `contenu_local` | `TEXT` | `NOT NULL` | Texte en langue gabonaise |
+| `contenu_francais` | `TEXT` | `NOT NULL` | Traduction en français |
+| `sens_litteral` | `TEXT` | `NULL` | Traduction mot à mot |
+| `sens_philosophique` | `TEXT` | `NULL` | Enseignement moral ou symbolique |
+| `contexte_utilisation` | `TEXT` | `NULL` | Quand employer l'expression |
+| `url_audio` | `VARCHAR(500)` | `NULL` | Enregistrement audio |
+| `est_valide` | `BOOLEAN` | `DEFAULT TRUE` | Validé par un modérateur |
+| `cree_par` | `UUID` | `REFERENCES utilisateurs(id)` | Contributeur |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ajout |
 
 ---
 
-### 3.5. Historique & Moteur de Traduction
+### 3.5. Historique des Traductions
 
-#### Table `translations_history`
-Mémorise les traductions demandées pour l'historique utilisateur et l'amélioration de l'IA.
+#### Table `historique_traductions`
+Traçabilité des traductions exécutées par les utilisateurs.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant |
-| `user_id` | `UUID` | `REFERENCES users(id), NULL` | Utilisateur (NULL si anonyme) |
-| `source_lang_id` | `UUID` | `REFERENCES languages(id), NOT NULL` | Langue source |
-| `target_lang_id` | `UUID` | `REFERENCES languages(id), NOT NULL` | Langue cible |
-| `source_text` | `TEXT` | `NOT NULL` | Texte original saisi ou dicté |
-| `translated_text`| `TEXT` | `NOT NULL` | Résultat traduit |
-| `engine` | `VARCHAR(50)` | `DEFAULT 'tradition_ia_v2'` | Moteur (`'tradition_ia_v2'`, `'gemini_flash'`) |
-| `confidence_score`| `DECIMAL(4,2)`| `DEFAULT 0.95` | Indice de confiance de la traduction |
-| `latency_ms` | `INT` | `NULL` | Temps de réponse en ms |
-| `is_favorite` | `BOOLEAN` | `DEFAULT FALSE` | Marqué comme favori |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date et heure |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant unique |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id) ON DELETE CASCADE` | Utilisateur demandeur |
+| `langue_source_id` | `UUID` | `REFERENCES langues(id)` | Langue de départ |
+| `langue_cible_id` | `UUID` | `REFERENCES langues(id)` | Langue d'arrivée |
+| `texte_source` | `TEXT` | `NOT NULL` | Texte original |
+| `texte_traduit` | `TEXT` | `NOT NULL` | Résultat traduit |
+| `moteur_ia` | `VARCHAR(50)` | `DEFAULT 'tradition_ia_v2'` | Modèle d'IA utilisé |
+| `score_confiance` | `DECIMAL(4,2)`| `DEFAULT 0.95` | Indice de fiabilité (0.00 à 1.00) |
+| `latence_ms` | `INT` | `NULL` | Temps de génération en millisecondes |
+| `est_favori` | `BOOLEAN` | `DEFAULT FALSE` | Mis en favoris |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de la traduction |
 
 ---
 
 ### 3.6. Assistant IA & Conversations
 
-#### Table `ai_conversations`
-Fils de discussion avec l'assistant culturel Tradition IA.
+#### Table `conversations_ia`
+Fils de discussions engagés avec l'assistant virtuel.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant de session de chat |
-| `user_id` | `UUID` | `REFERENCES users(id), NOT NULL` | Propriétaire de la conversation |
-| `title` | `VARCHAR(150)` | `DEFAULT 'Nouvelle discussion'`| Titre généré de la discussion |
-| `context_language_id`| `UUID` | `REFERENCES languages(id), NULL` | Langue de prédilection de la session |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de création |
-| `updated_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date du dernier message |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant du fil |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id) ON DELETE CASCADE` | Propriétaire |
+| `titre` | `VARCHAR(150)` | `DEFAULT 'Nouvelle discussion'` | Intitulé de la discussion |
+| `langue_contexte_id` | `UUID` | `REFERENCES langues(id)` | Langue ciblée pour le contexte |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ouverture |
+| `date_mise_a_jour` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date du dernier message |
 
-#### Table `ai_messages`
-Messages individuels échangés dans les conversations.
+#### Table `messages_ia`
+Messages individuels échangés au sein d'une discussion.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant du message |
-| `conversation_id`| `UUID` | `REFERENCES ai_conversations(id)` | Conversation parente |
-| `sender_role` | `VARCHAR(20)` | `NOT NULL` | `'user'`, `'assistant'`, `'system'` |
-| `content` | `TEXT` | `NOT NULL` | Texte du message en markdown |
-| `cultural_references`| `JSONB` | `DEFAULT '{}'` | Citations de proverbes ou règles associées |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Horodatage précis |
+| `conversation_id` | `UUID` | `REFERENCES conversations_ia(id) ON DELETE CASCADE` | Discussion parente |
+| `role_expediteur` | `VARCHAR(20)` | `CHECK ('utilisateur', 'assistant', 'systeme')` | Auteur du message |
+| `contenu` | `TEXT` | `NOT NULL` | Texte du message |
+| `references_culturelles` | `JSONB` | `DEFAULT '{}'` | Citations d'auteurs, masques, proverbes |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'envoi |
 
 ---
 
 ### 3.7. Validation IA & Contribution Communautaire
 
-#### Table `ai_validations`
-Backoffice de relecture pour les linguistes et administrateurs.
+#### Table `validations_ia`
+Pipeline de relecture où les linguistes valident ou corrigent les suggestions de l'IA.
 
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant |
-| `user_id` | `UUID` | `REFERENCES users(id), NULL` | Contributeur |
-| `language_id` | `UUID` | `REFERENCES languages(id), NOT NULL` | Langue concernée |
-| `source_french` | `TEXT` | `NOT NULL` | Texte en français |
-| `suggested_translation`| `TEXT` | `NOT NULL` | Traduction proposée |
-| `status` | `VARCHAR(20)` | `DEFAULT 'pending'` | `'pending'`, `'approved'`, `'rejected'` |
-| `reviewer_id` | `UUID` | `REFERENCES users(id), NULL` | Administrateur ou linguiste ayant validé |
-| `reviewer_notes` | `TEXT` | `NULL` | Motif d'acceptation ou de rejet |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de soumission |
-| `reviewed_at` | `TIMESTAMPTZ` | `NULL` | Date d'évaluation |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant de la proposition |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id)` | Auteur de la proposition |
+| `langue_id` | `UUID` | `REFERENCES langues(id) ON DELETE CASCADE` | Langue concernée |
+| `francais_source` | `TEXT` | `NOT NULL` | Phrase source en français |
+| `traduction_suggeree` | `TEXT` | `NOT NULL` | Traduction proposée |
+| `statut` | `VARCHAR(20)` | `CHECK ('en_attente', 'approuve', 'rejete')` | Statut du workflow |
+| `relecteur_id` | `UUID` | `REFERENCES utilisateurs(id)` | Administrateur / Linguiste relecteur |
+| `notes_relecteur` | `TEXT` | `NULL` | Commentaires linguistiques justificatifs |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de proposition |
+| `date_relecture` | `TIMESTAMPTZ` | `NULL` | Date de décision |
 
 ---
 
 ### 3.8. Favoris Utilisateurs
 
-#### Table `user_favorites`
-Permet aux utilisateurs de sauvegarder leurs mots, proverbes et traductions préférés.
-
+#### Table `favoris_utilisateurs`
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant |
-| `user_id` | `UUID` | `REFERENCES users(id), NOT NULL` | Utilisateur |
-| `item_type` | `VARCHAR(30)` | `NOT NULL` | `'translation'`, `'dictionary_word'`, `'expression'` |
-| `item_id` | `UUID` | `NOT NULL` | Identifiant de l'élément cible |
-| `custom_notes` | `TEXT` | `NULL` | Note personnelle de l'utilisateur |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ajout |
+| `id` | `UUID` | `PRIMARY KEY, DEFAULT gen_random_uuid()` | Identifiant du favori |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id) ON DELETE CASCADE` | Utilisateur |
+| `type_element` | `VARCHAR(30)` | `CHECK ('traduction', 'mot_dictionnaire', 'expression')` | Type d'élément épinglé |
+| `element_id` | `UUID` | `NOT NULL` | Clé primaire de l'élément cible |
+| `notes_personnalisees` | `TEXT` | `NULL` | Mémo ou annotation personnelle |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date d'ajout |
 
 ---
 
-### 3.9. Analytics & Paramètres Système
+### 3.9. Statistiques & Paramètres Système
 
-#### Table `analytics_events`
-Métriques d'utilisation pour le tableau de bord Admin Analytics.
-
+#### Table `evenements_analytiques`
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `BIGSERIAL` | `PRIMARY KEY` | Numéro d'événement |
-| `event_name` | `VARCHAR(50)` | `NOT NULL` | `'translate'`, `'tts_listen'`, `'voice_input'`, `'chat_query'` |
-| `language_code`| `VARCHAR(10)` | `NULL` | Langue ciblée |
-| `user_id` | `UUID` | `NULL` | Utilisateur (anonymisé si non connecté) |
-| `duration_ms` | `INT` | `DEFAULT 0` | Temps de traitement |
-| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Horodatage de l'action |
+| `id` | `BIGSERIAL` | `PRIMARY KEY` | Incrément unique |
+| `nom_evenement` | `VARCHAR(50)` | `NOT NULL` | Nom de l'action (`traduction_executee`, etc.) |
+| `code_langue` | `VARCHAR(10)` | `NULL` | Langue sollicitée |
+| `utilisateur_id` | `UUID` | `REFERENCES utilisateurs(id)` | Utilisateur (si connecté) |
+| `duree_ms` | `INT` | `DEFAULT 0` | Durée de traitement |
+| `date_creation` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Horodatage |
 
-#### Table `system_settings`
-Configuration globale de la plateforme modifiable depuis l'interface d'administration.
-
+#### Table `parametres_systeme`
 | Colonne | Type | Contraintes | Description |
 | :--- | :--- | :--- | :--- |
-| `setting_key` | `VARCHAR(80)` | `PRIMARY KEY` | Clé unique (ex: `maintenance_mode`, `ai_model_name`) |
-| `setting_value`| `TEXT` | `NOT NULL` | Valeur (string, booléen, JSON) |
-| `description` | `VARCHAR(255)` | `NULL` | Description du rôle du paramètre |
-| `updated_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Dernière mise à jour |
+| `cle_parametre` | `VARCHAR(80)` | `PRIMARY KEY` | Clé de configuration |
+| `valeur_parametre` | `TEXT` | `NOT NULL` | Valeur associée |
+| `description` | `VARCHAR(255)` | `NULL` | Rôle du paramètre |
+| `date_mise_a_jour` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Date de mise à jour |
 
 ---
 
-## 4. Déroulement Pas à Pas (Guide de Déploiement)
+## 4. Guide de Déploiement & Bonnes Pratiques
 
-Voici les étapes méthodiques pour monter la base de données en production :
-
-```
-Étape 1 ──────► Étape 2 ──────► Étape 3 ──────► Étape 4 ──────► Étape 5
-Choix du        Exécution       Seeding des     Sécurité &      Connexion API
-SGBD Cloud      du Schéma DDL   Données Gabon   Index/RLS       Node.js Backend
-```
-
-### Étape 1 : Choix de la plateforme SGBD
-1. **Option Recommandée** : **Supabase (PostgreSQL hébergé)**
-   - Gratuit, ultra-rapide, inclut Authentification, Row Level Security et API temps réel.
-2. **Alternative Cloud** : Google Cloud SQL (Postgres), Neon Tech, Render Postgres ou MySQL 8+.
-
-### Étape 2 : Création de la base et exécution du DDL
-- Ouvrez votre console SQL (pgAdmin, Supabase SQL Editor ou DBeaver).
-- Exécutez le script complet fourni dans [`database_schema.sql`](file:///c:/Users/Rosny%20Minlo/Desktop/Tradition%20IA/database_schema.sql).
-- Le script crée les extensions nécessaires (`pgcrypto` ou `uuid-ossp`), les 11 tables, les contraintes de clés étrangères et les index d'optimisation.
-
-### Étape 3 : Injection du jeu de données culturel initial (Seeding)
-- Les 10 langues gabonaises (Fang, Punu, Myènè, Nzébi, Téké, Vili, Obamba, Guisir, Kota, Anglais) sont insérées avec leurs masques SVG/PNG associés.
-- Les proverbes, salutations courantes et vocabulaire de base issu de `api/_knowledge.js` sont automatiquement pré-remplis.
-
-### Étape 4 : Mise en place des Index & Performances
-Des index B-Tree et GIN (pour recherche de texte) sont configurés :
-- Index sur `users(email)` et `users(role)`
-- Index sur `dictionary_entries(french_word)` et `dictionary_entries(language_id)`
-- Index sur `translations_history(user_id, created_at DESC)`
-- Index sur `ai_messages(conversation_id, created_at ASC)`
-
-### Étape 5 : Intégration dans le backend Tradition IA
-- Dans votre fichier `.env` ou variables d'environnement Vercel :
-```env
-DATABASE_URL="postgresql://postgres:[PASSWORD]@[HOST]:5432/tradition_ia?sslmode=require"
-JWT_SECRET="votre_secret_tres_securise_tradition_ia"
-```
-- Les endpoints `api/translate.js`, `api/chat.js` et les pages admin se connectent directement à cette base de données pour persister l'historique et les validations.
-
----
-
-## 5. Script d'Initialisation des Données (Seeding)
-
-Consultez le fichier [`database_schema.sql`](file:///c:/Users/Rosny%20Minlo/Desktop/Tradition%20IA/database_schema.sql) pour exécuter l'intégralité du code SQL prêt à l'emploi.
+1. **Dans Supabase ou PostgreSQL** :
+   - Ouvrez la console SQL (**SQL Editor**).
+   - Collez le contenu du fichier [`database_schema.sql`](file:///c:/Users/LENOVO/OneDrive/Desktop/Tradition-IA/database_schema.sql).
+   - Cliquez sur **Run** pour créer l'ensemble des tables, contraintes d'intégrité, index et données de référence gabonaises.
+2. **Sécurité (RLS)** :
+   - Activez Row Level Security (`ALTER TABLE utilisateurs ENABLE ROW LEVEL SECURITY;`).
+   - Les politiques autorisent la lecture publique des langues et du dictionnaire validé, et restreignent l'historique et les favoris à leur propriétaire.

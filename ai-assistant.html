@@ -609,7 +609,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
             </button>
           </div>
-          <p class="chat-footer-disclaimer">Mbolo IA est propulsé par Gemini & la base de connaissances du Gabon.</p>
+          <p class="chat-footer-disclaimer">Mbolo IA est propulsé par l'IA & la base de connaissances du Gabon.</p>
         </div>
 
       </div>
@@ -760,7 +760,7 @@
       try {
         let aiReply;
         if (IS_DEPLOYED) {
-          // Sur le serveur : appel direct à l'API Gemini via /api/chat
+          // Sur le serveur : appel direct à l'API via /api/chat
           aiReply = await fetchAIResponse(txt);
         } else {
           // En local (file://) : réponse de secours
@@ -803,14 +803,14 @@
       const response = await fetch(API_CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history, persona: 'tuteur' })
+        body: JSON.stringify({ message, history, conversationHistory: history, persona: 'tuteur' })
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || `Erreur serveur ${response.status}`);
+        throw new Error(data.error || data.message || `Erreur serveur ${response.status}`);
       }
-      return data.reply;
+      return data.reply || data.message;
     }
 
     // ─── Fallback local si offline ─────────────────────────────────────────────
