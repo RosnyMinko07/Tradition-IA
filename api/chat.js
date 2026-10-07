@@ -1,5 +1,5 @@
-// api/chat.js - Assistant Mbolo IA (Tradition IA & Langues Gabonaises)
-const { DICTIONARY_DATA, PHRASES_DATA, LANGUAGES_DATA, buildSystemPrompt } = require('./_knowledge');
+// api/chat.js - Assistant Mbolo IA (Tradition IA - Propulsé par DeepSeek sur OpenRouter)
+const { buildSystemPrompt } = require('./_knowledge');
 
 module.exports = async (req, res) => {
   // Configuration CORS
@@ -37,8 +37,18 @@ module.exports = async (req, res) => {
 
     const trimmedMessage = message.trim();
 
-    // Clé API OpenRouter (optionnelle : si absente, la base locale répond sans erreur)
+    // Clé API OpenRouter
     const apiKey = (process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || '').trim();
+
+    if (!apiKey) {
+      console.error('❌ OPENROUTER_API_KEY non configurée');
+      return res.status(200).json({
+        success: false,
+        error: "Clé OPENROUTER_API_KEY manquante sur Vercel.",
+        message: "Clé OPENROUTER_API_KEY manquante sur Vercel.",
+        reply: "⚠️ La variable **OPENROUTER_API_KEY** n'est pas configurée dans votre projet Vercel.\n\n👉 Allez sur **Vercel → Votre projet → Settings → Environment Variables** et ajoutez votre clé OpenRouter `OPENROUTER_API_KEY`."
+      });
+    }
 
     // Détecter si la question porte sur le créateur Rosny
     function isAboutRosny(text) {
@@ -53,16 +63,16 @@ module.exports = async (req, res) => {
 
     const aboutRosny = isAboutRosny(trimmedMessage);
 
-    // ── Construction du Prompt Système (Mbolo IA + Contexte Culturel + Connaissance Rosny) ──
+    // Prompt Système avec connaissances gabonaises + créateur Rosny
     const baseKnowledgePrompt = typeof buildSystemPrompt === 'function' ? buildSystemPrompt('assistant', persona) : '';
 
     const devContext = `
 
-CRÉATEUR & DÉVELOPPEMENT DE TRADITION IA :
+CRÉATEUR & DÉVELOPPEUR DE TRADITION IA :
 • La plateforme Tradition IA a été conçue et développée par **Rosny OTSINA**, développeur Full Stack freelance basé à Libreville, Gabon.
 • Contact développeur : rodrigueotsina@gmail.com | Téléphone : +241 077 12 24 85 | GitHub : https://github.com/RosnyMinko07
-• Si un utilisateur te demande qui t'a créé ou qui a développé Tradition IA, présente Rosny OTSINA avec respect, fierté et bienveillance.
-• Pour toute autre question, reste pleinement dans ton rôle d'assistant linguistique et culturel **Mbolo IA**, dédié aux 9 langues du Gabon.`;
+• Si l'utilisateur te demande qui t'a créé ou qui a développé Tradition IA, présente Rosny OTSINA avec respect, fierté et bienveillance.
+• Pour toute autre question, réponds en tant que **Mbolo IA**, expert des 9 langues et cultures du Gabon.`;
 
     const fullSystemPrompt = baseKnowledgePrompt + devContext;
 
@@ -79,7 +89,7 @@ CRÉATEUR & DÉVELOPPEMENT DE TRADITION IA :
     unifiedHistory.slice(-12).forEach(msg => {
       const role = (msg.role === 'user' || msg.role === 'client') ? 'user' : 'assistant';
       const content = (msg.content || msg.text || '').trim();
-      if (content && !content.startsWith('Erreur :')) {
+      if (content && !content.startsWith('Erreur :') && !content.startsWith('⚠️')) {
         messages.push({ role, content });
       }
     });
@@ -90,69 +100,77 @@ CRÉATEUR & DÉVELOPPEMENT DE TRADITION IA :
       content: trimmedMessage
     });
 
+    // Modèles DeepSeek prioritaires sur OpenRouter
+    const modelsToTry = [
+      process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat',
+      'deepseek/deepseek-chat',
+      'deepseek/deepseek-coder',
+      'deepseek/deepseek-r1-distill-qwen-32b'
+    ];
+
+    const models = [...new Set(modelsToTry)];
+
     let aiResponse = null;
     let usedModel = null;
+    let lastError = null;
 
-    // ── 1. Tentative avec OpenRouter si la clé API est configurée ──
-    if (apiKey) {
-      const candidateModels = [
-        process.env.OPENROUTER_MODEL,
-        'deepseek/deepseek-chat',
-        'qwen/qwen3-30b-a3b:free',
-        'deepseek/deepseek-r1-distill-qwen-32b',
-        'deepseek/deepseek-coder'
-      ].filter(Boolean);
+    // Appel direct à l'API DeepSeek sur OpenRouter
+    for (const model of models) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
-      const openRouterModels = [...new Set(candidateModels)];
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': req.headers.origin || 'https://tradition-ia.vercel.app',
+            'X-Title': 'Tradition IA - Mbolo Chatbot'
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: messages,
+            max_tokens: 1500,
+            temperature: 0.7,
+            top_p: 0.9
+          })
+        });
 
-      for (const model of openRouterModels) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 22000); // Timeout 22s
+        clearTimeout(timeoutId);
 
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            signal: controller.signal,
-            headers: {
-              'Authorization': `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': req.headers.origin || 'https://tradition-iavercel.app',
-              'X-Title': 'Tradition IA - Mbolo Chatbot'
-            },
-            body: JSON.stringify({
-              model: model,
-              messages: messages,
-              max_tokens: 1200,
-              temperature: 0.7,
-              top_p: 0.9
-            })
-          });
-
-          clearTimeout(timeoutId);
-
-          if (response.ok) {
-            const data = await response.json();
-            const reply = data.choices?.[0]?.message?.content?.trim();
-            if (reply) {
-              aiResponse = reply;
-              usedModel = model;
-              console.log(`✅ [Tradition IA] Succès OpenRouter avec : ${model}`);
-              break;
-            }
+        if (response.ok) {
+          const data = await response.json();
+          const reply = data.choices?.[0]?.message?.content?.trim();
+          if (reply) {
+            aiResponse = reply;
+            usedModel = model;
+            console.log(`✅ [Tradition IA] Succès DeepSeek OpenRouter (${model})`);
+            break;
           }
-        } catch (modelError) {
-          console.warn(`⚠️ [Tradition IA] Erreur OpenRouter (${model}):`, modelError.message);
+        } else {
+          const errorText = await response.text();
+          console.warn(`⚠️ [OpenRouter] Échec avec ${model}:`, response.status, errorText.substring(0, 120));
+          lastError = new Error(`OpenRouter (${response.status}): ${errorText.substring(0, 150)}`);
         }
+      } catch (err) {
+        console.warn(`⚠️ [OpenRouter] Exception ${model}:`, err.message);
+        lastError = err;
       }
     }
 
-    // ── 2. Moteur de réponse autonome basé sur _knowledge.js (quand pas de clé API) ──
     if (!aiResponse) {
-      usedModel = 'Moteur Tradition IA (Base _knowledge.js)';
-      aiResponse = generateResponseFromKnowledge(trimmedMessage, aboutRosny);
+      const errMsg = lastError?.message || "Erreur de communication avec l'API OpenRouter / DeepSeek.";
+      console.error('❌ Échec DeepSeek OpenRouter:', errMsg);
+      return res.status(200).json({
+        success: false,
+        error: errMsg,
+        message: errMsg,
+        reply: `⚠️ Erreur DeepSeek (OpenRouter) : ${errMsg}\n\nVérifiez que votre clé OPENROUTER_API_KEY est valide et dispose de crédits.`
+      });
     }
 
-    // Réponse au format attendu par Tradition IA et le front-end
     return res.status(200).json({
       success: true,
       reply: aiResponse,
@@ -163,130 +181,11 @@ CRÉATEUR & DÉVELOPPEMENT DE TRADITION IA :
 
   } catch (error) {
     console.error('❌ [Tradition IA /api/chat] Erreur générale:', error);
-
-    const fallbackReply = "🇬🇦 **Mbolo !** Je suis l'assistant **Mbolo IA** de Tradition IA.\n\n" +
-      "Je suis là pour vous faire découvrir les 9 langues du Gabon (Fang, Punu, Myènè, Nzébi, Téké, Vili, Obamba, Guisir, Kota).\n\n" +
-      "Posez-moi une question sur une salutation, un mot ou la culture gabonaise !";
-
     return res.status(200).json({
-      success: true,
-      reply: fallbackReply,
-      message: fallbackReply,
-      model: 'Mode Local'
+      success: false,
+      error: error.message,
+      message: error.message,
+      reply: `⚠️ Erreur technique : ${error.message || 'Impossible de contacter DeepSeek.'}`
     });
   }
 };
-
-// ─── Générateur de réponse intelligente tirée de _knowledge.js ────────────────
-function generateResponseFromKnowledge(message, aboutRosny) {
-  const lower = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-  // 1. Question sur le créateur Rosny
-  if (aboutRosny) {
-    return `👋 **À propos du concepteur de Tradition IA :**\n\n` +
-      `La plateforme **Tradition IA** a été conçue et développée par **Rosny OTSINA**, développeur Full Stack freelance gabonais basé à Libreville.\n\n` +
-      `• 📍 **Localisation :** Libreville, Gabon\n` +
-      `• 📧 **Email :** rodrigueotsina@gmail.com\n` +
-      `• 📞 **Téléphone :** +241 077 12 24 85\n` +
-      `• 💻 **GitHub :** [github.com/RosnyMinko07](https://github.com/RosnyMinko07)\n\n` +
-      `✨ Rosny a créé ce projet pour préserver, numériser et valoriser le patrimoine linguistique et traditionnel des 9 provinces du Gabon !`;
-  }
-
-  // 2. Recherche directe de mot ou expression dans le dictionnaire
-  if (Array.isArray(DICTIONARY_DATA)) {
-    const matchedWords = DICTIONARY_DATA.filter(entry => {
-      const frNorm = (entry.fr || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      return lower.includes(frNorm) && frNorm.length > 2;
-    });
-
-    if (matchedWords.length > 0) {
-      const top = matchedWords[0];
-      let reply = `💡 **Vocabulaire gabonais pour "${top.fr}" :**\n\n`;
-      if (top.fang) reply += `• **Fang** : **${top.fang}**\n`;
-      if (top.punu) reply += `• **Punu** : **${top.punu}**\n`;
-      if (top.myene) reply += `• **Myènè** : **${top.myene}**\n`;
-      if (top.nzebi) reply += `• **Nzébi** : **${top.nzebi}**\n`;
-      if (top.teke) reply += `• **Téké** : **${top.teke}**\n`;
-      if (top.vili) reply += `• **Vili** : **${top.vili}**\n`;
-      if (top.kota) reply += `• **Kota** : **${top.kota}**\n`;
-      if (top.guisir) reply += `• **Guisir** : **${top.guisir}**\n`;
-      if (top.obamba) reply += `• **Obamba** : **${top.obamba}**\n`;
-      reply += `\n*(Catégorie : ${top.category || 'Général'})* 🇬🇦`;
-      return reply;
-    }
-  }
-
-  // 3. Recherche dans les phrases et proverbes
-  if (Array.isArray(PHRASES_DATA)) {
-    const matchedPhrase = PHRASES_DATA.find(p => {
-      const frNorm = (p.fr || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      return lower.includes(frNorm) || (p.fang && lower.includes(p.fang.toLowerCase()));
-    });
-
-    if (matchedPhrase) {
-      let reply = `📜 **Expression gabonaise : "${matchedPhrase.fr}"**\n\n`;
-      if (matchedPhrase.fang) reply += `• **Fang** : **${matchedPhrase.fang}**\n`;
-      if (matchedPhrase.punu) reply += `• **Punu** : **${matchedPhrase.punu}**\n`;
-      if (matchedPhrase.myene) reply += `• **Myènè** : **${matchedPhrase.myene}**\n`;
-      if (matchedPhrase.sens) reply += `\n*Sens traditionnel :* ${matchedPhrase.sens}\n`;
-      if (matchedPhrase.context) reply += `\n*Usage :* ${matchedPhrase.context}`;
-      return reply;
-    }
-  }
-
-  // 4. Questions sur une langue spécifique
-  if (Array.isArray(LANGUAGES_DATA)) {
-    const matchedLang = LANGUAGES_DATA.find(l => lower.includes(l.name.toLowerCase()));
-    if (matchedLang) {
-      return `🇬🇦 **La langue ${matchedLang.name} (${matchedLang.nativeName}) :**\n\n` +
-        `• **Famille linguistique :** ${matchedLang.family}\n` +
-        `• **Régions principales :** ${matchedLang.region}\n` +
-        `• **Locuteurs estimés :** ${matchedLang.speakers}\n` +
-        `• **Particularités :** ${matchedLang.notes}\n\n` +
-        `Vous pouvez me demander la traduction de mots du quotidien (bonjour, merci, eau, maison, famille) en ${matchedLang.name} !`;
-    }
-  }
-
-  // 5. Salutations
-  if (lower.includes('bonjour') || lower.includes('mbolo') || lower.includes('salut') || lower.includes('coucou')) {
-    return `🇬🇦 **Mbolo !** (Bonjour !)\n\n` +
-      `Au Gabon, **Mbolo** est le mot d'accueil et de fraternité universel, partagé par la majorité de nos peuples (Fang, Punu, Myènè, Guisir, Kota).\n\n` +
-      `Je suis **Mbolo IA**, votre assistant culturel. Vous pouvez me poser des questions sur :\n` +
-      `• La traduction de mots ou de phrases complètes\n` +
-      `• Les expressions et proverbes ancestraux\n` +
-      `• L'histoire des masques traditionnels (Mukudj, Ngil, Kota)\n` +
-      `• Les 9 langues du Gabon`;
-  }
-
-  // 6. Proverbes
-  if (lower.includes('proverbe') || lower.includes('conte') || lower.includes('sagesse')) {
-    const proverbe = (PHRASES_DATA || []).find(p => p.type === 'proverbe') || {
-      fr: "L'éléphant ne sent pas le poids de sa trompe.",
-      fang: "Nzok é kiki abim e ñgôl.",
-      sens: "Chacun est capable de supporter ses propres responsabilités."
-    };
-    return `📜 **Proverbe gabonais :**\n\n` +
-      `> « ${proverbe.fr} »\n\n` +
-      `• **En Fang :** *${proverbe.fang || 'Nzok é kiki abim e ñgôl'}*\n` +
-      `• **Signification :** ${proverbe.sens || 'Chacun assume sa propre charge avec force.'}`;
-  }
-
-  // 7. Masques et culture
-  if (lower.includes('masque') || lower.includes('culture') || lower.includes('tradition') || lower.includes('bwiti')) {
-    return `🎭 **Le patrimoine culturel et les masques du Gabon :**\n\n` +
-      `• **Le Masque Mukudj (Punu)** : Peint au kaolin blanc, il incarne la grâce féminine ancestrale et la sérénité lors des danses sur échasses.\n` +
-      `• **Le Masque Ngil (Fang)** : Masque longiligne en bois clair, emblème de droiture et de justice communautaire.\n` +
-      `• **Les Figures de reliquaire Kota** : Sculptures gardiennes ornées de laiton et de cuivre honorant les ancêtres.\n` +
-      `• **Le Mvet** : Récit épique et instrument de musique sacré accompagnant les contes initiatiques Fang.\n\n` +
-      `Quelle tradition ou ethnie vous intéresse le plus ?`;
-  }
-
-  // 8. Réponse générale chaleureuse
-  return `🇬🇦 **Mbolo ! Je suis Mbolo IA, l'assistant des langues gabonaises.**\n\n` +
-    `Je suis prêt à vous répondre sur les 9 langues du Gabon (Fang, Punu, Myènè, Nzébi, Téké, Vili, Guisir, Kota, Obamba).\n\n` +
-    `Vous pouvez me demander par exemple :\n` +
-    `• *"Comment dit-on merci en Punu ?"*\n` +
-    `• *"Traduis maison en Fang"*\n` +
-    `• *"Raconte-moi l'histoire du masque Mukudj"*\n` +
-    `• *"Donne-moi un proverbe gabonais"*`;
-}
