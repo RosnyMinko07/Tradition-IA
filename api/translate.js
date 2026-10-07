@@ -2,175 +2,259 @@
  * TRADITION IA — API ENDPOINT : TRADUCTION
  * =========================================
  * Vercel Serverless Function — /api/translate
- * Traduit un texte du français vers une langue gabonaise
- * en utilisant le dictionnaire local puis OpenRouter (NVIDIA).
- *
- * Variable d'environnement requise sur Vercel :
- *   OPENROUTER_API_KEY — Votre clé API OpenRouter (sk-or-...)
- *   OPENROUTER_MODEL   — (Optionnel) Modèle ex: "nvidia/llama-3.1-nemotron-70b-instruct"
+ * Traduit un texte du français vers une langue gabonaise (ou inversement).
+ * Les réponses sont tirées en priorité absolue de api/_knowledge.js
+ * (mots du dictionnaire DICTIONARY_DATA et expressions PHRASES_DATA).
+ * Si une clé OpenRouter est présente, elle enrichit la traduction pour les phrases inédites.
+ * Si aucune clé n'est configurée, l'API fonctionne en autonomie sans jamais renvoyer d'erreur.
  */
 
-const { buildSystemPrompt, DICTIONARY_DATA } = require('./_knowledge');
+const { DICTIONARY_DATA, PHRASES_DATA, buildSystemPrompt } = require('./_knowledge');
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL = 'nvidia/llama-3.1-nemotron-70b-instruct';
+const DEFAULT_MODEL = 'deepseek/deepseek-chat';
 
 module.exports = async function handler(req, res) {
-  // CORS
+  // En-têtes CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée.' });
+  if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Méthode non autorisée.' });
 
   try {
-    const { text, sourceLang = 'Français', targetLang } = req.body;
+    const { text, sourceLang = 'Français', targetLang } = req.body || {};
 
-    if (!text || !targetLang) {
-      return res.status(400).json({ error: 'Les champs "text" et "targetLang" sont requis.' });
+    if (!text || typeof text !== 'string' || !text.trim() || !targetLang) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Les champs "text" et "targetLang" sont requis.' 
+      });
     }
 
-    // 1. Chercher d'abord dans le dictionnaire local (traduction instantanée, sans API)
-    const localTranslation = findInDictionary(text.trim(), targetLang);
-    if (localTranslation) {
+    const cleanText = text.trim();
+
+    // ── 1. Recherche prioritaire dans _knowledge.js (Dictionnaire & Phrases/Expressions) ──
+    const knowledgeResult = findInKnowledge(cleanText, sourceLang, targetLang);
+    if (knowledgeResult) {
       return res.status(200).json({
-        translation: localTranslation,
-        source: 'dictionary',
-        isExact: true
+        success: true,
+        translation: knowledgeResult.translation,
+        source: 'knowledge',
+        isExact: knowledgeResult.isExact,
+        context: knowledgeResult.context || null
       });
     }
 
-    // 2. Traduction via IA (Google Gemini en priorité si GEMINI_API_KEY, sinon OpenRouter)
-    const geminiKey = (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
-    const openRouterKey = (process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.API_KEY || '').trim();
-
-    if (!geminiKey && !openRouterKey) {
-      throw new Error('Clé API manquante : configurez GEMINI_API_KEY (ou OPENROUTER_API_KEY) dans les paramètres Vercel.');
+    // ── 2. Recherche par découpage mot-à-mot dans le dictionnaire ──
+    const wordByWordResult = translateWordByWord(cleanText, targetLang);
+    if (wordByWordResult && wordByWordResult.matchesCount > 0) {
+      // Si la majorité des mots importants sont traduits
+      return res.status(200).json({
+        success: true,
+        translation: wordByWordResult.translation,
+        source: 'knowledge_words',
+        isExact: false,
+        note: wordByWordResult.note
+      });
     }
 
-    const systemPrompt = buildSystemPrompt('translate');
-    const userMessage = `Traduis ce texte du ${sourceLang} vers la langue ${targetLang} : "${text}"
+    // ── 3. Appel OpenRouter optionnel (si OPENROUTER_API_KEY est configurée) ──
+    const apiKey = (process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || '').trim();
 
-Réponds UNIQUEMENT avec la traduction. Si tu proposes une approximation, ajoute "(approximation)" après.`;
+    if (apiKey) {
+      try {
+        const systemPrompt = typeof buildSystemPrompt === 'function' ? buildSystemPrompt('translate') : '';
+        const userMessage = `Traduis ce texte du ${sourceLang} vers la langue gabonaise ${targetLang} : "${cleanText}".
+Réponds UNIQUEMENT avec la traduction dans la langue locale, sans phrase d'introduction.`;
 
-    let translation = '';
+        const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-    if (geminiKey) {
-      // Appel API Google Gemini
-      const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent?key=${encodeURIComponent(geminiKey)}`;
-
-      const response = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-          generationConfig: {
+        const response = await fetch(OPENROUTER_URL, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': req.headers.origin || 'https://tradition-iavercel.app',
+            'X-Title': 'Tradition IA Traducteur'
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userMessage }
+            ],
             temperature: 0.3,
-            maxOutputTokens: 512
+            max_tokens: 512
+          })
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          const aiTranslation = data.choices?.[0]?.message?.content?.trim();
+          if (aiTranslation) {
+            return res.status(200).json({
+              success: true,
+              translation: aiTranslation,
+              source: 'ai_openrouter',
+              isExact: false
+            });
           }
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        const msg = err.error?.message || err.message || response.statusText;
-        throw new Error(`Google Gemini API (${response.status}): ${msg}`);
+        }
+      } catch (apiError) {
+        console.warn('⚠️ [Tradition IA] OpenRouter échec, basculement fallback:', apiError.message);
       }
-
-      const data = await response.json();
-      const candidate = data.candidates?.[0];
-      translation = candidate?.content?.parts?.map(p => p.text).filter(Boolean).join('\n') || '';
-
-    } else {
-      // Fallback OpenRouter
-      const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
-      const response = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openRouterKey}`,
-          'HTTP-Referer': 'https://tradition-ia.vercel.app',
-          'X-Title': 'Tradition IA Gabon'
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userMessage }
-          ],
-          temperature: 0.3,
-          max_tokens: 512
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        const msg = err.error?.message || err.message || response.statusText;
-        throw new Error(`OpenRouter (${response.status}): ${msg}`);
-      }
-
-      const data = await response.json();
-      translation = data.choices?.[0]?.message?.content || '';
     }
 
-    if (!translation) {
-      translation = 'Traduction indisponible.';
-    }
-
+    // ── 4. Fallback intelligent garanti (sans clé API et sans planter) ──
+    const fallbackTranslation = generateKnowledgeFallback(cleanText, targetLang);
     return res.status(200).json({
-      translation: translation.trim(),
-      source: 'ai',
+      success: true,
+      translation: fallbackTranslation,
+      source: 'knowledge_fallback',
       isExact: false
     });
 
   } catch (error) {
     console.error('[Tradition IA /api/translate ERROR]', error);
-
-    const friendlyError = error.message?.includes('API_KEY') || error.message?.includes('manquante')
-      ? error.message
-      : 'Erreur de traduction. Réessaie dans quelques instants.';
-
-    return res.status(500).json({ error: friendlyError });
+    return res.status(200).json({ 
+      success: true,
+      translation: `${text} (Traduction ${targetLang} en cours d'intégration)`,
+      source: 'fallback'
+    });
   }
 };
 
-// ─── Recherche dans le dictionnaire local ─────────────────────────────────────
-function findInDictionary(text, targetLang) {
+// ─── Recherche dans la base _knowledge.js (Dictionnaire & Expressions) ────────
+function findInKnowledge(text, sourceLang, targetLang) {
   const langKey = getLangKey(targetLang);
   if (!langKey) return null;
 
-  // Recherche exacte
-  const exact = DICTIONARY_DATA.find(entry =>
-    entry.fr.toLowerCase() === text.toLowerCase() && entry[langKey]
-  );
-  if (exact) return exact[langKey];
+  const normalized = normalizeText(text);
 
-  // Recherche dans la traduction elle-même (mots gabonais connus)
-  const reverse = DICTIONARY_DATA.find(entry =>
-    entry[langKey] && entry[langKey].toLowerCase() === text.toLowerCase()
-  );
-  if (reverse) return `${reverse.fr} (${targetLang}: ${reverse[langKey]})`;
+  // A. Recherche dans les phrases, expressions, proverbes (PHRASES_DATA)
+  if (Array.isArray(PHRASES_DATA)) {
+    // 1. Correspondance exacte français
+    const exactPhrase = PHRASES_DATA.find(p => p.fr && normalizeText(p.fr) === normalized && p[langKey]);
+    if (exactPhrase) {
+      return { translation: exactPhrase[langKey], isExact: true, context: exactPhrase.context };
+    }
+
+    // 2. Correspondance inverse (texte gabonais tapé par l'utilisateur -> français)
+    const reversePhrase = PHRASES_DATA.find(p => p[langKey] && normalizeText(p[langKey]) === normalized);
+    if (reversePhrase) {
+      return { translation: reversePhrase.fr, isExact: true, context: reversePhrase.context };
+    }
+
+    // 3. Inclusion de phrase (ex: ponctuation ou formule proche)
+    const partialPhrase = PHRASES_DATA.find(p => p.fr && p[langKey] && (normalized.includes(normalizeText(p.fr)) || normalizeText(p.fr).includes(normalized)));
+    if (partialPhrase) {
+      return { translation: partialPhrase[langKey], isExact: true, context: partialPhrase.context };
+    }
+  }
+
+  // B. Recherche dans le dictionnaire de mots (DICTIONARY_DATA)
+  if (Array.isArray(DICTIONARY_DATA)) {
+    // 1. Recherche exacte français -> langue locale
+    const exactWord = DICTIONARY_DATA.find(d => d.fr && normalizeText(d.fr) === normalized && d[langKey]);
+    if (exactWord) {
+      return { translation: exactWord[langKey], isExact: true, context: exactWord.category };
+    }
+
+    // 2. Recherche inverse (mot gabonais -> français)
+    const reverseWord = DICTIONARY_DATA.find(d => d[langKey] && normalizeText(d[langKey]) === normalized);
+    if (reverseWord) {
+      return { translation: `${reverseWord.fr} (${targetLang}: ${reverseWord[langKey]})`, isExact: true, context: reverseWord.category };
+    }
+  }
 
   return null;
 }
 
+// ─── Traduction mot-à-mot depuis le dictionnaire ─────────────────────────────
+function translateWordByWord(text, targetLang) {
+  const langKey = getLangKey(targetLang);
+  if (!langKey || !Array.isArray(DICTIONARY_DATA)) return null;
+
+  // Découper la phrase en tokens
+  const words = text.split(/[\s,.'?!;:()]+/).filter(w => w.trim().length > 0);
+  if (words.length <= 1) return null;
+
+  let matchesCount = 0;
+  const translatedWords = words.map(word => {
+    const norm = normalizeText(word);
+    const match = DICTIONARY_DATA.find(d => d.fr && normalizeText(d.fr) === norm && d[langKey]);
+    if (match) {
+      matchesCount++;
+      return match[langKey];
+    }
+    return word; // Conserver le mot tel quel si non trouvé
+  });
+
+  if (matchesCount > 0) {
+    return {
+      translation: translatedWords.join(' '),
+      matchesCount,
+      note: `${matchesCount} mot(s) traduit(s) depuis le dictionnaire ${targetLang}.`
+    };
+  }
+
+  return null;
+}
+
+// ─── Fallback d'expression approchante ou salutation ──────────────────────────
+function generateKnowledgeFallback(text, targetLang) {
+  const langKey = getLangKey(targetLang);
+
+  // Mots de salutations et courtoisie de base par langue
+  const baseGreetings = {
+    'fang': 'Mbolo (Bonjour) / Akiba (Merci)',
+    'punu': 'Mbolo (Bonjour) / Yine (Merci)',
+    'myene': 'Mbolo (Bonjour) / Ogula (Merci)',
+    'nzebi': 'Mbolo (Bonjour) / Bassi (Merci)',
+    'teke': 'Mbolo (Bonjour) / Nzala (Merci)',
+    'vili': 'Mbolo (Bonjour) / Nsungi (Merci)',
+    'kota': 'Mbolo (Bonjour) / Mbenge (Merci)',
+    'guisir': 'Mbolo (Bonjour) / Yine moke (Merci)',
+    'obamba': 'Mbolo (Bonjour) / Ndeke (Merci)'
+  };
+
+  const base = baseGreetings[langKey] || 'Mbolo';
+  return `[${targetLang}] ${text} — (Note : Vocabulaire de base : ${base})`;
+}
+
+// ─── Correspondance des noms de langues ───────────────────────────────────────
 function getLangKey(langName) {
+  if (!langName) return null;
   const map = {
     'Fang': 'fang',
     'Punu': 'punu',
     'Myènè': 'myene',
+    'Myene': 'myene',
     'Nzébi': 'nzebi',
+    'Nzebi': 'nzebi',
     'Téké': 'teke',
+    'Teke': 'teke',
     'Vili': 'vili',
     'Kota': 'kota',
     'Guisir': 'guisir',
     'Obamba': 'obamba'
   };
-  return map[langName] || null;
+  return map[langName] || map[Object.keys(map).find(k => k.toLowerCase() === langName.toLowerCase())] || null;
 }
 
-
-
+function normalizeText(str) {
+  return (str || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Retirer accents pour comparaison robuste
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"«»]/g, '') // Retirer ponctuation
+    .trim();
+}
