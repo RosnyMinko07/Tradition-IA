@@ -1559,7 +1559,9 @@
       'au revoir': { fang: 'Mawé', punu: 'Sighé', myene: 'Goluwé', nzebi: 'Kuele' },
       'bienvenue': { fang: 'Mbôlô', punu: 'Mbolo', myene: 'Mbolo', kota: 'Wéli' },
       'oui': { fang: 'Eh', punu: 'Iya', myene: 'In-e', nzebi: 'Iya' },
-      'non': { fang: 'Kêm', punu: 'Nzi', myene: 'Nao', nzebi: 'Nzi' }
+      'non': { fang: 'Kêm', punu: 'Nzi', myene: 'Nao', nzebi: 'Nzi' },
+      "je t'aime": { fang: 'Ma dzime wah', punu: 'Ni ku tondi', nzebi: 'Ni gu tondi', myene: 'Mi tondi we', teke: 'Ni kwo zoli', anglais: 'I love you' },
+      "je taime": { fang: 'Ma dzime wah', punu: 'Ni ku tondi', nzebi: 'Ni gu tondi', myene: 'Mi tondi we', teke: 'Ni kwo zoli', anglais: 'I love you' }
     };
 
     let currentTargetLang = 'Fang';
@@ -1798,11 +1800,8 @@
 
       if (DICTIONARY[q] && DICTIONARY[q][langKey]) {
         resText.innerText = DICTIONARY[q][langKey];
-      } else if (DICTIONARY[q]) {
-        const firstVal = Object.values(DICTIONARY[q])[0];
-        resText.innerText = firstVal;
       } else {
-        resText.innerText = q === 'laisse-moi' ? 'zame mah' : 'Mbolo ' + q;
+        resText.innerText = "Traduction en cours d'intégration dans cette langue.";
       }
       if (resLang) resLang.innerText = 'TRADUCTION (' + currentTargetLang.toUpperCase() + ')';
     }

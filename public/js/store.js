@@ -119,7 +119,7 @@ class AppStore {
           && d.targetLang.toLowerCase() === targetLang.toLowerCase()
       );
 
-      if (pdfMatch && pdfMatch.exactMatch) {
+      if (pdfMatch && pdfMatch.exactMatch && (targetLang.toLowerCase() === 'fang' || targetLang.toLowerCase() === 'fan')) {
         translatedResult = pdfMatch.exactMatch.fr || pdfMatch.exactMatch.fang;
       } else if (dictMatch) {
         translatedResult = dictMatch.translation;

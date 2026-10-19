@@ -30,7 +30,7 @@ const LOCAL_KNOWLEDGE = {
   "fiche moi la paix": { fang: 'Korgh me mïs', punu: 'Mbika bwe', myene: 'Nkambé' },
   "fiche-moi la paix": { fang: 'Korgh me mïs', punu: 'Mbika bwe', myene: 'Nkambé' },
   "exactement": { fang: 'Dza feh', punu: 'Ghete', myene: 'Kwelé' },
-  "je t'aime": { fang: 'Ma dzime wah', punu: 'Ni ku tondi', myene: 'Mi tondi we' },
+  "je t'aime": { fang: 'Ma dzime wah', nzebi: 'Ni gu tondi', punu: 'Ni ku tondi', myene: 'Mi tondi we', teke: 'Ni kwo zoli', anglais: 'I love you' },
   "nourriture": { fang: 'bidzi', punu: 'bidya', myene: 'inoma' },
   "arachides": { fang: 'Owone', punu: 'Bikuki', myene: 'Orono' },
   "parler": { fang: 'kobe', punu: 'lamba', myene: 'renga' }
