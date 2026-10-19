@@ -31,6 +31,44 @@ async function logHistory(sourceLang, targetLang, sourceText, translatedText, so
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const DEFAULT_MODEL = 'deepseek/deepseek-chat';
 
+async function fetchAiTranslation(cleanText, sourceLang, targetLang, apiKey) {
+  const isEnglish = (targetLang || '').toLowerCase().includes('anglais') || (targetLang || '').toLowerCase().includes('english');
+  const userMessage = isEnglish
+    ? `Traduis ce texte du ${sourceLang} vers l'Anglais : "${cleanText}".\nRéponds UNIQUEMENT avec la traduction en anglais, sans phrase d'introduction, sans guillemets superflus.`
+    : `Traduis ce texte du ${sourceLang} vers la langue gabonaise ${targetLang} : "${cleanText}".\nRéponds UNIQUEMENT avec la traduction dans la langue locale, sans phrase d'introduction ni explication.`;
+
+  const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+  const response = await fetch(OPENROUTER_URL, {
+    method: 'POST',
+    signal: controller.signal,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://tradition-ia.vercel.app',
+      'X-Title': 'Tradition IA Traducteur'
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: buildSystemPrompt('translate') },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0.3,
+      max_tokens: 512
+    })
+  });
+
+  clearTimeout(timeoutId);
+  if (response.ok) {
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  }
+  return null;
+}
+
 module.exports = async function handler(req, res) {
   // En-têtes CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,103 +89,95 @@ module.exports = async function handler(req, res) {
     }
 
     const cleanText = text.trim();
+    const isEnglish = (targetLang || '').toLowerCase().includes('anglais') || (targetLang || '').toLowerCase().includes('english')
+                   || (sourceLang || '').toLowerCase().includes('anglais') || (sourceLang || '').toLowerCase().includes('english');
 
-    // ── 1. Recherche prioritaire dans _knowledge.js (Dictionnaire & Phrases/Expressions) ──
+    // ── 1. Traduction vers ou depuis l'Anglais ──────────────────────────────────
+    if (isEnglish) {
+      // Priorité A : Modèle IA via OpenRouter (si clé configurée)
+      const apiKey = (process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || '').trim();
+      if (apiKey) {
+        try {
+          const aiTrans = await fetchAiTranslation(cleanText, sourceLang, targetLang, apiKey);
+          if (aiTrans) {
+            logHistory(sourceLang, targetLang, cleanText, aiTrans, 'traduction', true);
+            return res.status(200).json({ success: true, translation: aiTrans });
+          }
+        } catch (e) {}
+      }
+
+      // Priorité B : Service direct de traduction haute fidélité
+      try {
+        const pair = (sourceLang.toLowerCase().includes('anglais') || sourceLang.toLowerCase().includes('english'))
+          ? 'en|fr'
+          : 'fr|en';
+        const freeRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanText)}&langpair=${pair}`);
+        if (freeRes.ok) {
+          const data = await freeRes.json();
+          if (data && data.responseData && data.responseData.translatedText) {
+            const cleanEn = data.responseData.translatedText.trim();
+            logHistory(sourceLang, targetLang, cleanText, cleanEn, 'traduction', true);
+            return res.status(200).json({ success: true, translation: cleanEn });
+          }
+        }
+      } catch (e) {}
+
+      // Priorité C : Dictionnaire local anglais
+      const fallbackEn = generateKnowledgeFallback(cleanText, targetLang);
+      logHistory(sourceLang, targetLang, cleanText, fallbackEn, 'traduction', true);
+      return res.status(200).json({ success: true, translation: fallbackEn });
+    }
+
+    // ── 2. Langues gabonaises : Recherche exacte dans le corpus ───────────────
     const knowledgeResult = findInKnowledge(cleanText, sourceLang, targetLang);
     if (knowledgeResult) {
-      logHistory(sourceLang, targetLang, cleanText, knowledgeResult.translation, 'knowledge', knowledgeResult.isExact);
+      logHistory(sourceLang, targetLang, cleanText, knowledgeResult.translation, 'traduction', true);
       return res.status(200).json({
         success: true,
-        translation: knowledgeResult.translation,
-        source: 'knowledge',
-        isExact: knowledgeResult.isExact,
-        context: knowledgeResult.context || null
+        translation: knowledgeResult.translation
       });
     }
 
-    // ── 2. Recherche par découpage mot-à-mot dans le dictionnaire ──
+    // ── 3. Langues gabonaises : Découpage mot-à-mot ───────────────────────────
     const wordByWordResult = translateWordByWord(cleanText, targetLang);
     if (wordByWordResult && wordByWordResult.matchesCount > 0) {
-      logHistory(sourceLang, targetLang, cleanText, wordByWordResult.translation, 'knowledge_words', false);
+      logHistory(sourceLang, targetLang, cleanText, wordByWordResult.translation, 'traduction', true);
       return res.status(200).json({
         success: true,
-        translation: wordByWordResult.translation,
-        source: 'knowledge_words',
-        isExact: false,
-        note: wordByWordResult.note
+        translation: wordByWordResult.translation
       });
     }
 
-    // ── 3. Appel OpenRouter optionnel (si OPENROUTER_API_KEY est configurée) ──
+    // ── 4. Langues gabonaises : Modèle IA (si clé disponible) ─────────────────
     const apiKey = (process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY || '').trim();
-
     if (apiKey) {
       try {
-        const isEnglish = (targetLang || '').toLowerCase().includes('anglais') || (targetLang || '').toLowerCase().includes('english');
-        const userMessage = isEnglish
-          ? `Traduis ce texte du ${sourceLang} vers l'Anglais : "${cleanText}".\nRéponds UNIQUEMENT avec la traduction en anglais, sans phrase d'introduction ni ponctuation superflue.`
-          : `Traduis ce texte du ${sourceLang} vers la langue gabonaise ${targetLang} : "${cleanText}".\nRéponds UNIQUEMENT avec la traduction dans la langue locale, sans phrase d'introduction.`;
-
-        const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-        const response = await fetch(OPENROUTER_URL, {
-          method: 'POST',
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': req.headers.origin || 'https://tradition-iavercel.app',
-            'X-Title': 'Tradition IA Traducteur'
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userMessage }
-            ],
-            temperature: 0.3,
-            max_tokens: 512
-          })
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          const aiTranslation = data.choices?.[0]?.message?.content?.trim();
-          if (aiTranslation) {
-            logHistory(sourceLang, targetLang, cleanText, aiTranslation, 'ai_openrouter', false);
-            return res.status(200).json({
-              success: true,
-              translation: aiTranslation,
-              source: 'ai_openrouter',
-              isExact: false
-            });
-          }
+        const aiTranslation = await fetchAiTranslation(cleanText, sourceLang, targetLang, apiKey);
+        if (aiTranslation) {
+          logHistory(sourceLang, targetLang, cleanText, aiTranslation, 'traduction', false);
+          return res.status(200).json({
+            success: true,
+            translation: aiTranslation
+          });
         }
       } catch (apiError) {
         console.warn('⚠️ [Tradition IA] OpenRouter échec, basculement fallback:', apiError.message);
       }
     }
 
-    // ── 4. Fallback intelligent garanti (sans clé API et sans planter) ──
+    // ── 5. Fallback par défaut ───────────────────────────────────────────────
     const fallbackTranslation = generateKnowledgeFallback(cleanText, targetLang);
-    logHistory(sourceLang, targetLang, cleanText, fallbackTranslation, 'knowledge_fallback', false);
+    logHistory(sourceLang, targetLang, cleanText, fallbackTranslation, 'traduction', false);
     return res.status(200).json({
       success: true,
-      translation: fallbackTranslation,
-      source: 'knowledge_fallback',
-      isExact: false
+      translation: fallbackTranslation
     });
 
   } catch (error) {
     console.error('[Tradition IA /api/translate ERROR]', error);
     return res.status(200).json({ 
       success: true,
-      translation: "Traduction en cours d'intégration dans cette langue.",
-      source: 'fallback'
+      translation: "Traduction en cours d'intégration dans cette langue."
     });
   }
 };

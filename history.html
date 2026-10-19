@@ -98,9 +98,8 @@
                 <tr>
                   <th>Date & Heure</th>
                   <th>Texte Original</th>
-                  <th>Traduction Générée</th>
-                  <th>Sens de Traduction</th>
-                  <th>Moteur</th>
+                  <th>Traduction</th>
+                  <th>Sens</th>
                   <th style="text-align: right;">Action</th>
                 </tr>
               </thead>
@@ -168,9 +167,9 @@
           if (window.showToast) window.showToast('Aucune traduction à exporter.', 'info');
           return;
         }
-        const csv = ['Date;Texte Source;Traduction;Langue Source;Langue Cible;Moteur'];
+        const csv = ['Date;Texte Source;Traduction;Langue Source;Langue Cible'];
         userTranslations.forEach(t => {
-          csv.push(`"${t.createdAt || ''}";"${(t.sourceText || '').replace(/"/g, '""')}";"${(t.translatedText || '').replace(/"/g, '""')}";"${t.sourceLang || 'Français'}";"${t.targetLang || ''}";"${t.isAI ? 'Modèle IA' : 'Dictionnaire'}"`);
+          csv.push(`"${t.createdAt || ''}";"${(t.sourceText || '').replace(/"/g, '""')}";"${(t.translatedText || '').replace(/"/g, '""')}";"${t.sourceLang || 'Français'}";"${t.targetLang || ''}"`);
         });
         const blob = new Blob(['\uFEFF' + csv.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -226,7 +225,6 @@
             <td style="font-weight: 600; color: var(--text-main);">${escapeHtml(t.sourceText)}</td>
             <td style="font-weight: 700; color: var(--primary);">${escapeHtml(t.translatedText)}</td>
             <td><span class="badge badge-blue-pro">${t.sourceLang || 'Français'} ➔ ${t.targetLang}</span></td>
-            <td><span class="badge ${t.isAI || t.sourceEngine === 'ai' ? 'badge-gold' : 'badge-blue'}">${t.isAI || t.sourceEngine === 'ai' ? 'Modèle IA' : 'Dictionnaire'}</span></td>
             <td style="text-align: right; white-space: nowrap;">
               <button class="btn btn-secondary btn-copy-hist" data-copy="${escapeHtml(t.translatedText)}" style="padding: 4px 10px; font-size: 0.75rem;" title="Copier la traduction">📋 Copier</button>
             </td>

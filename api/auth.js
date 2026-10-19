@@ -20,7 +20,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Méthode non autorisée.' });
 
-  const { action } = req.body || {};
+  const { action, hp_website, honeypot } = req.body || {};
+
+  // Protection Anti-Bot Honeypot : si le champ invisible est rempli, rejet immédiat
+  if (hp_website || honeypot) {
+    return res.status(400).json({ success: false, error: 'Requête non autorisée.' });
+  }
 
   try {
     // ── INSCRIPTION ────────────────────────────────────────────────
@@ -130,12 +135,15 @@ module.exports = async function handler(req, res) {
       let user = null;
       if (existing.length > 0) {
         const dbUser = existing[0];
-        const isAdm = dbUser.role === 'administrateur' || dbUser.role === 'admin';
+        // Interdiction formelle de se connecter en administrateur via une action non certifiée
+        if (dbUser.role === 'administrateur' || dbUser.role === 'admin') {
+          return res.status(403).json({ success: false, error: 'Connexion directe avec mot de passe requise pour les administrateurs.' });
+        }
         user = {
           id: dbUser.id,
           nom_complet: dbUser.nom_complet,
           courriel: dbUser.courriel,
-          role: isAdm ? 'admin' : 'utilisateur'
+          role: 'utilisateur'
         };
       } else {
         // Création automatique dans MySQL

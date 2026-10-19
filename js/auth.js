@@ -74,10 +74,11 @@ const TradAuth = {
   // ── API CALLS ──────────────────────────────────────────────────────
 
   async register(nom_complet, courriel, mot_de_passe) {
+    const hp = document.getElementById('hp_website')?.value || '';
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'register', nom_complet, courriel, mot_de_passe })
+      body: JSON.stringify({ action: 'register', nom_complet, courriel, mot_de_passe, hp_website: hp })
     });
     const data = await res.json();
     if (data.success) this.saveSession(data.token, data.user);
@@ -85,10 +86,11 @@ const TradAuth = {
   },
 
   async login(courriel, mot_de_passe) {
+    const hp = document.getElementById('hp_website')?.value || '';
     const res = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'login', courriel, mot_de_passe })
+      body: JSON.stringify({ action: 'login', courriel, mot_de_passe, hp_website: hp })
     });
     const data = await res.json();
     if (data.success) this.saveSession(data.token, data.user);

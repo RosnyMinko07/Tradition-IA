@@ -1,0 +1,103 @@
+================================================================================
+           GUIDE COMPLET : AUDIT DE SÉCURITÉ DE VOTRE APPLICATION WEB
+================================================================================
+
+1. QUEL OUTIL CHOISIR ?
+--------------------------------------------------------------------------------
+Pour auditer votre propre application en tant que développeur, l'outil de référence
+gratuit, open-source et standard de l'industrie est :
+
+   -> OWASP ZAP (Zed Attack Proxy)
+   Site officiel : https://www.zaproxy.org/
+
+Pourquoi ce choix ?
+- Totalement gratuit et maintenu par la fondation OWASP (Open Web Application Security Project).
+- Conçu spécifiquement pour les développeurs et les équipes de sécurité.
+- Dispose d'un mode "Automated Scan" en un clic idéal pour débuter.
+- Fournit un rapport clair avec le niveau de gravité de chaque faille et la solution pour la corriger.
+
+
+2. RÈGLE D'OR ET CADRE DE TEST
+--------------------------------------------------------------------------------
+- Ne lancez JAMAIS de scan sur un site web en ligne qui ne vous appartient pas ou
+  sur un hébergement mutualisé sans accord écrit.
+- Réalisez toujours vos tests en local :
+    URL cible : http://localhost:3000
+
+
+3. ÉTAPES PAS À PAS : DU DÉBUT À LA FIN
+--------------------------------------------------------------------------------
+
+ÉTAPE 1 : INSTALLATION ET PRÉPARATION
+-------------------------------------
+1. Téléchargez et installez OWASP ZAP depuis https://www.zaproxy.org/download/
+   (nécessite Java si non présent sur votre machine).
+2. Lancez votre serveur en local dans votre terminal :
+   node server.js
+3. Vérifiez dans votre navigateur que le site répond bien sur :
+   http://localhost:3000
+
+ÉTAPE 2 : LANCER UN SCAN AUTOMATISÉ (AUTOMATED SCAN)
+----------------------------------------------------
+1. Ouvrez OWASP ZAP.
+2. À l'écran d'accueil, choisissez : "Non, je ne souhaite pas enregistrer cette session pour l'instant" puis cliquez sur "Démarrer".
+3. Cliquez sur le gros bouton bleu : "Automated Scan".
+4. Dans le champ "URL to attack", entrez :
+   http://localhost:3000
+5. Laissez l'option "Use traditional spider" cochée.
+6. Cliquez sur "Attack".
+
+Que fait ZAP pendant cette étape ?
+- Phase 1 (Spider) : Il explore l'ensemble des pages, liens, formulaires et routes de votre site web pour dresser une cartographie complète.
+- Phase 2 (Active Scan) : Il envoie des requêtes de test automatisées sur chaque paramètre (vérification d'injections SQL, failles XSS, sécurité des cookies, en-têtes HTTP manquants).
+
+ÉTAPE 3 : ANALYSER LE RAPPORT D'ALERTES
+---------------------------------------
+À la fin du scan, regardez l'onglet "Alertes" (Alerts) en bas à gauche.
+Les alertes sont classées par couleur de gravité :
+
+- ROUGE (High / Élevé) : Vulnérabilité critique nécessitant une correction immédiate (ex: Injection SQL possible, exécution de code distant).
+- ORANGE (Medium / Moyen) : Risque important (ex: Failles XSS, mauvaise gestion de session, absence de protection CSRF).
+- JAUNE (Low / Faible) : Faiblesses de configuration (ex: Cookies sans attributs 'HttpOnly' ou 'Secure', formulaires sans autocomplete sécurisé).
+- BLEU (Informational / Informatif) : Bonnes pratiques et informations de diagnostic (ex: En-têtes HTTP de sécurité manquants comme Content-Security-Policy).
+
+Pour chaque alerte :
+- Cliquez dessus pour voir l'URL concernée, la requête envoyée, la réponse du serveur, ainsi que la SOLUTION recommandée directement fournie par ZAP.
+
+ÉTAPE 4 : GÉNÉRER LE RAPPORT FINAL
+----------------------------------
+1. Dans le menu en haut d'OWASP ZAP, cliquez sur :
+   Rapport -> Générer un rapport (ou Report -> Generate Report).
+2. Choisissez le format HTML.
+3. Sauvegardez le fichier pour conserver la trace des points à corriger.
+
+
+4. COMPLÉMENTS ESSENTIELS POUR UNE APPLICATION NODE.JS
+--------------------------------------------------------------------------------
+
+A. Audit des dépendances (NPM) :
+   Ouvrez votre terminal dans le dossier de votre projet et tapez :
+     npm audit
+   Pour corriger automatiquement les failles des modules :
+     npm audit fix
+
+B. Analyse statique du code (SAST) :
+   Vérifiez que votre code utilise systématiquement :
+   - Des requêtes SQL préparées (ex: `db.execute('SELECT * FROM users WHERE email = ?', [email])`) pour éliminer tout risque d'injection SQL.
+   - Le hachage sécurisé des mots de passe (ex: bcrypt ou argon2).
+   - Les en-têtes de sécurité HTTP via le module standard `helmet` :
+     npm install helmet
+     Dans server.js :
+     const helmet = require('helmet');
+     app.use(helmet());
+
+
+5. CHECKLIST AVANT LA MISE EN PRODUCTION
+--------------------------------------------------------------------------------
+[ ] Mots de passe chiffrés avec bcrypt (jamais en clair).
+[ ] Requêtes SQL 100% paramétrées (aucun SELECT/UPDATE avec concaténation de chaînes).
+[ ] En-têtes de sécurité configurés (via Helmet).
+[ ] Variables sensibles (clés API, mots de passe base de données) dans un fichier .env (hors de git).
+[ ] HTTPS activé obligatoirement avec un certificat SSL valide en production.
+[ ] Rate limiting en place sur les routes de connexion (/api/auth/login).
+================================================================================

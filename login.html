@@ -70,6 +70,11 @@
             Connectez-vous à la plateforme Tradition IA</p>
 
           <form id="form-login" style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
+            <!-- Champ Honeypot Anti-Bot (invisible aux utilisateurs légitimes, piégeant les robots) -->
+            <div style="display:none !important; position: absolute; left: -9999px;" aria-hidden="true">
+              <input type="text" name="hp_website" id="hp_website" tabindex="-1" autocomplete="off">
+            </div>
+
             <div class="form-group">
               <label class="form-label" style="font-size: 0.88rem; margin-bottom: 5px;">Adresse Email</label>
               <input type="email" id="login-email" class="form-input" required autocomplete="email"

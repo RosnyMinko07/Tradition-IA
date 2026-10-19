@@ -1,8 +1,7 @@
 /**
  * TRADITION IA — BASE DE CONNAISSANCES OFFICIELLE
  * =============================================================
- * Source unique de vérité : txt.txt (Langue Fang du Gabon).
- * Toute autre traduction sera ajoutée progressivement au fur et à mesure.
+ * Répertoire linguistique des langues et traditions du Gabon.
  *
  * Utilisé par :
  *  - api/chat.js (Prompt système et connaissances pour l'IA)
@@ -10,7 +9,7 @@
  *  - api/migrate.js (Initialisation MySQL)
  */
 
-// ===========================================================
+// ============================================================
 // 1. LANGUES GABONAISES — RÉFÉRENCE NATIONALE
 // ============================================================
 const LANGUAGES_DATA = [
@@ -21,7 +20,7 @@ const LANGUAGES_DATA = [
     family: 'Bantoue du Nord-Ouest',
     region: 'Estuaire (Libreville), Woleu-Ntem (Oyem, Bitam), Ogooué-Ivindo (Makokou)',
     speakers: '~800 000 locuteurs',
-    notes: 'Langue principale documentée dans txt.txt. Tonale. Formes verbales, négations et comptage complet de 0 à 100.'
+    notes: 'Langue principale documentée. Tonale. Formes verbales, négations et comptage complet de 0 à 100.'
   },
   {
     name: 'Punu',
@@ -294,10 +293,10 @@ const PHRASES_DATA = [
 ];
 
 // ============================================================
-// 4. NOTES GRAMMATICALES ET RÈGLES BASÉES SUR txt.txt
+// 4. NOTES GRAMMATICALES ET RÈGLES FANG
 // ============================================================
 const GRAMMAR_NOTES = `
-RÈGLES FANG FONDAMENTALES (DOCUMENT OFFICIEL txt.txt) :
+RÈGLES LINGUISTIQUES FANG FONDAMENTALES :
 1. COMPTER EN FANG (0 À 100) :
    - 0: zeze, 1: fog, 2: bê, 3: lal, 4: nî, 5: tan, 6: saman, 7: zanbgwal, 8: môôm, 9: ébul, 10: awôm
    - 11 à 19 : awôm ye + unité (ex: 11: awôm ye fog, 12: awôm ye bê, 19: awôm y'ébul)
@@ -328,20 +327,17 @@ function buildSystemPrompt(mode = 'chat') {
 
   return `Tu es TRADITION IA, l'intelligence artificielle gardienne des traditions et langues du Gabon 🇬🇦.
 
-CONTEXTE ET SOURCES OFFICIELLES ACTUELLES :
-Les données linguistiques officielles actuelles proviennent du document de référence "txt.txt" en langue Fang.
-Les autres langues gabonaises (Punu, Myènè, Nzébi, Téké, Vili, Obamba, Guisir, Kota) seront enrichies petit à petit.
-
 RÈGLES ABSOLUES :
-1. Tu réponds toujours en français, en citant les mots et phrases authentiques en Fang issus de la base.
-2. Pour les chiffres, utilise rigoureusement la numération Fang de 0 à 100 (zeze, fog, bê, lal, nî, tan, saman, zanbgwal, môôm, ébul, awôm, mewôm, ntet).
-3. Pour les négations et impératifs, respecte les formes authentiques ("Me bele ki...", "Me dzi...", "Ô tagha a...", "Ô tagha m'a...").
-4. Sois pédagogue, fier de la culture gabonaise et chaleureux.
+1. Réponds toujours avec précision, clarté et bienveillance en tant qu'expert linguistique et culturel gabonais.
+2. RÈGLE STRICTE : Ne mentionne JAMAIS de nom de fichier technique (interdiction totale de citer "txt.txt", "fichier source", "_knowledge.js", etc.). Ne divulgue jamais tes sources de données internes.
+3. Pour les chiffres en Fang, utilise fidèlement la numération authentique de 0 à 100 (zeze, fog, bê, lal, nî, tan, saman, zanbgwal, môôm, ébul, awôm, mewôm, ntet).
+4. Pour les négations et impératifs en Fang, respecte rigoureusement les formes traditionnelles ("Me bele ki...", "Me dzi...", "Ô tagha a...", "Ô tagha m'a...").
+5. Si on te demande une traduction vers l'Anglais, le Français ou une langue locale, fournis directement le résultat traduit de manière naturelle, sans préciser de détails techniques sur la méthode ou le modèle.
 
-DICTIONNAIRE OFFICIEL ISSU DE txt.txt :
+DICTIONNAIRE DE RÉFÉRENCE :
 ${dictList}
 
-PHRASES & DIALOGUES DU QUOTIDIEN ISSUS DE txt.txt :
+PHRASES & DIALOGUES DU QUOTIDIEN :
 ${phrasesList}
 
 ${GRAMMAR_NOTES}
