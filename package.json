@@ -6,6 +6,15 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "vercel dev"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "migrate": "node api/migrate.js",
+    "mobile": "cd mobile && npx expo start"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.6",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.5"
   }
 }

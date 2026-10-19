@@ -5,12 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dictionnaire - Tradition IA</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=4.2">
+  <style>
+    /* GARANTIE POPUP MODAL FLOTTANTE IMMERSIVE */
+    .modal-backdrop {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(4, 7, 13, 0.85) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      display: none !important;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 9999999 !important;
+      overflow-y: auto !important;
+      padding: 24px 16px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+    }
+
+    .modal-backdrop.active {
+      display: flex !important;
+    }
+
+    .modal-backdrop .modal-card {
+      position: relative !important;
+      width: 100% !important;
+      max-width: 540px !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+      background: #111827 !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      border-radius: 20px !important;
+      padding: 30px !important;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 30px rgba(148, 163, 184, 0.15) !important;
+      z-index: 10000000 !important;
+      margin: auto !important;
+      animation: modalPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    @keyframes modalPopIn {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    body.modal-open {
+      overflow: hidden !important;
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
   <script src="js/masks.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/pdf_knowledge.js"></script>
   <script src="js/common.js"></script>
 </head>
@@ -32,15 +91,12 @@
         <a href="translate.html" class="nav-link">Traduction</a>
         <a href="ai-assistant.html" class="nav-link">Assistant IA</a>
         <a href="dictionary.html" class="nav-link active">Dictionnaire</a>
-        <a href="history.html" class="nav-link">Historique</a>
-        <a href="profile.html" class="nav-link">Mon Profil</a>
+        <a href="history.html" class="nav-link" data-auth-required="true">Historique</a>
+        <a href="profile.html" class="nav-link" data-auth-required="true">Mon Profil</a>
       </nav>
 
       <div id="nav-user-container">
         <div class="nav-auth-buttons">
-          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          </button>
           <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
           <a href="register.html" class="btn btn-primary" style="padding: 8px 16px;">S'inscrire</a>
         </div>
@@ -51,15 +107,29 @@
       <main class="main-content">
         <div class="page-header">
           <div class="page-title-group">
-            <h1>Dictionnaire Collaboratif</h1>
-            <p class="page-subtitle">Recherchez et explorez les mots répertoriés des langues locales</p>
+            <h1>Dictionnaire & Expressions Collaboratives</h1>
+            <p class="page-subtitle">Explorez les mots et proposez de nouvelles phrases (validées par l'équipe)</p>
           </div>
-          <button id="btn-add-word-modal" class="btn btn-primary">+ Proposer un mot</button>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="btn-add-word-modal" class="btn btn-secondary">+ Proposer un mot</button>
+            <button id="btn-add-phrase-modal" class="btn btn-primary">💬 Proposer une phrase</button>
+          </div>
+        </div>
+
+        <!-- Onglets Mots / Phrases & Compteur -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 12px;">
+            <button id="tab-btn-words" class="btn btn-secondary active" style="padding: 8px 16px; font-weight: 700; background: var(--primary); color: #FFF;">📚 Mots Répertoriés</button>
+            <button id="tab-btn-phrases" class="btn btn-secondary" style="padding: 8px 16px; font-weight: 700; background: transparent; color: var(--text-main);">💬 Phrases & Expressions Validées</button>
+          </div>
+          <div id="dict-count-badge" class="badge badge-gold" style="font-size: 0.85rem; padding: 6px 14px; font-weight: 600;">
+            Chargement de la base MySQL...
+          </div>
         </div>
 
         <div class="glass-card" style="padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 240px;">
-            <input type="text" id="dict-search-input" class="form-input" placeholder="🔍 Rechercher un mot en Français ou traduction...">
+            <input type="text" id="dict-search-input" class="form-input" placeholder="Rechercher en français ou en langue locale...">
           </div>
           <div style="width: 200px;">
             <select id="dict-filter-lang" class="form-select">
@@ -70,7 +140,7 @@
 
         <div class="data-table-container">
           <table class="data-table">
-            <thead>
+            <thead id="dict-table-head">
               <tr>
                 <th>Mot (Français)</th>
                 <th>Traduction Locale</th>
@@ -84,120 +154,352 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Modale Proposer un Mot -->
-        <div id="modal-add-word" class="modal-backdrop">
-          <div class="modal-card">
-            <div class="modal-header">
-              <h3 style="font-size: 1.2rem;">Proposer un Nouveau Mot</h3>
-              <button class="btn btn-secondary btn-icon" data-close-modal>✕</button>
-            </div>
-            <form id="form-add-word">
-              <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="form-group">
-                  <label class="form-label">Mot en Français</label>
-                  <input type="text" id="new-word-fr" class="form-input" placeholder="ex: Maison" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Traduction Locale</label>
-                  <input type="text" id="new-word-gabo" class="form-input" placeholder="ex: Ntang" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Langue Cible</label>
-                  <select id="new-word-lang" class="form-select">
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Catégorie</label>
-                  <select id="new-word-cat" class="form-select">
-                    <option value="Salutations">Salutations</option>
-                    <option value="Expressions">Expressions</option>
-                    <option value="Nourriture">Nourriture</option>
-                    <option value="Personnes">Personnes</option>
-                    <option value="Lieux">Lieux</option>
-                    <option value="Nature">Nature</option>
-                    <option value="Général">Général</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Exemple de Phrase</label>
-                  <input type="text" id="new-word-example" class="form-input" placeholder="ex: Mon ntang est au village">
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
-                <button type="submit" class="btn btn-primary">Enregistrer le Mot</button>
-              </div>
-            </form>
-          </div>
-        </div>
       </main>
     </div>
   </div>
 
-  <script type="module" src="js/common.js"></script>
+  <!-- Modale Proposer un Mot -->
+  <div id="modal-add-word" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem;">Proposer un Nouveau Mot</h3>
+        <button type="button" class="btn btn-secondary btn-icon" data-close-modal title="Fermer">✕</button>
+      </div>
+      <form id="form-add-word">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Mot en Français</label>
+            <input type="text" id="new-word-fr" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Traduction Locale</label>
+            <input type="text" id="new-word-gabo" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Langue Cible</label>
+            <select id="new-word-lang" class="form-select">
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Catégorie</label>
+            <select id="new-word-cat" class="form-select">
+              <option value="Salutations">Salutations</option>
+              <option value="Expressions">Expressions</option>
+              <option value="Nourriture">Nourriture</option>
+              <option value="Personnes">Personnes</option>
+              <option value="Lieux">Lieux</option>
+              <option value="Nature">Nature</option>
+              <option value="Général">Général</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Exemple de Phrase</label>
+            <input type="text" id="new-word-example" class="form-input">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer le Mot</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modale Proposer une Phrase (Soumise à validation Admin) -->
+  <div id="modal-add-phrase" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem;">💬 Proposer une Phrase ou Expression</h3>
+        <button type="button" class="btn btn-secondary btn-icon" data-close-modal title="Fermer">✕</button>
+      </div>
+      <form id="form-add-phrase">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 8px; padding: 12px; font-size: 0.84rem; color: var(--gold); line-height: 1.4;">
+            🛡️ <strong>Validation administrative :</strong> Votre phrase sera examinée par un administrateur et publiée sur la plateforme dès approbation.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phrase en Français <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="new-phrase-fr" class="form-input" placeholder="Ex: Je n'ai pas le temps" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Traduction dans la Langue Locale <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="new-phrase-trans" class="form-input" placeholder="Ex: Me bele ki Eyong" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Langue Cible <span style="color: var(--danger);">*</span></label>
+            <select id="new-phrase-lang" class="form-select" required>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contexte ou Signification</label>
+            <input type="text" id="new-phrase-context" class="form-input" placeholder="Ex: Vie quotidienne, Salutation, Négation...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Votre nom ou pseudo (optionnel)</label>
+            <input type="text" id="new-phrase-author" class="form-input" placeholder="Ex: Paul M. (Oyem)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+          <button type="submit" class="btn btn-primary">Soumettre pour Validation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+    let currentTab = 'words';
+
+    // Fonctions de contrôle absolu des modales (avec blocage de scroll en arrière-plan)
+    function openTradModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+      }
+    }
+
+    function closeTradModal(modalOrId) {
+      const modal = typeof modalOrId === 'string' ? document.getElementById(modalOrId) : modalOrId;
+      if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      if (!document.querySelector('.modal-backdrop.active')) {
+        document.body.classList.remove('modal-open');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
+      // Configuration des boutons de fermeture et touches pour toutes les modales
+      document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const parent = btn.closest('.modal-backdrop');
+          if (parent) closeTradModal(parent);
+        });
+      });
+
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            closeTradModal(backdrop);
+          }
+        });
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop.active').forEach(m => closeTradModal(m));
+        }
+      });
+
       if (window.Store) {
         await window.Store.loadInitialData();
+        // Garantir le chargement des 276 mots officiels de MySQL
+        if (window.DB && typeof window.DB.getDictionary === 'function') {
+          window.Store.dictionary = await window.DB.getDictionary();
+        }
 
         const langFilter = document.getElementById('dict-filter-lang');
         const langNew = document.getElementById('new-word-lang');
+        const langPhraseNew = document.getElementById('new-phrase-lang');
+
         if (window.Store.languages) {
-          const opts = window.Store.languages.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
+          const targetLangs = window.Store.languages.filter(l => {
+            const n = (l.name || '').toLowerCase();
+            return n !== 'français' && n !== 'francais' && l.code !== 'fra';
+          });
+          const opts = targetLangs.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
           if (langFilter) langFilter.innerHTML = '<option value="">Toutes les langues</option>' + opts;
           if (langNew) langNew.innerHTML = opts;
+          if (langPhraseNew) langPhraseNew.innerHTML = opts;
         }
 
-        renderDict();
+        renderContent();
 
-        document.getElementById('dict-search-input')?.addEventListener('input', renderDict);
-        document.getElementById('dict-filter-lang')?.addEventListener('change', renderDict);
+        // Onglets Mots / Phrases
+        const tabWords = document.getElementById('tab-btn-words');
+        const tabPhrases = document.getElementById('tab-btn-phrases');
 
-        document.getElementById('btn-add-word-modal')?.addEventListener('click', () => {
-          document.getElementById('modal-add-word')?.classList.add('active');
+        tabWords?.addEventListener('click', () => {
+          currentTab = 'words';
+          tabWords.classList.add('active');
+          tabWords.style.background = 'var(--primary)';
+          tabWords.style.color = '#FFF';
+          tabPhrases.classList.remove('active');
+          tabPhrases.style.background = 'transparent';
+          tabPhrases.style.color = 'var(--text-main)';
+          renderContent();
+        });
+
+        tabPhrases?.addEventListener('click', () => {
+          currentTab = 'phrases';
+          tabPhrases.classList.add('active');
+          tabPhrases.style.background = 'var(--primary)';
+          tabPhrases.style.color = '#FFF';
+          tabWords.classList.remove('active');
+          tabWords.style.background = 'transparent';
+          tabWords.style.color = 'var(--text-main)';
+          renderContent();
+        });
+
+        document.getElementById('dict-search-input')?.addEventListener('input', renderContent);
+        document.getElementById('dict-filter-lang')?.addEventListener('change', renderContent);
+
+        // Modale Proposer un Mot
+        document.getElementById('btn-add-word-modal')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          openTradModal('modal-add-word');
         });
 
         document.getElementById('form-add-word')?.addEventListener('submit', async (e) => {
           e.preventDefault();
           const entry = {
-            word: document.getElementById('new-word-fr').value,
-            translation: document.getElementById('new-word-gabo').value,
+            word: document.getElementById('new-word-fr').value.trim(),
+            translation: document.getElementById('new-word-gabo').value.trim(),
             targetLang: document.getElementById('new-word-lang').value,
             sourceLang: 'Français',
             category: document.getElementById('new-word-cat').value || 'Général',
-            example: document.getElementById('new-word-example').value
+            example: document.getElementById('new-word-example').value.trim()
           };
           await window.Store.addDictionaryEntry(entry);
-          document.getElementById('modal-add-word')?.classList.remove('active');
-          window.showToast('Mot ajouté au dictionnaire avec succès !');
-          renderDict();
+          if (window.DB && typeof window.DB.getDictionary === 'function') {
+            window.Store.dictionary = await window.DB.getDictionary();
+          }
+          closeTradModal('modal-add-word');
+          e.target.reset();
+          if (window.showToast) window.showToast('✅ Mot enregistré en base de données avec succès !');
+          if (currentTab === 'words') renderContent();
+        });
+
+        // Modale Proposer une Phrase
+        document.getElementById('btn-add-phrase-modal')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          openTradModal('modal-add-phrase');
+        });
+
+        document.getElementById('form-add-phrase')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const phrase = document.getElementById('new-phrase-fr').value.trim();
+          const translation = document.getElementById('new-phrase-trans').value.trim();
+          const targetLang = document.getElementById('new-phrase-lang').value;
+          const context = document.getElementById('new-phrase-context').value.trim() || 'Vie quotidienne';
+          const author = document.getElementById('new-phrase-author').value.trim();
+
+          await window.Store.proposeExpression({
+            phrase,
+            translation,
+            targetLang,
+            sourceLang: 'Français',
+            context,
+            submittedBy: author || (window.Store.user?.name || 'Visiteur'),
+            isValidated: false
+          });
+
+          closeTradModal('modal-add-phrase');
+          e.target.reset();
+          if (window.showToast) window.showToast('✅ Phrase transmise ! Elle sera publiée dès validation par l\'administrateur.');
+          renderContent();
         });
       }
     });
 
-    function renderDict() {
+    function renderContent() {
       const container = document.getElementById('dictionary-table-body');
+      const tableHead = document.getElementById('dict-table-head');
+      const countBadge = document.getElementById('dict-count-badge');
       if (!container || !window.Store) return;
 
       const q = (document.getElementById('dict-search-input')?.value || '').toLowerCase();
       const lang = document.getElementById('dict-filter-lang')?.value;
 
-      const filtered = window.Store.dictionary.filter(i => {
-        const matchQ = i.word.toLowerCase().includes(q) || i.translation.toLowerCase().includes(q);
-        const matchL = !lang || i.targetLang === lang;
-        return matchQ && matchL;
-      });
+      if (currentTab === 'words') {
+        tableHead.innerHTML = `
+          <tr>
+            <th>Mot (Français)</th>
+            <th>Traduction Locale</th>
+            <th>Langue</th>
+            <th>Catégorie</th>
+            <th>Exemple</th>
+          </tr>
+        `;
+        const allWords = window.Store.dictionary || [];
+        const filtered = allWords.filter(i => {
+          const matchQ = (i.word || '').toLowerCase().includes(q) || (i.translation || '').toLowerCase().includes(q);
+          const matchL = !lang || i.targetLang === lang;
+          return matchQ && matchL;
+        });
 
-      container.innerHTML = filtered.map(item => `
-        <tr>
-          <td style="font-weight: 700; color: var(--text-main);">${item.word}</td>
-          <td style="font-weight: 700; color: var(--primary);">${item.translation}</td>
-          <td><span class="badge badge-blue">${item.targetLang}</span></td>
-          <td><span class="badge badge-gold">${item.category || 'Général'}</span></td>
-          <td style="color: var(--text-muted); font-style: italic;">${item.example || '-'}</td>
-        </tr>
-      `).join('');
+        if (countBadge) {
+          countBadge.innerText = `${filtered.length} mot${filtered.length > 1 ? 's' : ''} en base MySQL`;
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">Aucun mot trouvé dans la base MySQL</td></tr>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(item => `
+          <tr>
+            <td style="font-weight: 700; color: var(--text-main);">${escapeHtml(item.word)}</td>
+            <td style="font-weight: 700; color: var(--primary);">${escapeHtml(item.translation)}</td>
+            <td><span class="badge badge-blue">${escapeHtml(item.targetLang)}</span></td>
+            <td><span class="badge badge-gold">${escapeHtml(item.category || 'Général')}</span></td>
+            <td style="color: var(--text-muted); font-style: italic;">${escapeHtml(item.example || item.exampleFr || item.exampleLocal || '-')}</td>
+          </tr>
+        `).join('');
+      } else {
+        tableHead.innerHTML = `
+          <tr>
+            <th>Phrase (Français)</th>
+            <th>Traduction Locale</th>
+            <th>Langue</th>
+            <th>Contexte</th>
+            <th>Statut</th>
+          </tr>
+        `;
+        // Afficher uniquement les phrases validées pour les visiteurs
+        const validatedList = typeof window.Store.getValidatedExpressions === 'function' 
+          ? window.Store.getValidatedExpressions() 
+          : (window.Store.expressions || []).filter(e => e.isValidated !== false);
+
+        const filtered = validatedList.filter(i => {
+          const matchQ = (i.phrase || '').toLowerCase().includes(q) || (i.translation || '').toLowerCase().includes(q);
+          const matchL = !lang || i.targetLang === lang;
+          return matchQ && matchL;
+        });
+
+        if (countBadge) {
+          countBadge.innerText = `${filtered.length} expression${filtered.length > 1 ? 's' : ''} validée${filtered.length > 1 ? 's' : ''}`;
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">Aucune phrase validée trouvée</td></tr>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(item => `
+          <tr>
+            <td style="font-weight: 700; color: var(--text-main);">${escapeHtml(item.phrase)}</td>
+            <td style="font-weight: 700; color: var(--primary);">${escapeHtml(item.translation)}</td>
+            <td><span class="badge badge-green">${escapeHtml(item.targetLang)}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.88rem;">${escapeHtml(item.context || 'Usage courant')}</td>
+            <td><span class="badge badge-gold">✓ Validé</span></td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
   </script>
 </body>

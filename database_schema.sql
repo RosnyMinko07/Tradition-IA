@@ -267,8 +267,7 @@ VALUES
     ('obb', 'Obamba', 'Lembaama', 'Bantoue (B60)', 'Haut-Ogooué (Okondja)', '~40 000 locuteurs', 'images/obamba.png', 7),
     ('gsi', 'Guisir', 'Yigisir', 'Bantoue (B40)', 'Ngounié (Fougamou, Mandji)', '~40 000 locuteurs', 'images/guisir.png', 8),
     ('kto', 'Kota', 'Ikota', 'Bantoue (B20)', 'Ogooué-Ivindo (Makokou, Booué)', '~50 000 locuteurs', 'images/kota.png', 9),
-    ('fra', 'Français', 'Français', 'Romane', 'Langue officielle du Gabon / Internationale', '~2 000 000 locuteurs', 'images/gabon_flag.png', 10),
-    ('eng', 'Anglais', 'English', 'Germanique', 'Deuxième langue officielle / Internationale', 'Global', 'images/anglais.png', 11)
+    ('eng', 'Anglais', 'English', 'Germanique', 'Deuxième langue officielle / Internationale', 'Global', 'images/anglais.png', 10)
 ON CONFLICT (code) DO NOTHING;
 
 -- Insertion des paramètres système

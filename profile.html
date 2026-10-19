@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil - Tradition IA</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=4.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
   <script src="js/masks.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
 </head>
 <body>
@@ -31,15 +32,12 @@
         <a href="translate.html" class="nav-link">Traduction</a>
         <a href="ai-assistant.html" class="nav-link">Assistant IA</a>
         <a href="dictionary.html" class="nav-link">Dictionnaire</a>
-        <a href="history.html" class="nav-link">Historique</a>
-        <a href="profile.html" class="nav-link active">Mon Profil</a>
+        <a href="history.html" class="nav-link" data-auth-required="true">Historique</a>
+        <a href="profile.html" class="nav-link active" data-auth-required="true">Mon Profil</a>
       </nav>
 
       <div id="nav-user-container">
         <div class="nav-auth-buttons">
-          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          </button>
           <a href="login.html" class="btn btn-secondary" style="padding: 8px 16px;">Connexion</a>
           <a href="register.html" class="btn btn-primary" style="padding: 8px 16px;">S'inscrire</a>
         </div>
@@ -53,16 +51,17 @@
             <h1>Profil & Paramètres</h1>
             <p class="page-subtitle">Gérez vos informations personnelles et préférences de langue</p>
           </div>
+          <a href="dashboard.html" class="btn btn-secondary">📊 Mon Tableau de Bord</a>
         </div>
 
         <div class="grid-2">
           <div class="glass-card" style="padding: 28px;">
             <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
-              <div class="user-avatar" style="width: 72px; height: 72px; font-size: 2rem;" id="prof-avatar">V</div>
+              <div class="user-avatar" style="width: 72px; height: 72px; font-size: 2rem;" id="prof-avatar">U</div>
               <div>
-                <h2 style="font-size: 1.4rem; color: var(--text-main);" id="prof-name">Visiteur</h2>
-                <div style="color: var(--primary); font-weight: 600; font-size: 0.9rem;" id="prof-role">👤 Visiteur</div>
-                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;" id="prof-email">visiteur@tradition.ga</div>
+                <h2 style="font-size: 1.4rem; color: var(--text-main);" id="prof-name">Utilisateur</h2>
+                <div style="color: var(--primary); font-weight: 600; font-size: 0.9rem;" id="prof-role">👤 Membre</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;" id="prof-email">utilisateur@traditionia.ga</div>
               </div>
             </div>
 
@@ -90,6 +89,10 @@
               <button type="submit" class="btn btn-primary" style="margin-top: 10px; justify-content: center;">
                 Enregistrer les Modifications
               </button>
+
+              <button type="button" id="btn-profile-logout" class="btn btn-danger" style="margin-top: 4px; justify-content: center; width: 100%;">
+                🚪 Se Déconnecter du Compte
+              </button>
             </form>
           </div>
 
@@ -108,55 +111,79 @@
     </div>
   </div>
 
-  <script type="module" src="js/common.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      const user = (window.TradAuth && window.TradAuth.getUser()) || window.Store?.user;
+      if (!user || (!user.name && !user.nom_complet && !user.email)) {
+        window.location.href = 'login.html';
+        return;
+      }
+
       if (window.Store) {
         await window.Store.loadInitialData();
-        const user = window.Store.user;
-        const prefSelect = document.getElementById('profile-pref-lang');
-        const maskContainer = document.getElementById('prof-mask-container');
-        const maskLabel = document.getElementById('prof-mask-label');
+      }
 
-        function updateMaskDisplay(lang) {
-          const targetLang = lang || 'Fang';
-          if (maskContainer && window.Masks) {
-            maskContainer.innerHTML = window.Masks.render(targetLang, 180);
-          }
-          if (maskLabel) {
-            maskLabel.innerText = `Masque ${targetLang}`;
-          }
+      const prefSelect = document.getElementById('profile-pref-lang');
+      const maskContainer = document.getElementById('prof-mask-container');
+      const maskLabel = document.getElementById('prof-mask-label');
+
+      function updateMaskDisplay(lang) {
+        const targetLang = lang || 'Fang';
+        if (maskContainer && window.Masks) {
+          maskContainer.innerHTML = window.Masks.render(targetLang, 180);
         }
-
-        if (user) {
-          document.getElementById('prof-name').innerText = user.name;
-          document.getElementById('prof-avatar').innerText = user.name.charAt(0);
-          document.getElementById('prof-email').innerText = user.email;
-          document.getElementById('prof-role').innerText = user.role === 'admin' ? '⚡ Administrateur' : '👤 Visiteur';
-          document.getElementById('profile-name-input').value = user.name;
-          if (user.preferredLang && prefSelect) {
-            prefSelect.value = user.preferredLang;
-          }
-          updateMaskDisplay(user.preferredLang || 'Fang');
-        } else {
-          updateMaskDisplay('Fang');
+        if (maskLabel) {
+          maskLabel.innerText = `Masque ${targetLang}`;
         }
+      }
 
-        if (prefSelect) {
-          prefSelect.addEventListener('change', (e) => {
-            updateMaskDisplay(e.target.value);
-          });
-        }
+      const displayName = user.nom_complet || user.name || 'Utilisateur';
+      const userEmail = user.courriel || user.email || 'utilisateur@traditionia.ga';
+      document.getElementById('prof-name').innerText = displayName;
+      document.getElementById('prof-avatar').innerText = displayName.charAt(0).toUpperCase();
+      document.getElementById('prof-email').innerText = userEmail;
+      document.getElementById('prof-role').innerText = user.role === 'admin' ? '⚡ Administrateur' : '👤 Membre';
+      document.getElementById('profile-name-input').value = displayName;
 
-        document.getElementById('form-profile')?.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const name = document.getElementById('profile-name-input').value;
-          const preferredLang = document.getElementById('profile-pref-lang').value;
-          window.Store.updateProfile({ name, preferredLang });
-          window.showToast('Profil mis à jour !');
-          setTimeout(() => location.reload(), 500);
+      if (user.preferredLang && prefSelect) {
+        prefSelect.value = user.preferredLang;
+      }
+      updateMaskDisplay(user.preferredLang || 'Fang');
+
+      if (prefSelect) {
+        prefSelect.addEventListener('change', (e) => {
+          updateMaskDisplay(e.target.value);
         });
       }
+
+      document.getElementById('form-profile')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('profile-name-input').value.trim() || 'Utilisateur';
+        const preferredLang = document.getElementById('profile-pref-lang').value;
+        const updated = { ...user, name, nom_complet: name, preferredLang };
+
+        if (window.TradAuth) {
+          window.TradAuth.saveSession(window.TradAuth.getToken() || 'local_token', updated);
+        }
+        if (window.Store) {
+          window.Store.updateProfile({ name, preferredLang });
+        }
+
+        window.showToast('Profil mis à jour avec succès !');
+        setTimeout(() => location.reload(), 400);
+      });
+
+      document.getElementById('btn-profile-logout')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (window.triggerLogoutConfirm) {
+          window.triggerLogoutConfirm();
+        } else if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+          if (window.TradAuth) window.TradAuth.logout();
+          if (window.Store) window.Store.logout();
+          window.showToast('Vous avez été déconnecté avec succès.');
+          setTimeout(() => { window.location.href = 'index.html'; }, 300);
+        }
+      });
     });
   </script>
 </body>

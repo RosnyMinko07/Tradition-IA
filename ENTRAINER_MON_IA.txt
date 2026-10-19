@@ -1,0 +1,605 @@
+================================================================================
+ TRADITION IA — GUIDE COMPLET : COMMENT ENTRAÎNER VOTRE IA AVEC PYTHON
+================================================================================
+ Projet    : Tradition IA (Préservation & Traduction des Langues Gabonaises)
+ Auteur    : Rosny OTSINA
+ Langues   : Fang, Punu, Myènè, Nzébi, Téké, Vili, Obamba, Guisir, Kota
+ Fichier   : ENTRAINER_MON_IA.txt
+================================================================================
+
+TABLE DES MATIÈRES :
+--------------------------------------------------------------------------------
+ 1. COMPRENDRE : VOTRE SYSTÈME ACTUEL VS LE VRAI ENTRAÎNEMENT (FINE-TUNING)
+ 2. POURQUOI PYTHON EST L'OUTIL INCONTOURNABLE
+ 3. LES OUTILS & BIBLIOTHÈQUES À INSTALLER
+ 4. ÉTAPE 1 : PRÉPARER LE DATASET AVEC LES PHRASES DE NOTRE APPLICATION
+ 5. SCRIPT PYTHON POUR CONVERTIR NOS DONNÉES EN FICHIER D'ENTRAÎNEMENT (.JSONL)
+ 6. ÉTAPE 2 : LE SCRIPT PYTHON D'ENTRAÎNEMENT COMPLET (FINE-TUNING LoRA / QLoRA)
+ 7. LES FONCTIONS PHARES DU FINE-TUNING (DÉCORTIQUÉES LIGNE PAR LIGNE)
+ 8. OÙ FAIRE TOURNER L'ENTRAÎNEMENT ? (GOOGLE COLAB GRATUIT OU LOCAL)
+ 9. ÉTAPE 3 : TESTER LE MODÈLE ENTRAÎNÉ EN PYTHON (INFÉRENCE)
+ 10. EN CAS DE BLOCAGE : COMMENT SE DÉBROUILLER, DÉBOGUER ET FOUILLER SUR LE WEB
+ 11. ÉTAPE 4 : CONNECTER LE MODÈLE ENTRAÎNÉ À NOTRE APPLICATION TRADITION IA
+ 12. CONSEILS POUR ENRICHIR VOTRE BASE DE DONNÉES ET OBTENIR UNE IA SURPUISSANTE
+================================================================================
+
+
+================================================================================
+1. COMPRENDRE : VOTRE SYSTÈME ACTUEL VS LE VRAI ENTRAÎNEMENT (FINE-TUNING)
+================================================================================
+
+Dans votre application actuelle Tradition IA (api/_knowledge.js, api/chat.js),
+vous utilisez une méthode appelée le "PROMPT SYSTÈME" (In-Context Learning) :
+- À chaque message de l'utilisateur, votre serveur envoie une grosse liste de mots
+  et de phrases en Fang, Punu, Myènè... au modèle généraliste (DeepSeek ou OpenAI).
+- Le modèle "lit" ces notes dans sa mémoire immédiate et essaie de répondre.
+
+AVANTAGES DU SYSTÈME ACTUEL :
+- Très rapide à modifier (on ajoute une ligne dans _knowledge.js et c'est actif).
+- Pas besoin de carte graphique ni de calculs lourds.
+
+LIMITES DU SYSTÈME ACTUEL :
+- Les modèles généraux comme DeepSeek, Llama ou GPT ne connaissent pas la grammaire
+  profonde des langues bantoues du Gabon.
+- Si le texte à traduire est complexe ou n'est pas mot à mot dans la liste, le
+  modèle peut inventer (hallucination).
+- Le prompt système consomme des tokens à chaque requête.
+
+CE QU'EST LE VRAI ENTRAÎNEMENT (FINE-TUNING) :
+- On prend un grand modèle de base (ex: LLaMA 3 8B, Mistral 7B ou Qwen 2.5 7B).
+- On lui injecte des milliers d'exemples de traductions, dialogues et proverbes
+  gabonais en modifiant directement les poids neuronaux du modèle (technique LoRA).
+- Le modèle "apprend" pour de bon : il comprend la morphologie, les préfixes
+  de classe nominale, la syntaxe et les expressions gabonaises SANS avoir besoin
+  qu'on lui réinjecte un dictionnaire à chaque question.
+
+
+================================================================================
+2. POURQUOI PYTHON EST L'OUTIL INCONTOURNABLE
+================================================================================
+
+Python est le standard mondial absolu pour l'Intelligence Artificielle parce que :
+1. Tout l'écosystème open-source (PyTorch, Hugging Face, Unsloth, Meta Llama,
+   Mistral AI) est développé et optimisé en Python.
+2. Les calculs GPU (CUDA sur cartes graphiques NVIDIA) sont directement pilotés
+   par les librairies Python.
+3. Il permet en 30 lignes de code de charger un modèle de plusieurs milliards de
+   paramètres, de formater des données et de lancer l'apprentissage.
+
+
+================================================================================
+3. LES OUTILS & BIBLIOTHÈQUES À INSTALLER
+================================================================================
+
+Pour entraîner votre IA, voici les 5 bibliothèques reines :
+
+1. PyTorch (`torch`) :
+   Le moteur mathématique de base créé par Meta qui gère les calculs sur GPU.
+
+2. Hugging Face Transformers (`transformers`) :
+   La plateforme mondiale de partage de modèles d'IA (Llama, Mistral, Gemma...).
+
+3. Hugging Face TRL (`trl` - Transformer Reinforcement Learning) :
+   Fournit la classe `SFTTrainer` (Supervised Fine-Tuning Trainer) conçue
+   spécifiquement pour entraîner une IA à suivre des instructions.
+
+4. PEFT & BitsAndBytes (`peft`, `bitsandbytes`) :
+   Permettent le QLoRA (Quantized Low-Rank Adaptation). Cela réduit l'usage de
+   mémoire GPU de 80% ! Un modèle de 8 milliards de paramètres qui demandait
+   autrefois 32 Go de VRAM peut désormais s'entraîner sur un simple GPU de 16 Go
+   ou sur Google Colab (carte T4 gratuite).
+
+5. Unsloth (`unsloth`) :
+   L'outil le plus rapide et le plus populaire actuellement. Il accélère
+   l'entraînement de 2x à 5x tout en divisant la mémoire nécessaire par 2.
+
+
+================================================================================
+4. ÉTAPE 1 : PRÉPARER LE DATASET AVEC LES PHRASES DE NOTRE APPLICATION
+================================================================================
+
+Un modèle de chat moderne s'entraîne avec le format "Messages" (JSONL).
+Chaque exemple contient :
+- "system" : Qui est l'IA (Mbolo IA, expert des traditions gabonaises créé par Rosny OTSINA).
+- "user"   : La demande de l'utilisateur.
+- "assistant" : La réponse parfaite attendue.
+
+VOICI DES EXEMPLES EXACTS BASÉS SUR LES DONNÉES RÉELLES DE NOTRE APPLICATION :
+
+--- EXEMPLE 1 : Salutation & Présentation en Fang ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, l'assistant linguistique et culturel expert des 9 langues du Gabon de la plateforme Tradition IA, conçue par Rosny OTSINA."
+    },
+    {
+      "role": "user",
+      "content": "Comment dit-on 'Bonjour, comment vas-tu ?' en langue Fang ?"
+    },
+    {
+      "role": "assistant",
+      "content": "En langue Fang, on dit : 'Mbolo, mi neng ?'. La réponse habituelle pour dire que tout va bien est 'Ma neng ayé'."
+    }
+  ]
+}
+
+--- EXEMPLE 2 : Traduction Vie Quotidienne en Punu ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, traducteur spécialisé dans les langues gabonaises."
+    },
+    {
+      "role": "user",
+      "content": "Traduis en Punu : 'Je vais au marché.'"
+    },
+    {
+      "role": "assistant",
+      "content": "En Punu (Yipunu), 'Je vais au marché' se traduit par : 'Nda enda nsanda.' (où 'nsanda' désigne le marché)."
+    }
+  ]
+}
+
+--- EXEMPLE 3 : Traduction Myènè (Besoins) ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, traducteur spécialisé dans les langues gabonaises."
+    },
+    {
+      "role": "user",
+      "content": "Comment dit-on 'J'ai soif' et 'L'eau est froide' en Myènè ?"
+    },
+    {
+      "role": "assistant",
+      "content": "En Myènè (Omyènè) :\n- 'J'ai soif' se dit : 'Ino e njika me.'\n- 'L'eau est froide' se dit : 'Ino o tama.' ('Ino' signifie l'eau)."
+    }
+  ]
+}
+
+--- EXEMPLE 4 : Proverbe Traditionnel Fang & Punu avec explication ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, gardien des sagesses et traditions orales du Gabon."
+    },
+    {
+      "role": "user",
+      "content": "Donne-moi un proverbe gabonais sur la solidarité avec sa traduction."
+    },
+    {
+      "role": "assistant",
+      "content": "Voici un grand proverbe traditionnel :\n- En Fang : 'Mone fok a ke bian, bone bele ba ke nkumo.'\n- En Punu : 'Mwana mosi o enda mbebo, bana bale ba enda mosika.'\n- Équivalent français : 'Seul on va plus vite, ensemble on va plus loin.'\n- Sens culturel : La solidarité, la famille et l'entraide communautaire ('Engagha' en fang / 'Buyumu' en punu) sont supérieures à l'individualisme."
+    }
+  ]
+}
+
+--- EXEMPLE 5 : Culture & Masques traditionnels du Gabon ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, expert de la culture gabonaise."
+    },
+    {
+      "role": "user",
+      "content": "Parle-moi du masque Mukudj et du masque Ngil."
+    },
+    {
+      "role": "assistant",
+      "content": "Ce sont deux masques emblématiques du patrimoine gabonais :\n1. Le Mukudj (peuple Punu) : Masque blanc enduit de kaolin porté par des danseurs sur de hautes échasses (jusqu'à 3 mètres). Il représente la beauté idéalisée d'une femme ancêtre et la sérénité du monde spirituel.\n2. Le Ngil (peuple Fang) : Masque judiciaire allongé en bois clair, porté par la société secrète du Ngil pour maintenir la justice, démasquer les malfaiteurs et chasser les mauvais esprits."
+    }
+  ]
+}
+
+--- EXEMPLE 6 : Identité du développeur créateur ---
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "Tu es Mbolo IA, assistant de la plateforme Tradition IA."
+    },
+    {
+      "role": "user",
+      "content": "Qui a créé Tradition IA ?"
+    },
+    {
+      "role": "assistant",
+      "content": "La plateforme Tradition IA a été conçue et développée par Rosny OTSINA, développeur Full Stack freelance basé à Libreville, Gabon (contact : rodrigueotsina@gmail.com | GitHub : https://github.com/RosnyMinko07)."
+    }
+  ]
+}
+
+
+================================================================================
+5. SCRIPT PYTHON POUR GÉNÉRER LE DATASET D'ENTRAÎNEMENT
+================================================================================
+
+Le fichier `preparer_dataset.py` (déjà présent à la racine de votre projet)
+extrait automatiquement les données de `api/_knowledge.js` et génère le fichier
+`dataset_tradition_ia.jsonl`.
+
+Pour le lancer sous Windows :
+   py preparer_dataset.py
+
+Ce script produit un fichier JSONL propre où chaque ligne est un objet JSON
+contenant la conversation d'entraînement complète.
+
+
+================================================================================
+6. ÉTAPE 2 : LE SCRIPT PYTHON D'ENTRAÎNEMENT COMPLET (FINE-TUNING LoRA / QLoRA)
+================================================================================
+
+Voici le code du script `entrainer_modele.py` disponible à la racine du projet :
+
+--------------------------------------------------------------------------------
+import os
+import sys
+import torch
+from datasets import load_dataset
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    TrainingArguments
+)
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from trl import SFTTrainer
+
+# 1. Modèle de base recommandé
+MODEL_ID = "Qwen/Qwen2.5-7B-Instruct"
+OUTPUT_DIR = "./tradition_ia_modele_entraine"
+DATASET_FILE = "dataset_tradition_ia.jsonl"
+
+# 2. Quantification 4-bit (QLoRA)
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16,
+    bnb_4bit_use_double_quant=True,
+)
+
+# 3. Chargement du tokenizer et du modèle
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_ID,
+    quantization_config=bnb_config if torch.cuda.is_available() else None,
+    device_map="auto" if torch.cuda.is_available() else "cpu",
+    trust_remote_code=True
+)
+
+if torch.cuda.is_available():
+    model = prepare_model_for_kbit_training(model)
+
+# 4. Configuration LoRA
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+
+# 5. Chargement et formatage du dataset
+dataset = load_dataset("json", data_files=DATASET_FILE, split="train")
+
+def formater_prompts(batch):
+    textes = []
+    for conversation in batch["messages"]:
+        texte_formate = tokenizer.apply_chat_template(
+            conversation,
+            tokenize=False,
+            add_generation_prompt=False
+        )
+        textes.append(texte_formate)
+    return {"text": textes}
+
+dataset = dataset.map(formater_prompts, batched=True)
+
+# 6. Hyperparamètres d'entraînement
+training_args = TrainingArguments(
+    output_dir=OUTPUT_DIR,
+    per_device_train_batch_size=2,
+    gradient_accumulation_steps=4,
+    optim="paged_adamw_8bit" if torch.cuda.is_available() else "adamw_torch",
+    learning_rate=2e-4,
+    lr_scheduler_type="cosine",
+    save_strategy="epoch",
+    logging_steps=10,
+    num_train_epochs=5,
+    fp16=torch.cuda.is_available() and not torch.cuda.is_bf16_supported(),
+    bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+    report_to="none"
+)
+
+# 7. Lanceur SFTTrainer
+trainer = SFTTrainer(
+    model=model,
+    train_dataset=dataset,
+    peft_config=lora_config,
+    dataset_text_field="text",
+    max_seq_length=1024,
+    tokenizer=tokenizer,
+    args=training_args
+)
+
+print("🚀 Démarrage de l'entraînement...")
+trainer.train()
+
+# 8. Sauvegarde
+trainer.model.save_pretrained(OUTPUT_DIR)
+tokenizer.save_pretrained(OUTPUT_DIR)
+print("🎉 Entraînement terminé !")
+--------------------------------------------------------------------------------
+
+
+================================================================================
+7. LES FONCTIONS PHARES DU FINE-TUNING (DÉCORTIQUÉES EN DÉTAIL)
+================================================================================
+
+Voici l'explication précise de chaque fonction essentielle utilisée dans le code :
+
+1. `AutoTokenizer.from_pretrained(MODEL_ID)` :
+   - Rôle : Les ordinateurs et les IA ne lisent pas des lettres, mais des nombres.
+     Le tokenizer découpe le texte gabonais en petits morceaux (mots ou syllabes
+     appelés "tokens") et leur attribue un numéro unique d'identification.
+
+2. `BitsAndBytesConfig(load_in_4bit=True, ...)` :
+   - Rôle : C'est la fonction magique du QLoRA. Normalement, un modèle de 7 milliards
+     de paramètres pèse 28 Go de VRAM. Cette fonction compresse les poids en 4 bits,
+     ce qui fait chuter le besoin en mémoire à seulement 5,5 Go de VRAM sans perdre
+     la qualité linguistique !
+
+3. `AutoModelForCausalLM.from_pretrained(...)` :
+   - Rôle : Télécharge et instancie le réseau de neurones complet du modèle de base
+     (ex: Qwen 2.5 ou Mistral). L'argument `device_map="auto"` répartit
+     automatiquement le modèle sur votre GPU ou RAM.
+
+4. `prepare_model_for_kbit_training(model)` :
+   - Rôle : Gèle les milliards de poids du modèle original en lecture seule et prépare
+     les couches d'attention pour recevoir les gradients de calcul lors du LoRA.
+
+5. `LoraConfig(r=16, lora_alpha=32, target_modules=...)` :
+   - Rôle : Configure la taille et l'emplacement des adaptateurs LoRA.
+     * `r=16` (Rang) : Nombre de dimensions de la matrice adaptatrice.
+     * `lora_alpha=32` : Intensité avec laquelle les nouvelles connaissances sur les
+       langues gabonaises vont influencer les réponses finales de l'IA.
+     * `target_modules` : Les matrices d'attention du modèle où sont greffés les adaptateurs.
+
+6. `get_peft_model(model, lora_config)` :
+   - Rôle : Greffe les adaptateurs LoRA sur le modèle. Après cette fonction, seulement
+     0,1% à 0,2% des paramètres sont modifiables, ce qui rend l'entraînement
+     ultra-rapide et ultra-léger.
+
+7. `tokenizer.apply_chat_template(conversation)` :
+   - Rôle : Convertit le dictionnaire JSON (`messages`) au format brut attendu par
+     l'architecture du modèle (par exemple en ajoutant les balises `<|im_start|>system...`,
+     `<|im_start|>user...`, `<|im_start|>assistant...`).
+
+8. `TrainingArguments(...)` :
+   - Rôle : Pilote tout le comportement mathématique de l'apprentissage :
+     * `learning_rate=2e-4` : La vitesse à laquelle les neurones corrigent leurs erreurs.
+     * `per_device_train_batch_size` : Combien de phrases l'IA analyse en même temps.
+     * `gradient_accumulation_steps` : Simule un gros lot de données pour stabiliser l'apprentissage.
+     * `num_train_epochs=5` : Le nombre de fois que l'IA va relire l'intégralité du dataset.
+
+9. `SFTTrainer(...)` (Supervised Fine-Tuning Trainer de Hugging Face TRL) :
+   - Rôle : Le grand chef d'orchestre. Il prend le modèle, les adaptateurs, vos données
+     gabonaises et gère la distribution des calculs, le masquage des invites et la perte (loss).
+
+10. `trainer.train()` :
+    - Rôle : LA fonction reine ! Elle lance la grande boucle d'entraînement (forward pass,
+      calcul de l'erreur via la Cross-Entropy Loss, backward pass et descente de gradient).
+
+11. `trainer.model.save_pretrained(OUTPUT_DIR)` :
+    - Rôle : Enregistre sur votre disque dur les adaptateurs LoRA créés (généralement un petit
+      dossier de moins de 100 Mo contenant `adapter_model.safetensors` et `adapter_config.json`).
+
+12. `PeftModel.from_pretrained(base_model, LORA_PATH)` & `model.generate(...)` :
+    - Rôle : Utilisées lors du test (`tester_modele.py`). Elles fusionnent à la volée le modèle
+      de base avec vos adaptateurs et génèrent les réponses token par token.
+
+
+================================================================================
+8. OÙ FAIRE TOURNER L'ENTRAÎNEMENT ?
+================================================================================
+
+OPTION A : GOOGLE COLAB (100% GRATUIT, RECOMMANDÉ)
+Si votre PC ne possède pas de carte graphique NVIDIA RTX :
+1. Rendez-vous sur : https://colab.research.google.com
+2. Créez un nouveau notebook.
+3. Allez dans "Exécution" -> "Modifier le type d'exécution" -> Sélectionnez "T4 GPU".
+4. Tapez et exécutez dans la première cellule :
+   !pip install torch transformers datasets trl peft bitsandbytes accelerate
+5. Téléversez votre fichier `dataset_tradition_ia.jsonl`.
+6. Copiez-collez le script `entrainer_modele.py` et lancez la cellule.
+   Temps estimé : 10 à 30 minutes.
+7. Téléchargez le dossier généré `tradition_ia_modele_entraine.zip`.
+
+OPTION B : SUR VOTRE PC LOCAL (WINDOWS AVEC CARTE NVIDIA)
+1. Ouvrez PowerShell dans votre dossier Tradition-IA.
+2. Si la commande `python` ouvre le Microsoft Store, utilisez le lanceur universel :
+   py preparer_dataset.py
+   py entrainer_modele.py
+
+
+================================================================================
+9. ÉTAPE 3 : TESTER LE MODÈLE ENTRAÎNÉ EN PYTHON (INFÉRENCE)
+================================================================================
+
+Le script `tester_modele.py` (à la racine du projet) permet d'interroger votre
+modèle tout juste entraîné :
+
+   py tester_modele.py
+
+Il charge le modèle de base, applique vos adaptateurs LoRA et lui pose des questions :
+- "Comment dit-on 'Bonjour, comment vas-tu ?' en Fang ?"
+- "Traduis en Punu : 'Je vais au marché.'"
+- "Donne-moi un proverbe gabonais sur la solidarité et explique son sens."
+- "Qui est le créateur de Tradition IA ?"
+
+
+================================================================================
+10. EN CAS DE BLOCAGE : SE DÉBROUILLER, DÉBOGUER ET FOUILLER SUR LE WEB
+================================================================================
+
+⚠️ VÉRITÉ FONDAMENTALE DE L'IA :
+Aucun chercheur, développeur ou ingénieur au monde ne réussit un entraînement de LLM
+du premier coup sans rencontrer d'erreur ! Dans le domaine du Deep Learning,
+savoir déboguer par soi-même et fouiller sur le web est une compétence indispensable.
+
+--------------------------------------------------------------------------------
+COMMENT CHERCHER EFFICACEMENT SUR LE WEB QUAND UNE ERREUR APPARAÎT ?
+--------------------------------------------------------------------------------
+
+1. LA RÈGLE D'OR : COPIER UNIQUEMENT LA DERNIÈRE LIGNE DU TRACEBACK
+   Quand Python crashe, il affiche 40 lignes d'erreur rouge. Ne copiez pas tout !
+   Regardez TOUT EN BAS la dernière ligne (ex: `OutOfMemoryError: CUDA out of memory`
+   ou `ImportError: cannot import name 'SFTTrainer'`).
+   C'est cette ligne exacte qu'il faut copier dans Google ou DuckDuckGo.
+
+2. AJOUTER LE BON MOT-CLÉ DU FRAMEWORK :
+   Tapez dans votre moteur de recherche :
+   `huggingface [nom_de_l_erreur]`
+   OU
+   `pytorch [nom_de_l_erreur]`
+   OU
+   `peft lora [nom_de_l_erreur]`
+
+3. LES 4 SITES OFFICIELS À FOUILLER EN PRIORITÉ :
+   - GitHub Issues de Hugging Face :
+     https://github.com/huggingface/transformers/issues
+     https://github.com/huggingface/trl/issues
+     https://github.com/huggingface/peft/issues
+     (Tapez votre erreur dans la barre de recherche des "Issues Closed").
+   - Le Forum officiel Hugging Face :
+     https://discuss.huggingface.co
+   - Reddit r/LocalLLaMA :
+     https://www.reddit.com/r/LocalLLaMA/
+     (La plus grande communauté d'experts de fine-tuning au monde).
+   - Stack Overflow :
+     https://stackoverflow.com/questions/tagged/pytorch
+
+--------------------------------------------------------------------------------
+LES 7 PANNES LES PLUS FRÉQUENTES ET COMMENT S'EN SORTIR TOUT SEUL :
+--------------------------------------------------------------------------------
+
+PANNE 1 : `OutOfMemoryError: CUDA out of memory` (La mémoire GPU est saturée)
+  Cause : Le modèle ou la longueur des phrases est trop grand pour votre carte.
+  Solution :
+  - Dans `training_args`, réglez `per_device_train_batch_size = 1`.
+  - Augmentez `gradient_accumulation_steps = 8` ou `16`.
+  - Dans `SFTTrainer`, descendez `max_seq_length` de 1024 à 512.
+  - Ajoutez `gradient_checkpointing=True` dans vos arguments d'entraînement.
+
+PANNE 2 : `bitsandbytes` échoue sous Windows (`CUDA Setup failed / DLL not found`)
+  Cause : Windows et bitsandbytes ont souvent des incompatibilités de drivers CUDA.
+  Solution débrouille :
+  - Tapez : `pip install bitsandbytes-windows`
+  - OU bien, la solution la plus intelligente : ne perdez pas 3 heures à vous battre
+    avec Windows, ouvrez Google Colab (Linux) en 1 clic et faites tourner l'entraînement
+    sur leur machine virtuelle où tout est déjà préconfiguré !
+
+PANNE 3 : `Torch not compiled with CUDA enabled`
+  Cause : Vous avez installé la version CPU de PyTorch au lieu de la version GPU.
+  Solution :
+  - Désinstallez torch : `pip uninstall torch`
+  - Réinstallez la version CUDA depuis le site officiel :
+    `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121`
+
+PANNE 4 : La perte (`loss`) vaut `nan` ou ne descend jamais
+  Cause : Votre taux d'apprentissage est trop violent ou des données sont corrompues.
+  Solution :
+  - Baissez `learning_rate` : passez de `2e-4` à `5e-5` ou `1e-4`.
+  - Vérifiez dans votre fichier `dataset_tradition_ia.jsonl` qu'il n'y a pas
+    de ligne vide ou de phrase vide `""`.
+
+PANNE 5 : L'entraînement est ultra-lent (plusieurs heures pour 100 exemples)
+  Cause : Le script tourne sur votre processeur (CPU) au lieu de votre carte graphique.
+  Solution :
+  - Vérifiez dans Python : `import torch; print(torch.cuda.is_available())`.
+    Si cela affiche `False`, votre GPU n'est pas détecté.
+
+PANNE 6 : Le modèle répète en boucle la même phrase ou oublie tout
+  Cause : Phénomène d'"overfitting" (sur-apprentissage) ou de "catastrophic forgetting".
+  Solution :
+  - Réduisez le nombre d'époques : passez de 5 époques à 2 ou 3 époques.
+  - Enrichissez votre jeu de données avec plus de variété de questions.
+
+PANNE 7 : Vous n'avez pas de PC puissant et Google Colab se déconnecte ?
+  Alternatives gratuites dans le cloud :
+  - Kaggle (https://www.kaggle.com) : offre 30 heures par semaine de GPU double T4 gratuit !
+  - Lightning AI (https://lightning.ai) : crédits mensuels gratuits pour lancer du PyTorch.
+  - OpenAI Fine-Tuning : vous uploadez simplement `dataset_tradition_ia.jsonl` sur
+    la plateforme OpenAI et ils entraînent un `gpt-4o-mini` personnalisé pour quelques centimes,
+    sans que vous n'ayez besoin d'écrire une seule ligne de GPU.
+
+
+================================================================================
+11. ÉTAPE 4 : CONNECTER LE MODÈLE ENTRAÎNÉ À NOTRE APPLICATION TRADITION IA
+================================================================================
+
+Une fois que votre modèle est entraîné, comment le relier à votre site web
+Tradition IA (api/chat.js et api/translate.js) ?
+
+Trois chemins s'offrent à vous :
+
+MÉTHODE 1 : AVEC OLLAMA (Local & Gratuit)
+1. Exportez vos adaptateurs LoRA fusionnés en format `.gguf`.
+2. Créez un fichier `Modelfile` :
+   FROM ./tradition_ia.gguf
+   SYSTEM "Tu es Mbolo IA, l'expert des traditions gabonaises créé par Rosny OTSINA."
+3. Lancez : `ollama create mbolo-ia -f Modelfile` puis `ollama run mbolo-ia`.
+4. Dans `api/chat.js`, pointez simplement vers : `http://localhost:11434/v1/chat/completions`.
+
+MÉTHODE 2 : HÉBERGEMENT SERVEUR DÉDIÉ (Hugging Face Inference ou RunPod)
+1. Uploadez votre modèle sur votre compte Hugging Face (`huggingface-cli upload`).
+2. Déployez un endpoint API sécurisé.
+3. Dans votre Vercel (`Settings -> Environment Variables`), remplacez votre clé
+   OpenRouter par votre endpoint Hugging Face personnel.
+
+MÉTHODE 3 : FINE-TUNING CLOUD OPENAI (Le plus simple en production)
+Si vous ne voulez pas gérer de serveur GPU 24h/24 :
+1. Utilisez votre fichier `dataset_tradition_ia.jsonl`.
+2. Lancez le job de fine-tuning chez OpenAI (gpt-4o-mini).
+3. Vous obtenez un nom de modèle (ex: `ft:gpt-4o-mini:tradition-ia-2026`).
+4. Dans `api/chat.js`, modifiez la variable `DEFAULT_MODEL` pour pointer dessus.
+
+
+================================================================================
+12. CONSEILS POUR ENRICHIR VOTRE BASE ET CRÉER LA MEILLEURE IA GABONAISE
+================================================================================
+
+1. LA QUALITÉ AVANT LA QUANTITÉ :
+   - 200 à 500 paires de données rigoureusement vérifiées par des locuteurs natifs
+     (Fang de l'Estuaire ou du Woleu-Ntem, Punu de Tchibanga, Myènè de Port-Gentil)
+     valent mille fois mieux que 10 000 phrases imprécises.
+
+2. COUVREZ LA DIVERSITÉ DES SITUATIONS :
+   - Salutations selon les moments de la journée (matin, midi, crépuscule).
+   - Dialogues de négociation au marché, discussions familiales, conseils des anciens.
+   - Variantes dialectales si nécessaire (ex: Fang Ntumu, Fang Fang, Fang Atsi).
+
+3. EXPLOITEZ LE DICTIONNAIRE SAMUEL GALLEY DÉJÀ PRÉSENT DANS VOTRE PROJET :
+   - Votre fichier `js/pdf_knowledge.js` contient près de 20 000 entrées du
+     dictionnaire Fang-Français de Samuel Galley. C'est une mine d'or inestimable
+     pour enrichir votre dataset !
+
+4. VALEURS, RESPECT ET ATTRIBUTION :
+   - Conservez toujours dans le prompt système la reconnaissance de la culture gabonaise,
+     du respect dû aux ancêtres et la mention fière du créateur Rosny OTSINA.
+
+================================================================================
+FIN DU GUIDE — Avec ces méthodes, Tradition IA a tout pour devenir une référence !
+================================================================================

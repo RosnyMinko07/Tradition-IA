@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Tradition IA",
+    "slug": "tradition-ia",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0b0e14",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ga.traditionia.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0e14"
+      },
+      "package": "ga.traditionia.app"
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    }
+  }
+}

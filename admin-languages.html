@@ -11,6 +11,7 @@
   <script src="js/masks.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
 </head>
 <body>
@@ -19,24 +20,24 @@
     <header class="navbar">
       <a href="admin.html" class="navbar-brand">
         <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
-        <span>Tradition<span style="color: var(--primary);">IA</span> <span class="admin-badge">[Admin]</span></span>
+        <span>Tradition<span style="color: var(--gold);">IA</span> <span class="admin-badge">[CONSOLE ADMIN]</span></span>
       </a>
-      <div id="nav-user-container">
-        <div class="nav-auth-buttons">
-          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          </button>
-        </div>
-      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">🌐 Retour au Site Public</a>
+        <a href="admin.html" class="nav-link" style="color: var(--gold);">Dashboard Admin</a>
+      </nav>
+
+      <div id="nav-user-container"></div>
     </header>
 
     <div class="layout-container">
       <aside class="sidebar">
-        <div class="sidebar-title">Administration</div>
+        <div class="sidebar-title" style="color: var(--gold);">Administration</div>
         <a href="admin.html" class="sidebar-item">📊 Dashboard Admin</a>
         <a href="admin-users.html" class="sidebar-item">👥 Utilisateurs</a>
         <a href="admin-languages.html" class="sidebar-item active">🗣️ Langues Gabonaises</a>
-        <a href="admin-dictionary.html" class="sidebar-item">📚 Dictionnaire</a>
+        <a href="admin-dictionary.html" class="sidebar-item">📚 Dictionnaire Admin</a>
         <a href="admin-expressions.html" class="sidebar-item">💬 Expressions</a>
         <a href="admin-ai-validation.html" class="sidebar-item">🤖 Validation IA</a>
         <a href="admin-analytics.html" class="sidebar-item">📈 Analyses & Rapports</a>
@@ -66,19 +67,19 @@
               <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
                 <div class="form-group">
                   <label class="form-label">Nom de la Langue</label>
-                  <input type="text" id="new-lang-name" class="form-input" placeholder="ex: Nzébi" required>
+                  <input type="text" id="new-lang-name" class="form-input" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Nom Natif</label>
-                  <input type="text" id="new-lang-native" class="form-input" placeholder="ex: Inzébi" required>
+                  <input type="text" id="new-lang-native" class="form-input" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Description / Region</label>
-                  <input type="text" id="new-lang-desc" class="form-input" placeholder="ex: Langue du Haut-Ogooué" required>
+                  <input type="text" id="new-lang-desc" class="form-input" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Locuteurs Estimés</label>
-                  <input type="text" id="new-lang-speakers" class="form-input" placeholder="ex: 60 000" required>
+                  <input type="text" id="new-lang-speakers" class="form-input" required>
                 </div>
               </div>
               <div class="modal-footer">
@@ -95,6 +96,12 @@
   <script type="module" src="js/common.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      const user = (window.TradAuth && window.TradAuth.getUser()) || window.Store?.user;
+      if (!user || user.role !== 'admin') {
+        window.location.href = 'login.html';
+        return;
+      }
+
       if (window.Store) {
         await window.Store.loadInitialData();
         renderLangs();
@@ -138,9 +145,9 @@
             <div>${maskHtml}</div>
             <button class="btn btn-danger btn-del-l" data-id="${l.id}" style="padding: 4px 8px; font-size: 0.75rem;">✕ Supprimer</button>
           </div>
-          <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 4px;">${l.name}</h3>
-          <p style="color: var(--primary); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Nom natif : ${l.nativeName}</p>
+          <h3 style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 8px; font-weight: 700;">${l.name}</h3>
           <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">${l.description}</p>
+
           <div style="display: flex; gap: 8px; font-size: 0.8rem;">
             <span class="badge badge-green">${l.wordCount || 500} mots</span>
             <span class="badge badge-gold">${l.speakers || '100K'} locuteurs</span>

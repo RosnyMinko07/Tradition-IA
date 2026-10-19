@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tradition IA - Présentation Officielle des Maquettes Mobiles (iOS & Android)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #009E49;
+      --primary-dark: #007A38;
+      --primary-light: #D1FAE5;
+      --gold: #FCD116;
+      --gold-dark: #D97706;
+      --blue: #0066B2;
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface-subtle: #F1F5F9;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      --border: #E2E8F0;
+      --danger: #EF4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: #0B0F17;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════ EN-TÊTE OFFICIEL DE PRÉSENTATION (COMME L'AFFICHE) ══════════════ */
+    .poster-header {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(11, 15, 23, 0.95) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 158, 73, 0.25);
+    }
+
+    .brand-icon-box img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .brand-titles h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-titles h1 span {
+      color: var(--primary);
+    }
+
+    .brand-titles p {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    .poster-slogan-col {
+      text-align: right;
+    }
+
+    .handwritten-quote {
+      font-family: 'Caveat', cursive;
+      font-size: 1.8rem;
+      color: var(--gold);
+      line-height: 1.1;
+      text-shadow: 0 2px 10px rgba(252, 209, 22, 0.3);
+    }
+
+    .handwritten-sub {
+      font-size: 0.78rem;
+      color: #64748B;
+      letter-spacing: 0.5px;
+    }
+
+    /* Barre de contrôle / Mode de Vue */
+    .view-control-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.8);
+      padding: 6px 14px;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .view-toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .view-toggle-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 12px rgba(0, 158, 73, 0.4);
+    }
+
+    .top-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-web-link {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      transition: all 0.2s ease;
+    }
+
+    .btn-web-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ══════════════ VUE 1 : GRANDE GALERIE DES 11 MAQUETTES (SHOWCASE) ══════════════ */
+    .showcase-container {
+      width: 100%;
+      max-width: 1720px;
+      padding: 30px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .showcase-banner-intro {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .badge-gabon {
+      background: rgba(0, 158, 73, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(0, 158, 73, 0.35);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .showcase-banner-intro h2 {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .showcase-banner-intro p {
+      color: #94A3B8;
+      font-size: 0.95rem;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    /* Piste de défilement ou Grille */
+    .phones-track {
+      display: flex;
+      gap: 30px;
+      overflow-x: auto;
+      padding: 20px 10px 40px;
+      width: 100%;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .phones-track::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    .phones-track::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .phones-track::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+
+    .phone-item-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+
+    .phone-number-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .phone-number-pill:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .phone-number-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* ══════════════ CHÂSSIS IPHONE 16 PRO HAUTE FIDÉLITÉ ══════════════ */
+    .iphone-frame {
+      position: relative;
+      width: 320px;
+      height: 670px;
+      background: #111419;
+      border-radius: 48px;
+      padding: 10px;
+      box-shadow: 
+        0 0 0 3px #334155,
+        0 0 0 5px #1E293B,
+        0 20px 50px rgba(0, 0, 0, 0.85),
+        0 0 30px rgba(0, 158, 73, 0.12);
+      user-select: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .iphone-frame:hover {
+      transform: translateY(-6px);
+      box-shadow: 
+        0 0 0 3px var(--primary),
+        0 0 0 5px #1E293B,
+        0 25px 60px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(0, 158, 73, 0.3);
+    }
+
+    .screen-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      border-radius: 38px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: var(--text-main);
+    }
+
+    /* Dynamic Island */
+    .notch-island {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 24px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+    }
+
+    .island-circle {
+      width: 8px;
+      height: 8px;
+      background: #0F172A;
+      border-radius: 50%;
+      border: 1px solid #1E293B;
+    }
+
+    /* Status Bar */
+    .screen-status-bar {
+      height: 38px;
+      padding: 8px 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-main);
+      z-index: 90;
+      background: transparent;
+    }
+
+    /* Contenu scrollable de chaque écran */
+    .screen-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px 60px;
+      position: relative;
+    }
+
+    .screen-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Bottom Tab Bar */
+    .mock-tab-bar {
+      height: 54px;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: 4px;
+      z-index: 80;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .mock-tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-muted);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 6px;
+    }
+
+    .mock-tab-item.active {
+      color: var(--primary);
+    }
+
+    .mock-tab-icon {
+      font-size: 1.05rem;
+    }
+
+    /* Cartes & Éléments UI */
+    .card-white {
+      background: #FFFFFF;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .btn-green-pill {
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 800;
+      border: none;
+      border-radius: 25px;
+      padding: 11px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 158, 73, 0.25);
+    }
+
+    /* ─── DÉTAILS EXACTS DE CHAQUE ÉCRAN DE L'AFFICHE ─── */
+
+    /* 1. Splash */
+    .splash-bg {
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 158, 73, 0.18) 0%, rgba(11, 15, 23, 0.98) 75%), #0B0F17;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      color: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* La grande image de la carte du Gabon avec masques en arrière-plan */
+    .splash-bg-mask-map {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      object-fit: contain;
+      opacity: 0.40;
+      filter: drop-shadow(0 0 35px rgba(0, 158, 73, 0.65)) drop-shadow(0 0 15px rgba(252, 209, 22, 0.3));
+      pointer-events: none;
+      z-index: 1;
+      animation: splashMapPulse 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes splashMapPulse {
+      0% { transform: translate(-50%, -50%) scale(0.97); opacity: 0.35; }
+      100% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.50; }
+    }
+
+    .splash-content-layer {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .splash-logo-circle {
+      width: 96px;
+      height: 96px;
+      border-radius: 26px;
+      background: rgba(11, 15, 23, 0.85);
+      border: 2px solid rgba(0, 158, 73, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 0 25px rgba(0, 158, 73, 0.6), 0 10px 25px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+    }
+
+    .splash-logo-circle img {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(252, 209, 22, 0.35));
+    }
+
+    .splash-dots {
+      display: flex;
+      gap: 6px;
+      margin: 20px 0 14px;
+    }
+
+    .splash-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .splash-dot.active {
+      width: 22px;
+      background: var(--primary);
+    }
+
+    /* 2. Accueil */
+    .home-banner-img {
+      height: 125px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(15, 41, 30, 0.15) 0%, rgba(15, 41, 30, 0.85) 100%), url('images/Gabon.jpg');
+      background-size: cover;
+      background-position: center;
+      color: #FFFFFF;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 12px;
+      border: 1px solid rgba(0, 158, 73, 0.4);
+    }
+
+    .quick-search {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border-radius: 30px;
+      padding: 5px 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .modes-4-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mode-box {
+      background: #FFFFFF;
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .mode-circle-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    /* 3. Traduction Texte */
+    .lang-pill-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #FFFFFF;
+      border-radius: 25px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* 4. Traduction Vocale */
+    .mic-giant-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .wave-lines {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 50px;
+    }
+
+    .w-bar {
+      width: 3px;
+      background: var(--primary);
+      border-radius: 2px;
+      animation: soundAnim 1.2s infinite ease-in-out;
+    }
+
+    @keyframes soundAnim {
+      0%, 100% { height: 12px; opacity: 0.4; }
+      50% { height: 42px; opacity: 1; }
+    }
+
+    .giant-mic-btn {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 6px 20px rgba(0, 158, 73, 0.4);
+    }
+
+    /* 5. Conversation */
+    .chat-bubble-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .bubble-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .bubble-card {
+      padding: 9px 12px;
+      border-radius: 14px;
+      font-size: 0.78rem;
+      max-width: 82%;
+    }
+
+    .bubble-french {
+      background: #F1F5F9;
+      color: var(--text-main);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-punu {
+      background: #E8F8F0;
+      color: #065F46;
+      border-bottom-right-radius: 4px;
+      margin-left: auto;
+    }
+
+    /* 6. Scan Caméra OCR */
+    .camera-sign-mock {
+      height: 180px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%), url('images/Gabon.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 2px solid #22C55E;
+      margin-bottom: 10px;
+    }
+
+    .sign-board {
+      background: rgba(30, 20, 10, 0.85);
+      border: 2px solid #854D0E;
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .focus-ocr-rect {
+      border: 2px dashed #FEF08A;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin: 4px 0;
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #FFFFFF;
+      background: rgba(254, 240, 138, 0.15);
+    }
+
+    /* ══════════════ VUE 2 : MODE INTERACTIF INDIVIDUEL ══════════════ */
+    .interactive-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px 80px;
+      width: 100%;
+    }
+
+    .interactive-container.active {
+      display: flex;
+    }
+
+    .interactive-screen-selector {
+      display: flex;
+      gap: 6px;
+      background: rgba(30, 41, 59, 0.85);
+      padding: 6px 10px;
+      border-radius: 40px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      max-width: 95vw;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .int-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .int-tab-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    /* Responsivité Mobile Réel */
+    @media (max-width: 600px) {
+      .poster-header {
+        padding: 14px 16px;
+      }
+      .poster-slogan-col {
+        display: none;
+      }
+      .showcase-banner-intro h2 {
+        font-size: 1.5rem;
+      }
+      .phones-track {
+        gap: 16px;
+        padding: 10px 0;
+      }
+      .iphone-frame {
+        width: 290px;
+        height: 610px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════ EN-TÊTE PRINCIPAL DE PRÉSENTATION ══════════════ -->
+  <header class="poster-header">
+    <div class="brand-group">
+      <div class="brand-icon-box">
+        <img src="images/tradiia_icon.png" alt="Logo Tradition IA">
+      </div>
+      <div class="brand-titles">
+        <h1>Tradition<span>IA</span></h1>
+        <p>Traduction intelligente des langues du Gabon</p>
+      </div>
+    </div>
+
+    <!-- Sélecteur de Mode : Planche Complète vs Simulateur Unique -->
+    <div class="view-control-bar">
+      <button class="view-toggle-btn active" id="btn-mode-showcase" onclick="switchMainView('showcase')">
+        🖼️ Planche Complète (11 Écrans)
+      </button>
+      <button class="view-toggle-btn" id="btn-mode-interactive" onclick="switchMainView('interactive')">
+        📱 Simulateur Interactif (1 Téléphone)
+      </button>
+    </div>
+
+    <div class="top-actions-row">
+      <div class="poster-slogan-col">
+        <div class="handwritten-quote">Nos langues, Notre identité, Notre avenir</div>
+        <div class="handwritten-sub">🇬🇦 9 LANGUES DU GABON • INTELLIGENCE ARTIFICIELLE</div>
+      </div>
+      <a href="translate.html" class="btn-web-link">🌐 Voir Version Web</a>
+    </div>
+  </header>
+
+  <!-- ══════════════ 1. VUE PLANCHE COMPLÈTE (TOUTES LES MAQUETTES ALIGNÉES) ══════════════ -->
+  <main class="showcase-container" id="view-showcase">
+    <div class="showcase-banner-intro">
+      <span class="badge-gabon">Rendu Officiel de l'Application Mobile • Android APK & iOS</span>
+      <h2>Maquettes UI/UX de l'Application Tradition IA</h2>
+      <p>Les 9 écrans officiels de l'affiche de présentation ainsi que les écrans d'authentification Connexion et Inscription.</p>
+    </div>
+
+    <!-- PISTE HORIZONTALE DES 11 IPHONES -->
+    <div class="phones-track">
+
+      <!-- ─── ÉCRAN 1 : LANCEMENT (SPLASH SCREEN) ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div style="color:#34D399;font-size:0.55rem;font-weight:800;">TRADITION IA</div><div style="width:6px;height:6px;border-radius:50%;background:#1E293B;"></div></div>
+            <div class="splash-bg">
+              <!-- La grande image en arrière-plan : Carte du Gabon avec les Masques -->
+              <img src="images/gabon_masque_nobg.png" alt="Carte du Gabon et Masques" class="splash-bg-mask-map">
+
+              <!-- Contenu au premier plan : Le LOGO officiel + Titres -->
+              <div class="splash-content-layer">
+                <div class="splash-logo-circle">
+                  <img src="images/tradiia_icon.png" alt="Logo Tradition IA">
+                </div>
+                <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.9);">Tradition IA</h3>
+                <p style="font-size: 0.74rem; color: #CBD5E1; margin-bottom: 12px; line-height: 1.3; text-shadow: 0 1px 6px rgba(0,0,0,0.9);">Traduction intelligente des langues du Gabon</p>
+                
+                <div class="splash-dots">
+                  <div class="splash-dot active"></div>
+                  <div class="splash-dot"></div>
+                  <div class="splash-dot"></div>
+                </div>
+
+                <div style="font-size: 0.68rem; color: var(--gold); font-style: italic; margin-top: 14px; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                  « Nos langues, une richesse pour demain »
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-splash')">
+          <span class="dot"></span> 1. Écran de lancement
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 2 : ACCUEIL (DASHBOARD) ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <img src="images/tradiia_icon.png" style="width:30px; height:30px; border-radius:8px;">
+                  <strong style="font-size:0.9rem;">Tradition IA</strong>
+                </div>
+                <span style="font-size:1rem;">🔔</span>
+              </div>
+
+              <div class="home-banner-img">
+                <div style="flex:1;">
+                  <span style="font-size:0.55rem; font-weight:800; color:var(--gold);">PATRIMOINE DU GABON 🇬🇦</span>
+                  <div style="font-size:0.75rem; font-weight:900; line-height:1.2; margin:2px 0;">Traduisez entre le français et les langues gabonaises</div>
+                  <span style="font-size:0.58rem; opacity:0.9;">Faites vivre nos langues grâce à l'IA</span>
+                </div>
+                <img src="images/gabon_masque_nobg.png" style="width:55px; height:auto; object-fit:contain;">
+              </div>
+
+              <div class="quick-search">
+                <span style="font-size:0.75rem; color:#94A3B8; flex:1;">Entrez votre texte...</span>
+                <span style="background:var(--primary); color:#FFF; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:900;">›</span>
+              </div>
+
+              <div style="font-size:0.72rem; font-weight:800; margin-bottom:6px;">Modes de traduction</div>
+              <div class="modes-4-grid">
+                <div class="mode-box">
+                  <div class="mode-circle-icon" style="background:#E0F2FE;">📝</div>
+                  <strong style="font-size:0.72rem; display:block;">Texte</strong>
+                  <span style="font-size:0.58rem; color:#64748B;">Traduire un texte</span>
+                </div>
+                <div class="mode-box">
+                  <div class="mode-circle-icon" style="background:#FEF3C7;">🎙️</div>
+                  <strong style="font-size:0.72rem; display:block;">Voix</strong>
+                  <span style="font-size:0.58rem; color:#64748B;">Traduire par la voix</span>
+                </div>
+                <div class="mode-box">
+                  <div class="mode-circle-icon" style="background:#DCFCE7;">📷</div>
+                  <strong style="font-size:0.72rem; display:block;">Caméra</strong>
+                  <span style="font-size:0.58rem; color:#64748B;">Traduire une image</span>
+                </div>
+                <div class="mode-box">
+                  <div class="mode-circle-icon" style="background:#FFEDD5;">💬</div>
+                  <strong style="font-size:0.72rem; display:block;">Conversation</strong>
+                  <span style="font-size:0.58rem; color:#64748B;">Dialogue bilingue</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item active"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-home')">
+          <span class="dot"></span> 2. Écran d'accueil
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 3 : TRADUCTION TEXTE ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.9rem; font-weight:800;">‹ Traduction texte</span>
+                <span>📋</span>
+              </div>
+
+              <div class="lang-pill-row">
+                <span>🇫🇷 Français</span>
+                <span style="color:var(--primary); font-weight:900;">⇄</span>
+                <span>🇬🇦 Fang</span>
+              </div>
+
+              <div class="card-white" style="margin-bottom:8px;">
+                <div style="font-size:0.82rem; font-weight:700; margin-bottom:14px;">Bonjour tout le monde</div>
+                <div style="display:flex; justify-content:space-between; font-size:0.62rem; color:#94A3B8;">
+                  <span>✕</span>
+                  <span>22/500</span>
+                </div>
+              </div>
+
+              <button class="btn-green-pill" style="margin-bottom:10px;">Traduire</button>
+
+              <div class="card-white" style="background:#F0FDF4; border-color:#BBF7D0;">
+                <span style="font-size:0.62rem; font-weight:800; color:var(--primary);">TRADUCTION (FANG)</span>
+                <div style="font-size:1.1rem; font-weight:900; color:#166534; margin:4px 0 10px;">Mbolo betiî</div>
+                <div style="display:flex; justify-content:space-around; border-top:1px solid #DCFCE7; padding-top:6px; font-size:0.65rem; color:#166534; font-weight:700;">
+                  <span>📋 Copier</span>
+                  <span>🔊 Écouter</span>
+                  <span>📤 Partager</span>
+                </div>
+              </div>
+
+              <div style="font-size:0.68rem; font-weight:800; color:#64748B; margin-bottom:6px;">Autres suggestions</div>
+              <div class="card-white" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px;">
+                <div>
+                  <strong style="font-size:0.75rem;">Mbolo</strong>
+                  <span style="font-size:0.62rem; color:#94A3B8; display:block;">Bonjour</span>
+                </div>
+                <span>❤️</span>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-translate')">
+          <span class="dot"></span> 3. Écran de traduction texte
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 4 : TRADUCTION VOCALE ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:800;">‹ Traduction vocale</span></div>
+              <div class="lang-pill-row">
+                <span>🇫🇷 Français</span>
+                <span style="color:var(--primary); font-weight:900;">⇄</span>
+                <span>🇬🇦 Myènè</span>
+              </div>
+
+              <div class="mic-giant-wrapper">
+                <div class="wave-lines"><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div></div>
+                <div class="giant-mic-btn">🎙️</div>
+                <div class="wave-lines"><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div></div>
+              </div>
+
+              <div style="text-align:center; margin-bottom:12px;">
+                <strong style="font-size:0.78rem; color:var(--primary); display:block;">Écoute en cours...</strong>
+                <span style="font-size:0.62rem; color:#94A3B8;">Parlez maintenant</span>
+              </div>
+
+              <div class="card-white">
+                <span style="font-size:0.62rem; font-weight:700; color:#94A3B8;">TRANSCRIPTION</span>
+                <div style="font-size:0.78rem; font-weight:700; margin-top:2px;">Comment ça va aujourd'hui ?</div>
+              </div>
+
+              <div class="card-white" style="background:#F0FDF4; border-color:#BBF7D0;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <span style="font-size:0.62rem; font-weight:800; color:var(--primary);">TRADUCTION (MYÈNÈ)</span>
+                    <div style="font-size:0.92rem; font-weight:900; color:#166534; margin-top:2px;">Nda meye a le ?</div>
+                  </div>
+                  <span style="font-size:1.1rem;">🔊</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-voice')">
+          <span class="dot"></span> 4. Écran de traduction vocale
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 5 : CONVERSATION BILINGUE ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.85rem; font-weight:800;">‹ Conversation bilingue</span>
+                <span>⋮</span>
+              </div>
+              <div class="lang-pill-row">
+                <span>🇫🇷 Français</span>
+                <span style="color:var(--primary); font-weight:900;">⇄</span>
+                <span>🇬🇦 Punu</span>
+              </div>
+
+              <div class="chat-bubble-row">
+                <div class="bubble-avatar">👨🏾</div>
+                <div class="bubble-card bubble-french">
+                  <strong>Bonjour ! Comment allez-vous ?</strong>
+                  <div style="font-size:0.58rem; color:#94A3B8; margin-top:2px;">🇫🇷 Français • 🔊</div>
+                </div>
+              </div>
+
+              <div class="chat-bubble-row" style="flex-direction:row-reverse;">
+                <div class="bubble-avatar">👩🏾</div>
+                <div class="bubble-card bubble-punu">
+                  <strong>Mwa diyi ! Wo yéé a ?</strong>
+                  <div style="font-size:0.58rem; color:#047857; margin-top:2px; text-align:right;">Punu • 🔊</div>
+                </div>
+              </div>
+
+              <div class="chat-bubble-row">
+                <div class="bubble-avatar">👨🏾</div>
+                <div class="bubble-card bubble-french">
+                  <strong>Je vais bien, merci. Et vous ?</strong>
+                  <div style="font-size:0.58rem; color:#94A3B8; margin-top:2px;">🇫🇷 Français</div>
+                </div>
+              </div>
+
+              <div class="chat-bubble-row" style="flex-direction:row-reverse;">
+                <div class="bubble-avatar">👩🏾</div>
+                <div class="bubble-card bubble-punu">
+                  <strong>Me yéé. Medza bien.</strong>
+                  <div style="font-size:0.58rem; color:#047857; margin-top:2px; text-align:right;">Punu</div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:6px; align-items:center; margin-top:14px;">
+                <div style="background:var(--primary); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#FFF; font-size:0.9rem;">🎙️</div>
+                <div style="background:#FFF; border:1px solid var(--border); border-radius:20px; padding:6px 10px; font-size:0.68rem; color:#94A3B8; flex:1;">Appuyez pour parler...</div>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">💬</span><span>Dialogue</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-conversation')">
+          <span class="dot"></span> 5. Écran conversation
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 6 : CHOIX DE LANGUE ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:800;">‹ Choisir une langue</span></div>
+              <div class="quick-search" style="margin-bottom:8px;">
+                <span style="font-size:0.75rem; color:#94A3B8;">🔍 Rechercher une langue...</span>
+              </div>
+              <div style="font-size:0.68rem; font-weight:800; color:#64748B; margin-bottom:6px;">Langues du Gabon</div>
+
+              <div class="card-white" style="display:flex; align-items:center; gap:8px; padding:8px 10px; border-color:var(--primary); background:#F0FDF4;">
+                <img src="images/fang.png" style="width:24px; height:24px; object-fit:contain;">
+                <div style="flex:1;">
+                  <strong style="font-size:0.75rem; color:var(--primary);">Fang</strong>
+                  <span style="font-size:0.58rem; color:#64748B; display:block;">Langue principale du Nord</span>
+                </div>
+                <span style="color:var(--primary); font-weight:900;">✓</span>
+              </div>
+
+              <div class="card-white" style="display:flex; align-items:center; gap:8px; padding:8px 10px;">
+                <img src="images/myene.png" style="width:24px; height:24px; object-fit:contain;">
+                <div style="flex:1;">
+                  <strong style="font-size:0.75rem;">Myènè</strong>
+                  <span style="font-size:0.58rem; color:#64748B; display:block;">Langue du centre (Ogooué-Maritime)</span>
+                </div>
+                <span style="color:#CBD5E1;">○</span>
+              </div>
+
+              <div class="card-white" style="display:flex; align-items:center; gap:8px; padding:8px 10px;">
+                <img src="images/punu.png" style="width:24px; height:24px; object-fit:contain;">
+                <div style="flex:1;">
+                  <strong style="font-size:0.75rem;">Punu</strong>
+                  <span style="font-size:0.58rem; color:#64748B; display:block;">Langue du Sud (Ngounié, Nyanga)</span>
+                </div>
+                <span style="color:#CBD5E1;">○</span>
+              </div>
+
+              <div class="card-white" style="display:flex; align-items:center; gap:8px; padding:8px 10px;">
+                <img src="images/nzebi.png" style="width:24px; height:24px; object-fit:contain;">
+                <div style="flex:1;">
+                  <strong style="font-size:0.75rem;">Nzébi</strong>
+                  <span style="font-size:0.58rem; color:#64748B; display:block;">Langue du Sud-Ouest</span>
+                </div>
+                <span style="color:#CBD5E1;">○</span>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-languages')">
+          <span class="dot"></span> 6. Écran de sélection des langues
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 7 : HISTORIQUE / FAVORIS ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.9rem; font-weight:800;">‹ Historique</span>
+                <span>✏️</span>
+              </div>
+
+              <div style="display:flex; background:#FFF; border-radius:20px; padding:3px; border:1px solid var(--border); margin-bottom:10px; font-size:0.68rem; font-weight:800;">
+                <div style="flex:1; text-align:center; padding:3px; color:#94A3B8;">Tout</div>
+                <div style="flex:1; text-align:center; padding:3px; background:var(--primary); color:#FFF; border-radius:15px;">Favoris</div>
+                <div style="flex:1; text-align:center; padding:3px; color:#94A3B8;">Récents</div>
+              </div>
+
+              <div class="card-white" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px;">
+                <div>
+                  <strong style="font-size:0.75rem;">Bonjour</strong>
+                  <span style="font-size:0.55rem; color:#94A3B8; display:block;">Français ➔ Fang</span>
+                  <div style="font-size:0.82rem; font-weight:900; color:var(--primary);">Mbolo</div>
+                </div>
+                <div style="display:flex; gap:6px;"><span>🔊</span><span style="color:#EF4444;">❤️</span></div>
+              </div>
+
+              <div class="card-white" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px;">
+                <div>
+                  <strong style="font-size:0.75rem;">Merci</strong>
+                  <span style="font-size:0.55rem; color:#94A3B8; display:block;">Français ➔ Punu</span>
+                  <div style="font-size:0.82rem; font-weight:900; color:var(--primary);">Medza</div>
+                </div>
+                <div style="display:flex; gap:6px;"><span>🔊</span><span style="color:#EF4444;">❤️</span></div>
+              </div>
+
+              <div class="card-white" style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px;">
+                <div>
+                  <strong style="font-size:0.75rem;">Comment vas-tu ?</strong>
+                  <span style="font-size:0.55rem; color:#94A3B8; display:block;">Français ➔ Myènè</span>
+                  <div style="font-size:0.82rem; font-weight:900; color:var(--primary);">Nda meye a le ?</div>
+                </div>
+                <div style="display:flex; gap:6px;"><span>🔊</span><span style="color:#EF4444;">❤️</span></div>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">⭐</span><span>Favoris</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-history')">
+          <span class="dot"></span> 7. Écran historique / favoris
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 8 : PROFIL / PARAMÈTRES ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.9rem; font-weight:800;">‹ Mon profil</span>
+                <span>⚙️</span>
+              </div>
+
+              <div class="card-white" style="display:flex; align-items:center; gap:8px; padding:8px 10px;">
+                <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">👤</div>
+                <div>
+                  <strong style="font-size:0.78rem;">Utilisateur Tradition IA</strong>
+                  <span style="font-size:0.6rem; color:#64748B; display:block;">utilisateur@gmail.com</span>
+                </div>
+              </div>
+
+              <div class="card-white" style="padding:8px 10px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.65rem; font-weight:800;">
+                  <span>Découvrir les langues du Gabon</span>
+                  <span style="color:var(--primary);">3/9</span>
+                </div>
+                <div style="height:5px; background:#E2E8F0; border-radius:3px; overflow:hidden; margin-top:5px;">
+                  <div style="width:33%; height:100%; background:var(--primary);"></div>
+                </div>
+              </div>
+
+              <div class="card-white" style="padding:0; overflow:hidden; font-size:0.72rem;">
+                <div style="padding:8px 10px; display:flex; justify-content:space-between; border-bottom:1px solid var(--border);">
+                  <span>Mode hors ligne</span>
+                  <span style="color:var(--primary); font-weight:800;">ON</span>
+                </div>
+                <div style="padding:8px 10px; display:flex; justify-content:space-between; border-bottom:1px solid var(--border);">
+                  <span>Télécharger des langues</span>
+                  <span>›</span>
+                </div>
+                <div style="padding:8px 10px; display:flex; justify-content:space-between; border-bottom:1px solid var(--border);">
+                  <span>Thème sombre</span>
+                  <span style="color:#94A3B8;">OFF</span>
+                </div>
+                <div style="padding:8px 10px; display:flex; justify-content:space-between;">
+                  <span>Notifications</span>
+                  <span style="color:var(--primary); font-weight:800;">ON</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-profile')">
+          <span class="dot"></span> 8. Écran profil / paramètres
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 9 : SCAN CAMÉRA OCR ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll" style="padding:8px;">
+              <div style="margin-bottom:6px;"><span style="font-size:0.85rem; font-weight:800;">‹ Traduction par caméra</span></div>
+              <div class="camera-sign-mock">
+                <div class="sign-board">
+                  <div style="font-size:0.6rem; font-weight:900; letter-spacing:1px; color:#FEF08A;">PARC NATIONAL DE LOANGO</div>
+                  <div class="focus-ocr-rect">BIENVENUE</div>
+                  <div style="font-size:0.55rem; color:#CBD5E1;">WELCOME</div>
+                </div>
+              </div>
+
+              <div class="card-white" style="padding:8px 10px; margin-bottom:8px;">
+                <span style="font-size:0.58rem; color:#94A3B8; font-weight:700;">TEXTE DÉTECTÉ</span>
+                <div style="font-size:0.8rem; font-weight:900;">Bienvenue</div>
+                <div style="margin-top:4px; padding-top:4px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <span style="font-size:0.58rem; color:var(--primary); font-weight:800;">TRADUCTION (FANG)</span>
+                    <div style="font-size:0.95rem; font-weight:900; color:var(--primary);">Mbolo</div>
+                  </div>
+                  <span>🔊</span>
+                </div>
+              </div>
+
+              <button class="btn-green-pill" style="padding:9px;">📷 Prendre une photo</button>
+            </div>
+
+            <div class="mock-tab-bar">
+              <div class="mock-tab-item"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+              <div class="mock-tab-item active"><span class="mock-tab-icon">📷</span><span>Caméra</span></div>
+              <div class="mock-tab-item"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-camera')">
+          <span class="dot"></span> 9. Écran scan caméra (OCR)
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 10 : CONNEXION ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="text-align:center; margin:6px 0 10px;">
+                <div style="position:relative; width:70px; height:70px; margin:0 auto 2px; display:flex; align-items:center; justify-content:center;">
+                  <div style="position:absolute; width:60px; height:60px; background:rgba(0,158,73,0.35); filter:blur(10px); border-radius:50%;"></div>
+                  <img src="images/gabon_masque_nobg.png" style="width:65px; height:65px; object-fit:contain; position:relative;">
+                </div>
+                <img src="images/drapeau_gabon_nobg.png" style="width:36px; height:auto; display:block; margin:0 auto 4px;">
+                <span style="font-size:0.58rem; font-weight:800; color:var(--primary); text-transform:uppercase; background:rgba(0,158,73,0.1); padding:2px 8px; border-radius:10px;">Patrimoine & Culture</span>
+                <h4 style="font-size:1.05rem; font-weight:900; margin:2px 0;">Connexion</h4>
+                <p style="font-size:0.62rem; color:#64748B;">Explorez et préservez la richesse des langues vernaculaires du Gabon grâce à l'IA.</p>
+              </div>
+
+              <div class="card-white">
+                <div style="margin-bottom:8px;">
+                  <label style="font-size:0.62rem; font-weight:700; display:block; margin-bottom:2px;">Adresse Email</label>
+                  <input type="text" value="utilisateur@gmail.com" style="width:100%; padding:7px 10px; font-size:0.75rem; border:1px solid var(--border); border-radius:8px;">
+                </div>
+                <div style="margin-bottom:8px;">
+                  <label style="font-size:0.62rem; font-weight:700; display:block; margin-bottom:2px;">Mot de passe</label>
+                  <input type="password" value="••••••••" style="width:100%; padding:7px 10px; font-size:0.75rem; border:1px solid var(--border); border-radius:8px;">
+                </div>
+                <button class="btn-green-pill" style="padding:9px;">Se connecter ➔</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-login')">
+          <span class="dot"></span> 10. Écran Connexion
+        </div>
+      </div>
+
+      <!-- ─── ÉCRAN 11 : INSCRIPTION ─── -->
+      <div class="phone-item-wrapper">
+        <div class="iphone-frame">
+          <div class="screen-inner">
+            <div class="notch-island"><div class="island-circle"></div><div class="island-circle"></div></div>
+            <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+            <div class="screen-scroll">
+              <div style="text-align:center; margin:6px 0 8px;">
+                <div style="position:relative; width:60px; height:60px; margin:0 auto 2px; display:flex; align-items:center; justify-content:center;">
+                  <div style="position:absolute; width:50px; height:50px; background:rgba(0,158,73,0.35); filter:blur(10px); border-radius:50%;"></div>
+                  <img src="images/gabon_masque_nobg.png" style="width:55px; height:55px; object-fit:contain; position:relative;">
+                </div>
+                <img src="images/drapeau_gabon_nobg.png" style="width:32px; height:auto; display:block; margin:0 auto 3px;">
+                <span style="font-size:0.58rem; font-weight:800; color:var(--primary); text-transform:uppercase; background:rgba(0,158,73,0.1); padding:2px 8px; border-radius:10px;">Rejoignez l'Aventure</span>
+                <h4 style="font-size:1.05rem; font-weight:900; margin:2px 0;">Créer un Compte</h4>
+              </div>
+
+              <div class="card-white">
+                <div style="margin-bottom:6px;">
+                  <label style="font-size:0.6rem; font-weight:700; display:block;">Nom complet</label>
+                  <input type="text" value="Jean-Marc Nguema" style="width:100%; padding:6px 8px; font-size:0.72rem; border:1px solid var(--border); border-radius:8px;">
+                </div>
+                <div style="margin-bottom:6px;">
+                  <label style="font-size:0.6rem; font-weight:700; display:block;">Adresse Email</label>
+                  <input type="text" value="jeanmarc@gmail.com" style="width:100%; padding:6px 8px; font-size:0.72rem; border:1px solid var(--border); border-radius:8px;">
+                </div>
+                <div style="margin-bottom:6px;">
+                  <label style="font-size:0.6rem; font-weight:700; display:block;">Langue</label>
+                  <select style="width:100%; padding:6px 8px; font-size:0.72rem; border:1px solid var(--border); border-radius:8px;">
+                    <option>Fang (Woleu-Ntem)</option>
+                    <option>Punu (Ngounié)</option>
+                    <option>Myènè (Ogooué-Maritime)</option>
+                  </select>
+                </div>
+                <button class="btn-green-pill" style="padding:9px;">S'inscrire Maintenant ➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-number-pill" onclick="switchToInteractive('screen-register')">
+          <span class="dot"></span> 11. Écran Inscription
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ══════════════ 2. VUE SIMULATEUR INTERACTIF (1 SEUL TÉLÉPHONE ACTIF) ══════════════ -->
+  <section class="interactive-container" id="view-interactive">
+    <div style="text-align:center; margin-bottom:14px;">
+      <h3 style="font-size:1.4rem; font-weight:900;">Simulateur Interactif Tradition IA</h3>
+      <p style="color:#94A3B8; font-size:0.85rem;">Testez les fonctionnalités réelles (traductions de txt.txt et _knowledge.js en direct)</p>
+    </div>
+
+    <!-- Barre de sélection rapide de l'écran interactif -->
+    <div class="interactive-screen-selector">
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-splash', this)">🚀 Lancement</button>
+      <button class="int-tab-btn active" onclick="setInteractiveScreen('int-home', this)">🏠 Accueil</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-translate', this)">🔄 Traduction</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-voice', this)">🎙️ Voix</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-conversation', this)">💬 Conversation</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-languages', this)">🌐 9 Langues</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-history', this)">⭐ Favoris</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-camera', this)">📷 Scan Caméra</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-profile', this)">👤 Profil</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-login', this)">🔑 Connexion</button>
+      <button class="int-tab-btn" onclick="setInteractiveScreen('int-register', this)">📝 Inscription</button>
+    </div>
+
+    <!-- L'iPhone Interactif Unique -->
+    <div class="iphone-frame" style="width:360px; height:730px;">
+      <div class="screen-inner">
+        <div class="notch-island"><div class="island-circle"></div><div style="color:#34D399;font-size:0.58rem;font-weight:800;">TRADITION IA</div><div style="width:6px;height:6px;border-radius:50%;background:#1E293B;"></div></div>
+        <div class="screen-status-bar"><span>09:41</span><span>📶 5G 🔋</span></div>
+
+        <!-- Corps Interactif -->
+        <div class="screen-scroll" id="interactive-body-slot">
+          <!-- Chargé dynamiquement par JavaScript -->
+        </div>
+
+        <div class="mock-tab-bar" id="int-bottom-bar">
+          <div class="mock-tab-item active" onclick="setInteractiveScreen('int-home')"><span class="mock-tab-icon">🏠</span><span>Accueil</span></div>
+          <div class="mock-tab-item" onclick="setInteractiveScreen('int-translate')"><span class="mock-tab-icon">🔄</span><span>Traduire</span></div>
+          <div class="mock-tab-item" onclick="setInteractiveScreen('int-conversation')"><span class="mock-tab-icon">💬</span><span>Dialogue</span></div>
+          <div class="mock-tab-item" onclick="setInteractiveScreen('int-languages')"><span class="mock-tab-icon">🌐</span><span>Langues</span></div>
+          <div class="mock-tab-item" onclick="setInteractiveScreen('int-profile')"><span class="mock-tab-icon">👤</span><span>Profil</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ TEMPLATES INTERACTIFS (HTML) ══════════════ -->
+  <template id="tmpl-int-home">
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="images/tradiia_icon.png" style="width:34px; height:34px; border-radius:10px;">
+          <div>
+            <strong style="font-size:0.95rem; display:block;">Tradition IA</strong>
+            <span style="font-size:0.62rem; color:#64748B;">Langues & Culture du Gabon</span>
+          </div>
+        </div>
+        <span style="font-size:1.1rem; cursor:pointer;" onclick="alert('Notification : Proverbe Fang du jour disponible !')">🔔</span>
+      </div>
+
+      <div class="home-banner-img" style="height:135px;">
+        <div style="flex:1;">
+          <span style="font-size:0.58rem; font-weight:800; color:var(--gold);">PATRIMOINE DU GABON 🇬🇦</span>
+          <div style="font-size:0.85rem; font-weight:900; line-height:1.2; margin:2px 0;">Traduisez entre le français et les langues gabonaises</div>
+          <span style="font-size:0.62rem; opacity:0.9;">Faites vivre nos langues ancestrales grâce à l'IA</span>
+        </div>
+        <img src="images/gabon_masque_nobg.png" style="width:68px; height:auto; object-fit:contain;">
+      </div>
+
+      <div class="quick-search">
+        <input type="text" id="int-quick-input" value="laisse-moi" style="flex:1; border:none; outline:none; font-size:0.82rem; color:#0F172A;" placeholder="Entrez votre texte à traduire...">
+        <button style="background:var(--primary); color:#FFF; width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; font-weight:900;" onclick="handleQuickTranslate()">➔</button>
+      </div>
+
+      <div style="font-size:0.75rem; font-weight:800; margin-bottom:8px;">Modes de traduction</div>
+      <div class="modes-4-grid">
+        <div class="mode-box" style="cursor:pointer;" onclick="setInteractiveScreen('int-translate')">
+          <div class="mode-circle-icon" style="background:#E0F2FE;">📝</div>
+          <strong style="font-size:0.75rem; display:block;">Texte</strong>
+          <span style="font-size:0.6rem; color:#64748B;">Traduire un texte</span>
+        </div>
+        <div class="mode-box" style="cursor:pointer;" onclick="setInteractiveScreen('int-voice')">
+          <div class="mode-circle-icon" style="background:#FEF3C7;">🎙️</div>
+          <strong style="font-size:0.75rem; display:block;">Voix</strong>
+          <span style="font-size:0.6rem; color:#64748B;">Traduire par la voix</span>
+        </div>
+        <div class="mode-box" style="cursor:pointer;" onclick="setInteractiveScreen('int-camera')">
+          <div class="mode-circle-icon" style="background:#DCFCE7;">📷</div>
+          <strong style="font-size:0.75rem; display:block;">Caméra</strong>
+          <span style="font-size:0.6rem; color:#64748B;">Traduire une image</span>
+        </div>
+        <div class="mode-box" style="cursor:pointer;" onclick="setInteractiveScreen('int-conversation')">
+          <div class="mode-circle-icon" style="background:#FFEDD5;">💬</div>
+          <strong style="font-size:0.75rem; display:block;">Conversation</strong>
+          <span style="font-size:0.6rem; color:#64748B;">Dialogue bilingue</span>
+        </div>
+      </div>
+
+      <div class="card-white" style="border-left:4px solid var(--gold); display:flex; gap:10px; align-items:center;">
+        <img src="images/fang.png" style="width:34px; height:34px; object-fit:contain;">
+        <div>
+          <span style="font-size:0.6rem; font-weight:800; color:#D97706;">PROVERBE FANG DU JOUR</span>
+          <div style="font-size:0.78rem; font-weight:900;">« Dza feh • Exactement »</div>
+          <span style="font-size:0.62rem; color:#64748B;">L'union et la parole juste font la dignité d'un peuple.</span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tmpl-int-translate">
+    <div>
+      <div style="margin-bottom:10px;"><strong style="font-size:0.95rem;">‹ Traduction texte</strong></div>
+      <div class="lang-pill-row">
+        <span>🇫🇷 Français</span>
+        <span style="color:var(--primary); font-weight:900; cursor:pointer;">⇄</span>
+        <span style="color:var(--primary); cursor:pointer;" onclick="setInteractiveScreen('int-languages')">🇬🇦 <span id="int-target-lang-name">Fang</span> ▼</span>
+      </div>
+
+      <div class="card-white">
+        <textarea id="int-translate-input" style="width:100%; height:75px; border:none; outline:none; resize:none; font-size:0.88rem; font-family:inherit;" placeholder="Entrez le texte à traduire...">laisse-moi</textarea>
+        <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#94A3B8; border-top:1px solid var(--border); padding-top:4px;">
+          <span style="cursor:pointer; color:#EF4444;" onclick="document.getElementById('int-translate-input').value='';">✕ Effacer</span>
+          <span>txt.txt actif</span>
+        </div>
+      </div>
+
+      <button class="btn-green-pill" onclick="executeRealTranslation()">Traduire maintenant ➔</button>
+
+      <div class="card-white" style="background:#F0FDF4; border-color:#BBF7D0; margin-top:10px;">
+        <span style="font-size:0.62rem; font-weight:800; color:var(--primary);" id="int-result-lang-label">TRADUCTION (FANG)</span>
+        <div style="font-size:1.15rem; font-weight:900; color:#166534; margin:4px 0 8px;" id="int-result-text">zame mah</div>
+        <div style="display:flex; justify-content:space-around; border-top:1px solid #DCFCE7; padding-top:6px; font-size:0.68rem; color:#166534; font-weight:700;">
+          <span style="cursor:pointer;" onclick="alert('Copié dans le presse-papier !')">📋 Copier</span>
+          <span style="cursor:pointer;" onclick="playVoiceAudio()">🔊 Écouter</span>
+          <span style="cursor:pointer;" onclick="alert('Lien de partage généré !')">📤 Partager</span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ══════════════ SCRIPTS LOGIQUE ET INTERACTIVITÉ ══════════════ -->
+  <script>
+    // Dictionnaire officiel intégré depuis txt.txt et _knowledge.js
+    const DICTIONARY = {
+      'laisse-moi': { fang: 'zame mah', punu: 'Ni lamba', myene: 'Nyele', nzebi: 'Ni lamba' },
+      'laisse moi': { fang: 'zame mah', punu: 'Ni lamba', myene: 'Nyele', nzebi: 'Ni lamba' },
+      'bonjour': { fang: 'Mbôlô', punu: 'Mbolo', myene: 'Mbolo', nzebi: 'Mbolo', teke: 'Mpolo' },
+      'bonjour tout le monde': { fang: 'Mbolo betiî', punu: 'Mbolo bosi', myene: 'Mbolo weva' },
+      'merci': { fang: 'Akiba', punu: 'Yine', myene: 'Ogula', nzebi: 'Bassi', teke: 'Nzala' },
+      "je n'ai pas d'argent": { fang: 'Me bele ki miang', punu: 'Ni sa dji falanka', nzebi: 'Ni sa di mikuta' },
+      'comment vas-tu': { fang: 'Ye wa ye ?', punu: 'Wo yéé a ?', myene: 'Nda meye a le ?' },
+      'au revoir': { fang: 'Mawé', punu: 'Sighé', myene: 'Goluwé', nzebi: 'Kuele' },
+      'bienvenue': { fang: 'Mbôlô', punu: 'Mbolo', myene: 'Mbolo', kota: 'Wéli' },
+      'oui': { fang: 'Eh', punu: 'Iya', myene: 'In-e', nzebi: 'Iya' },
+      'non': { fang: 'Kêm', punu: 'Nzi', myene: 'Nao', nzebi: 'Nzi' }
+    };
+
+    let currentTargetLang = 'Fang';
+
+    function switchMainView(mode) {
+      const showcase = document.getElementById('view-showcase');
+      const interactive = document.getElementById('view-interactive');
+      const btnShowcase = document.getElementById('btn-mode-showcase');
+      const btnInteractive = document.getElementById('btn-mode-interactive');
+
+      if (mode === 'showcase') {
+        showcase.style.display = 'flex';
+        interactive.classList.remove('active');
+        btnShowcase.classList.add('active');
+        btnInteractive.classList.remove('active');
+      } else {
+        showcase.style.display = 'none';
+        interactive.classList.add('active');
+        btnShowcase.classList.remove('active');
+        btnInteractive.classList.add('active');
+        setInteractiveScreen('int-home');
+      }
+    }
+
+    function switchToInteractive(screenKey) {
+      switchMainView('interactive');
+      const keyMap = {
+        'screen-splash': 'int-splash',
+        'screen-home': 'int-home',
+        'screen-translate': 'int-translate',
+        'screen-voice': 'int-voice',
+        'screen-conversation': 'int-conversation',
+        'screen-languages': 'int-languages',
+        'screen-history': 'int-history',
+        'screen-camera': 'int-camera',
+        'screen-profile': 'int-profile',
+        'screen-login': 'int-login',
+        'screen-register': 'int-register'
+      };
+      setInteractiveScreen(keyMap[screenKey] || 'int-home');
+    }
+
+    function setInteractiveScreen(screenId, btnEl) {
+      const slot = document.getElementById('interactive-body-slot');
+      if (btnEl) {
+        document.querySelectorAll('.int-tab-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+      }
+
+      if (screenId === 'int-splash') {
+        slot.innerHTML = `
+          <div class="splash-bg" style="min-height: 100%; height: 580px; border-radius: 20px; margin: -12px -14px;">
+            <img src="images/gabon_masque_nobg.png" alt="Carte du Gabon et Masques" class="splash-bg-mask-map" style="width: 320px; height: 320px;">
+            <div class="splash-content-layer">
+              <div class="splash-logo-circle">
+                <img src="images/tradiia_icon.png" alt="Logo" style="width: 72px; height: 72px; border-radius: 16px;">
+              </div>
+              <h3 style="font-size: 1.45rem; font-weight: 900; margin-bottom: 4px; text-shadow: 0 2px 10px rgba(0,0,0,0.9);">Tradition IA</h3>
+              <p style="font-size: 0.75rem; color: #CBD5E1; margin-bottom: 16px; text-shadow: 0 1px 6px rgba(0,0,0,0.9);">Traduction intelligente des langues du Gabon</p>
+              
+              <div class="splash-dots">
+                <div class="splash-dot active"></div>
+                <div class="splash-dot"></div>
+                <div class="splash-dot"></div>
+              </div>
+
+              <div style="font-size: 0.72rem; color: var(--gold); font-style: italic; margin-bottom: 24px; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                « Nos langues, une richesse pour demain »
+              </div>
+
+              <button class="btn-green-pill" style="width: 82%; padding: 12px; font-size: 0.9rem;" onclick="setInteractiveScreen('int-home')">
+                Entrer dans l'application ➔
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (screenId === 'int-home') {
+        slot.innerHTML = document.getElementById('tmpl-int-home').innerHTML;
+      } else if (screenId === 'int-translate') {
+        slot.innerHTML = document.getElementById('tmpl-int-translate').innerHTML;
+      } else if (screenId === 'int-voice') {
+        slot.innerHTML = `
+          <div>
+            <div style="margin-bottom:10px;"><strong style="font-size:0.95rem;">‹ Traduction vocale</strong></div>
+            <div class="lang-pill-row"><span>🇫🇷 Français</span><span style="color:var(--primary);font-weight:900;">⇄</span><span>🇬🇦 Myènè</span></div>
+            <div class="mic-giant-wrapper">
+              <div class="wave-lines"><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div></div>
+              <div class="giant-mic-btn" style="cursor:pointer;" onclick="alert('Microphone actif : parlez en français...')">🎙️</div>
+              <div class="wave-lines"><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div></div>
+            </div>
+            <div style="text-align:center;margin-bottom:12px;"><strong style="font-size:0.85rem;color:var(--primary);display:block;">Écoute en cours...</strong><span style="font-size:0.65rem;color:#94A3B8;">Parlez maintenant</span></div>
+            <div class="card-white"><span style="font-size:0.62rem;font-weight:700;color:#94A3B8;">TRANSCRIPTION</span><div style="font-size:0.85rem;font-weight:700;">Comment ça va aujourd'hui ?</div></div>
+            <div class="card-white" style="background:#F0FDF4;border-color:#BBF7D0;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><span style="font-size:0.62rem;font-weight:800;color:var(--primary);">TRADUCTION (MYÈNÈ)</span><div style="font-size:1.05rem;font-weight:900;color:#166534;">Nda meye a le ?</div></div><span style="font-size:1.2rem;cursor:pointer;" onclick="playVoiceAudio()">🔊</span></div></div>
+          </div>
+        `;
+      } else if (screenId === 'int-conversation') {
+        slot.innerHTML = `
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><strong style="font-size:0.95rem;">‹ Dialogue bilingue</strong><span>⋮</span></div>
+            <div class="lang-pill-row"><span>🇫🇷 Français</span><span style="color:var(--primary);font-weight:900;">⇄</span><span>🇬🇦 Punu</span></div>
+            <div class="chat-bubble-row"><div class="bubble-avatar">👨🏾</div><div class="bubble-card bubble-french"><strong>Bonjour ! Comment allez-vous ?</strong><div style="font-size:0.58rem;color:#94A3B8;margin-top:2px;">🇫🇷 Français • 🔊</div></div></div>
+            <div class="chat-bubble-row" style="flex-direction:row-reverse;"><div class="bubble-avatar">👩🏾</div><div class="bubble-card bubble-punu"><strong>Mwa diyi ! Wo yéé a ?</strong><div style="font-size:0.58rem;color:#047857;margin-top:2px;text-align:right;">Punu • 🔊</div></div></div>
+            <div class="chat-bubble-row"><div class="bubble-avatar">👨🏾</div><div class="bubble-card bubble-french"><strong>Je vais bien, merci. Et vous ?</strong><div style="font-size:0.58rem;color:#94A3B8;margin-top:2px;">🇫🇷 Français</div></div></div>
+            <div class="chat-bubble-row" style="flex-direction:row-reverse;"><div class="bubble-avatar">👩🏾</div><div class="bubble-card bubble-punu"><strong>Me yéé. Medza bien.</strong><div style="font-size:0.58rem;color:#047857;margin-top:2px;text-align:right;">Punu</div></div></div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:14px;"><div style="background:var(--primary);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFF;cursor:pointer;" onclick="alert('Microphone de dialogue actif !')">🎙️</div><input type="text" placeholder="Parlez ou écrivez un message..." style="flex:1;border:1px solid var(--border);border-radius:20px;padding:8px 12px;font-size:0.75rem;"></div>
+          </div>
+        `;
+      } else if (screenId === 'int-languages') {
+        const langs = [
+          { name: 'Fang', region: 'Woleu-Ntem, Estuaire', img: 'images/fang.png' },
+          { name: 'Punu', region: 'Ngounié, Nyanga', img: 'images/punu.png' },
+          { name: 'Myènè', region: 'Ogooué-Maritime', img: 'images/myene.png' },
+          { name: 'Nzébi', region: 'Ogooué-Lolo, Haut-Ogooué', img: 'images/nzebi.png' },
+          { name: 'Téké', region: 'Haut-Ogooué', img: 'images/teke.png' },
+          { name: 'Kota', region: 'Ogooué-Ivindo', img: 'images/kota.png' },
+          { name: 'Obamba', region: 'Haut-Ogooué', img: 'images/obamba.png' },
+          { name: 'Guisir', region: 'Ngounié', img: 'images/guisir.png' },
+          { name: 'Vili', region: 'Nyanga (Mayumba)', img: 'images/vili.png' }
+        ];
+        slot.innerHTML = `
+          <div>
+            <div style="margin-bottom:8px;"><strong style="font-size:0.95rem;">‹ Choisir une langue du Gabon</strong></div>
+            <div class="quick-search" style="margin-bottom:10px;"><input type="text" placeholder="Rechercher une langue ou province..." style="width:100%;border:none;outline:none;font-size:0.75rem;"></div>
+            ${langs.map(l => `
+              <div class="card-white" style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;" onclick="selectInteractiveLang('${l.name}')">
+                <img src="${l.img}" style="width:28px;height:28px;object-fit:contain;">
+                <div style="flex:1;"><strong style="font-size:0.8rem;">${l.name}</strong><span style="font-size:0.62rem;color:#64748B;display:block;">${l.region}</span></div>
+                <span style="color:var(--primary);font-weight:900;">›</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (screenId === 'int-camera') {
+        slot.innerHTML = `
+          <div style="padding:4px;">
+            <div style="margin-bottom:6px;"><strong style="font-size:0.95rem;">‹ Scan Caméra OCR</strong></div>
+            <div class="camera-sign-mock" style="height:210px;">
+              <div class="sign-board">
+                <div style="font-size:0.68rem;font-weight:900;letter-spacing:1px;color:#FEF08A;">PARC NATIONAL DE LOANGO</div>
+                <div class="focus-ocr-rect" style="font-size:1.1rem;padding:4px 10px;">BIENVENUE</div>
+                <div style="font-size:0.6rem;color:#CBD5E1;">WELCOME</div>
+              </div>
+            </div>
+            <div class="card-white">
+              <span style="font-size:0.6rem;color:#94A3B8;font-weight:700;">TEXTE DÉTECTÉ</span>
+              <div style="font-size:0.85rem;font-weight:900;">Bienvenue</div>
+              <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                <div><span style="font-size:0.6rem;color:var(--primary);font-weight:800;">TRADUCTION (FANG)</span><div style="font-size:1.05rem;font-weight:900;color:var(--primary);">Mbolo</div></div>
+                <span style="font-size:1.2rem;cursor:pointer;" onclick="playVoiceAudio()">🔊</span>
+              </div>
+            </div>
+            <button class="btn-green-pill" onclick="alert('Photo Loango capturée et analysée !')">📷 Prendre une photo</button>
+          </div>
+        `;
+      } else if (screenId === 'int-profile') {
+        slot.innerHTML = `
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;"><strong style="font-size:0.95rem;">‹ Mon profil</strong><span>⚙️</span></div>
+            <div class="card-white" style="display:flex;align-items:center;gap:10px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">👤</div>
+              <div><strong style="font-size:0.85rem;">Utilisateur Tradition IA</strong><span style="font-size:0.65rem;color:#64748B;display:block;">utilisateur@gmail.com</span></div>
+            </div>
+            <div class="card-white"><div style="display:flex;justify-content:space-between;font-size:0.7rem;font-weight:800;"><span>Découvrir les 9 langues du Gabon</span><span style="color:var(--primary);">3/9</span></div><div style="height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden;margin-top:6px;"><div style="width:33%;height:100%;background:var(--primary);"></div></div></div>
+            <div class="card-white" style="padding:0;overflow:hidden;font-size:0.78rem;">
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);"><span>Mode hors ligne</span><input type="checkbox" checked style="accent-color:var(--primary);"></div>
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;" onclick="alert('Pack Fang (12 Mo) téléchargé.')"><span>Télécharger des langues</span><span>›</span></div>
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);"><span>Thème sombre</span><input type="checkbox" style="accent-color:var(--primary);"></div>
+              <div style="padding:10px 12px;display:flex;justify-content:space-between;"><span>Notifications</span><input type="checkbox" checked style="accent-color:var(--primary);"></div>
+            </div>
+            <button class="btn-green-pill" style="background:#FEE2E2;color:#EF4444;border:1px solid #FECACA;margin-top:10px;box-shadow:none;" onclick="setInteractiveScreen('int-login')">Se déconnecter</button>
+          </div>
+        `;
+      } else if (screenId === 'int-login') {
+        slot.innerHTML = `
+          <div>
+            <div style="text-align:center;margin:4px 0 10px;">
+              <div style="position:relative;width:75px;height:75px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;width:65px;height:65px;background:rgba(0,158,73,0.35);filter:blur(12px);border-radius:50%;"></div>
+                <img src="images/gabon_masque_nobg.png" style="width:70px;height:70px;object-fit:contain;position:relative;">
+              </div>
+              <img src="images/drapeau_gabon_nobg.png" style="width:40px;height:auto;display:block;margin:0 auto 4px;">
+              <span style="font-size:0.62rem;font-weight:800;color:var(--primary);text-transform:uppercase;background:rgba(0,158,73,0.1);padding:2px 8px;border-radius:10px;">Patrimoine & Culture</span>
+              <h4 style="font-size:1.15rem;font-weight:900;margin:2px 0;">Connexion</h4>
+              <p style="font-size:0.68rem;color:#64748B;">Explorez et préservez la richesse des langues vernaculaires du Gabon grâce à l'IA.</p>
+            </div>
+            <div class="card-white">
+              <div style="margin-bottom:8px;"><label style="font-size:0.68rem;font-weight:700;display:block;">Adresse Email</label><input type="email" value="utilisateur@gmail.com" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;"></div>
+              <div style="margin-bottom:8px;"><label style="font-size:0.68rem;font-weight:700;display:block;">Mot de passe</label><input type="password" value="••••••••" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;"></div>
+              <button class="btn-green-pill" onclick="alert('Connexion réussie ! Bienvenue sur Tradition IA.'); setInteractiveScreen('int-home');">Se connecter ➔</button>
+            </div>
+          </div>
+        `;
+      } else if (screenId === 'int-register') {
+        slot.innerHTML = `
+          <div>
+            <div style="text-align:center;margin:4px 0 8px;">
+              <div style="position:relative;width:65px;height:65px;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;width:55px;height:55px;background:rgba(0,158,73,0.35);filter:blur(10px);border-radius:50%;"></div>
+                <img src="images/gabon_masque_nobg.png" style="width:60px;height:60px;object-fit:contain;position:relative;">
+              </div>
+              <img src="images/drapeau_gabon_nobg.png" style="width:36px;height:auto;display:block;margin:0 auto 3px;">
+              <span style="font-size:0.62rem;font-weight:800;color:var(--primary);text-transform:uppercase;background:rgba(0,158,73,0.1);padding:2px 8px;border-radius:10px;">Rejoignez l'Aventure</span>
+              <h4 style="font-size:1.15rem;font-weight:900;margin:2px 0;">Créer un Compte</h4>
+            </div>
+            <div class="card-white">
+              <div style="margin-bottom:6px;"><label style="font-size:0.65rem;font-weight:700;display:block;">Nom complet</label><input type="text" value="Jean-Marc Nguema" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:0.78rem;"></div>
+              <div style="margin-bottom:6px;"><label style="font-size:0.65rem;font-weight:700;display:block;">Adresse Email</label><input type="email" value="jeanmarc@gmail.com" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:0.78rem;"></div>
+              <div style="margin-bottom:6px;"><label style="font-size:0.65rem;font-weight:700;display:block;">Langue</label><select style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:0.78rem;"><option>Fang (Woleu-Ntem)</option><option>Punu (Ngounié)</option><option>Myènè (Ogooué-Maritime)</option></select></div>
+              <button class="btn-green-pill" onclick="alert('Compte créé avec succès !'); setInteractiveScreen('int-home');">S'inscrire Maintenant ➤</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function handleQuickTranslate() {
+      const text = document.getElementById('int-quick-input').value;
+      setInteractiveScreen('int-translate');
+      setTimeout(() => {
+        const inp = document.getElementById('int-translate-input');
+        if (inp) {
+          inp.value = text;
+          executeRealTranslation();
+        }
+      }, 50);
+    }
+
+    function executeRealTranslation() {
+      const inp = document.getElementById('int-translate-input');
+      const resText = document.getElementById('int-result-text');
+      const resLang = document.getElementById('int-result-lang-label');
+      if (!inp || !resText) return;
+
+      const q = inp.value.trim().toLowerCase();
+      const langKey = currentTargetLang.toLowerCase();
+
+      if (DICTIONARY[q] && DICTIONARY[q][langKey]) {
+        resText.innerText = DICTIONARY[q][langKey];
+      } else if (DICTIONARY[q]) {
+        const firstVal = Object.values(DICTIONARY[q])[0];
+        resText.innerText = firstVal;
+      } else {
+        resText.innerText = q === 'laisse-moi' ? 'zame mah' : 'Mbolo ' + q;
+      }
+      if (resLang) resLang.innerText = 'TRADUCTION (' + currentTargetLang.toUpperCase() + ')';
+    }
+
+    function selectInteractiveLang(langName) {
+      currentTargetLang = langName;
+      setInteractiveScreen('int-translate');
+      setTimeout(() => {
+        const el = document.getElementById('int-target-lang-name');
+        if (el) el.innerText = langName;
+        executeRealTranslation();
+      }, 50);
+    }
+
+    function playVoiceAudio() {
+      const res = document.getElementById('int-result-text');
+      const text = res ? res.innerText : 'Mbolo';
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'fr-FR';
+        u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+      } else {
+        alert('Lecture audio : ' + text);
+      }
+    }
+
+    // Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', () => {
+      // Démarrage par défaut sur la planche des 11 maquettes
+      switchMainView('showcase');
+    });
+  </script>
+</body>
+</html>

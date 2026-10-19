@@ -55,7 +55,17 @@ class AppStore {
 
   logout() {
     this.user = null;
+    this.translations = [];
     localStorage.removeItem(window.CONFIG.STORAGE_KEYS.USER);
+    this.notify();
+  }
+
+  async clearTranslations() {
+    if (window.DB && typeof window.DB.clearUserHistory === 'function') {
+      await window.DB.clearUserHistory();
+    }
+    this.translations = [];
+    this.notify();
   }
 
   updateProfile(updatedData) {
@@ -125,21 +135,7 @@ class AppStore {
   }
 
   _localTranslateFallback(sourceText, targetLang) {
-    const sampleGaboWords = {
-      'Fang':   ['Mbolo', 'Akiba', 'Owusu', 'Ntang', 'Nkogo', 'Eyenga', 'Mi neng', 'Nlem'],
-      'Punu':   ['Mbolo', 'Biké', 'Mbote', 'Yine', 'Dipumu', 'Muringi', 'Mulobi'],
-      'Nzébi':  ['Mbolo', 'Inzébi', 'Koulamoutou', 'Nzabi', 'Bassi'],
-      'Myènè':  ['Mbolo', 'Ogula', 'Nkambé', 'Ivanga', 'Ombwiri', 'Ntang', 'Oruwa'],
-      'Téké':   ['Mbolo', 'Iteké', 'Franceville', 'Batéké', 'Mpassa'],
-      'Vili':   ['Mbolo', 'Icivili', 'Mayumba', 'Tchibanga'],
-      'Obamba': ['Mbolo', 'Lembaama', 'Mpassa', 'Franceville'],
-      'Guisir': ['Mbolo', 'Yigisir', 'Fougamou', 'Mouila', 'Ndendé'],
-      'Kota':   ['Mbolo', 'Ikota', 'Makokou', 'Ogooué-Ivindo'],
-      'Anglais':['Hello', 'Welcome', 'Thank you', 'Greetings', 'Peace']
-    };
-    const words = sampleGaboWords[targetLang] || sampleGaboWords['Fang'];
-    const prefix = words[Math.floor(Math.random() * words.length)];
-    return `${prefix} ${sourceText} (Traduction ${targetLang} — déployez sur Vercel pour la vraie IA)`;
+    return "Traduction en cours d'intégration dans cette langue.";
   }
 
   // ── DICTIONNAIRE CRUD ────────────────────────────────────────────────────────
@@ -168,17 +164,52 @@ class AppStore {
     this.languages = this.languages.filter(l => l.id !== id);
   }
 
-  // ── EXPRESSIONS CRUD ─────────────────────────────────────────────────────────
+  // ── EXPRESSIONS CRUD & VALIDATION ──────────────────────────────────────────
 
   async addExpression(expr) {
+    if (expr.isValidated === undefined) {
+      expr.isValidated = Boolean(this.user && this.user.role === 'admin');
+    }
     const saved = await window.DB.addExpression(expr);
-    this.expressions.push(saved);
+    this.expressions.unshift(saved);
+    this.notify();
     return saved;
+  }
+
+  async proposeExpression(expr) {
+    expr.isValidated = false;
+    expr.submittedBy = this.user ? (this.user.name || this.user.email) : 'Visiteur';
+    expr.submittedAt = new Date().toLocaleDateString('fr-FR');
+    const saved = await window.DB.addExpression(expr);
+    this.expressions.unshift(saved);
+    this.notify();
+    return saved;
+  }
+
+  async approveExpression(id) {
+    await window.DB.approveExpression(id);
+    this.expressions = this.expressions.map(e => e.id === id ? { ...e, isValidated: true } : e);
+    this.notify();
+  }
+
+  async rejectExpression(id) {
+    await window.DB.deleteExpression(id);
+    this.expressions = this.expressions.filter(e => e.id !== id);
+    this.notify();
   }
 
   async deleteExpression(id) {
     await window.DB.deleteExpression(id);
     this.expressions = this.expressions.filter(e => e.id !== id);
+    this.notify();
+  }
+
+  getValidatedExpressions() {
+    return this.expressions.filter(e => e.isValidated === true || e.isValidated === 1);
+  }
+
+  getPendingExpressions() {
+    return this.expressions.filter(e => e.isValidated === false || e.isValidated === 0 || e.isValidated === undefined);
   }
 
   // ── UTILISATEURS CRUD ────────────────────────────────────────────────────────

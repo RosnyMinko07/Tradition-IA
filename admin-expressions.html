@@ -11,6 +11,7 @@
   <script src="js/masks.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/store.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/common.js"></script>
 </head>
 <body>
@@ -19,24 +20,24 @@
     <header class="navbar">
       <a href="admin.html" class="navbar-brand">
         <img src="images/tradiia_icon.png" alt="Tradition IA Logo" class="brand-logo-img" />
-        <span>Tradition<span style="color: var(--primary);">IA</span> <span class="admin-badge">[Admin]</span></span>
+        <span>Tradition<span style="color: var(--gold);">IA</span> <span class="admin-badge">[CONSOLE ADMIN]</span></span>
       </a>
-      <div id="nav-user-container">
-        <div class="nav-auth-buttons">
-          <button class="btn-theme-toggle" id="btn-theme-toggle" title="Passer au Thème Blanc Transparent" aria-label="Passer au Thème Blanc Transparent">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          </button>
-        </div>
-      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">🌐 Retour au Site Public</a>
+        <a href="admin.html" class="nav-link" style="color: var(--gold);">Dashboard Admin</a>
+      </nav>
+
+      <div id="nav-user-container"></div>
     </header>
 
     <div class="layout-container">
       <aside class="sidebar">
-        <div class="sidebar-title">Administration</div>
+        <div class="sidebar-title" style="color: var(--gold);">Administration</div>
         <a href="admin.html" class="sidebar-item">📊 Dashboard Admin</a>
         <a href="admin-users.html" class="sidebar-item">👥 Utilisateurs</a>
         <a href="admin-languages.html" class="sidebar-item">🗣️ Langues Gabonaises</a>
-        <a href="admin-dictionary.html" class="sidebar-item">📚 Dictionnaire</a>
+        <a href="admin-dictionary.html" class="sidebar-item">📚 Dictionnaire Admin</a>
         <a href="admin-expressions.html" class="sidebar-item active">💬 Expressions</a>
         <a href="admin-ai-validation.html" class="sidebar-item">🤖 Validation IA</a>
         <a href="admin-analytics.html" class="sidebar-item">📈 Analyses & Rapports</a>
@@ -45,71 +46,84 @@
       <main class="main-content">
         <div class="page-header">
           <div class="page-title-group">
-            <h1>Gestion des Expressions Idiomatiques</h1>
-            <p class="page-subtitle">Ajoutez et modérez les proverbes et expressions fréquentes</p>
+            <h1>Modération & Expressions Idiomatiques</h1>
+            <p class="page-subtitle">Validez les phrases proposées par les utilisateurs ou ajoutez-en directement</p>
           </div>
           <button id="btn-open-expr-modal" class="btn btn-primary">+ Nouvelle Expression</button>
         </div>
 
+        <!-- Onglets de modération -->
+        <div style="display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+          <button id="tab-admin-pending" class="btn btn-primary active" style="padding: 8px 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <span>⚡ En attente de validation</span>
+            <span id="badge-pending-count" class="badge" style="background: rgba(255,255,255,0.25); color: #FFF; font-size: 0.75rem;">0</span>
+          </button>
+          <button id="tab-admin-approved" class="btn btn-secondary" style="padding: 8px 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <span>✅ Expressions Validées & Publiées</span>
+            <span id="badge-approved-count" class="badge badge-green" style="font-size: 0.75rem;">0</span>
+          </button>
+        </div>
+
         <div class="data-table-container">
           <table class="data-table">
-            <thead>
-              <tr>
-                <th>Expression (Français)</th>
-                <th>Traduction Gabon</th>
-                <th>Langue</th>
-                <th>Contexte</th>
-                <th>Action</th>
-              </tr>
+            <thead id="expr-table-head">
+              <!-- Géré par JS -->
             </thead>
             <tbody id="expr-table-body">
               <!-- Chargé par JS -->
             </tbody>
           </table>
         </div>
-
-        <!-- Modale Ajouter Expression -->
-        <div id="modal-add-expr" class="modal-backdrop">
-          <div class="modal-card">
-            <div class="modal-header">
-              <h3 style="font-size: 1.2rem;">💬 Ajouter une Expression Idiomatique</h3>
-              <button class="btn btn-secondary btn-icon" data-close-modal>✕</button>
-            </div>
-            <form id="form-add-expr">
-              <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="form-group">
-                  <label class="form-label">Expression en Français</label>
-                  <input type="text" id="new-expr-phrase" class="form-input" placeholder="ex: Comment allez-vous ?" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Traduction Gabon</label>
-                  <input type="text" id="new-expr-trans" class="form-input" placeholder="ex: Mbolo mi neng ?" required>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Langue Cible</label>
-                  <select id="new-expr-lang" class="form-select">
-                    <!-- Options chargées -->
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Contexte d'utilisation</label>
-                  <input type="text" id="new-expr-context" class="form-input" placeholder="ex: Salutation du matin">
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
-                <button type="submit" class="btn btn-primary">Enregistrer l'Expression</button>
-              </div>
-            </form>
-          </div>
-        </div>
       </main>
     </div>
   </div>
 
-  <script type="module" src="js/common.js"></script>
+  <!-- Modale Ajouter Expression directe (Admin) -->
+  <div id="modal-add-expr" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem;">💬 Ajouter une Expression Validée (Admin)</h3>
+        <button type="button" class="btn btn-secondary btn-icon" data-close-modal title="Fermer">✕</button>
+      </div>
+      <form id="form-add-expr">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Expression en Français <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="new-expr-phrase" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Traduction dans la Langue Locale <span style="color: var(--danger);">*</span></label>
+            <input type="text" id="new-expr-trans" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Langue Cible</label>
+            <select id="new-expr-lang" class="form-select">
+              <!-- Options chargées -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contexte d'utilisation</label>
+            <input type="text" id="new-expr-context" class="form-input" placeholder="Ex: Vie quotidienne, proverbe...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+          <button type="submit" class="btn btn-primary">Publier Directement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+    let activeTab = 'pending'; // 'pending' ou 'approved'
+
     document.addEventListener('DOMContentLoaded', async () => {
+      const user = (window.TradAuth && window.TradAuth.getUser()) || window.Store?.user;
+      if (!user || user.role !== 'admin') {
+        window.location.href = 'login.html';
+        return;
+      }
+
       if (window.Store) {
         await window.Store.loadInitialData();
 
@@ -118,8 +132,27 @@
           langSelect.innerHTML = window.Store.languages.map(l => `<option value="${l.name}">${l.name}</option>`).join('');
         }
 
-        renderExpr();
+        renderView();
 
+        // Onglets
+        const tabPending = document.getElementById('tab-admin-pending');
+        const tabApproved = document.getElementById('tab-admin-approved');
+
+        tabPending?.addEventListener('click', () => {
+          activeTab = 'pending';
+          tabPending.className = 'btn btn-primary active';
+          tabApproved.className = 'btn btn-secondary';
+          renderView();
+        });
+
+        tabApproved?.addEventListener('click', () => {
+          activeTab = 'approved';
+          tabApproved.className = 'btn btn-primary active';
+          tabPending.className = 'btn btn-secondary';
+          renderView();
+        });
+
+        // Modale ajout direct admin
         document.getElementById('btn-open-expr-modal')?.addEventListener('click', () => {
           document.getElementById('modal-add-expr')?.classList.add('active');
         });
@@ -127,44 +160,143 @@
         document.getElementById('form-add-expr')?.addEventListener('submit', async (e) => {
           e.preventDefault();
           const newExpr = {
-            phrase: document.getElementById('new-expr-phrase').value,
-            translation: document.getElementById('new-expr-trans').value,
+            phrase: document.getElementById('new-expr-phrase').value.trim(),
+            translation: document.getElementById('new-expr-trans').value.trim(),
             targetLang: document.getElementById('new-expr-lang').value,
             sourceLang: 'Français',
-            context: document.getElementById('new-expr-context').value || 'Général'
+            context: document.getElementById('new-expr-context').value.trim() || 'Général',
+            isValidated: true,
+            submittedBy: 'Administrateur'
           };
           await window.Store.addExpression(newExpr);
           document.getElementById('modal-add-expr')?.classList.remove('active');
-          window.showToast('Expression ajoutée avec succès !');
-          renderExpr();
+          e.target.reset();
+          window.showToast('✅ Expression publiée avec succès !');
+          activeTab = 'approved';
+          tabApproved.className = 'btn btn-primary active';
+          tabPending.className = 'btn btn-secondary';
+          renderView();
         });
       }
     });
 
-    function renderExpr() {
+    function renderView() {
       const container = document.getElementById('expr-table-body');
+      const tableHead = document.getElementById('expr-table-head');
+      const badgePending = document.getElementById('badge-pending-count');
+      const badgeApproved = document.getElementById('badge-approved-count');
       if (!container || !window.Store) return;
-      container.innerHTML = window.Store.expressions.map(e => `
-        <tr>
-          <td style="font-weight: 700; color: #FFF;">${e.phrase}</td>
-          <td style="font-weight: 700; color: var(--primary);">${e.translation}</td>
-          <td><span class="badge badge-green">${e.targetLang}</span></td>
-          <td style="color: var(--text-muted); font-size: 0.85rem;">${e.context || 'Usage général'}</td>
-          <td>
-            <button class="btn btn-danger btn-del-e" data-id="${e.id}" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer</button>
-          </td>
-        </tr>
-      `).join('');
 
-      document.querySelectorAll('.btn-del-e').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          if (confirm('Supprimer cette expression ?')) {
-            await window.Store.deleteExpression(btn.getAttribute('data-id'));
-            window.showToast('Expression supprimée !');
-            renderExpr();
-          }
+      const allExpr = window.Store.expressions || [];
+      const pendingList = allExpr.filter(e => e.isValidated === false || e.isValidated === 0);
+      const approvedList = allExpr.filter(e => e.isValidated === true || e.isValidated === 1 || e.isValidated === undefined);
+
+      if (badgePending) badgePending.textContent = pendingList.length;
+      if (badgeApproved) badgeApproved.textContent = approvedList.length;
+
+      if (activeTab === 'pending') {
+        tableHead.innerHTML = `
+          <tr>
+            <th>Phrase Proposée (Français)</th>
+            <th>Traduction Locale Proposée</th>
+            <th>Langue</th>
+            <th>Contexte</th>
+            <th>Proposé par</th>
+            <th style="text-align: right;">Décision Admin</th>
+          </tr>
+        `;
+
+        if (pendingList.length === 0) {
+          container.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                🎉 <strong>Aucune proposition en attente !</strong><br>
+                Toutes les phrases soumises par les utilisateurs ont été examinées.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        container.innerHTML = pendingList.map(e => `
+          <tr>
+            <td style="font-weight: 700; color: #FFF;">${e.phrase}</td>
+            <td style="font-weight: 700; color: var(--primary);">${e.translation}</td>
+            <td><span class="badge badge-gold">${e.targetLang}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">${e.context || 'Usage général'}</td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">${e.submittedBy || 'Utilisateur'}</td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button class="btn btn-primary btn-approve-e" data-id="${e.id}" style="padding: 6px 12px; font-size: 0.8rem; margin-right: 6px; background: #10B981; border-color: #10B981;">
+                ✓ Valider & Publier
+              </button>
+              <button class="btn btn-danger btn-reject-e" data-id="${e.id}" style="padding: 6px 10px; font-size: 0.8rem;">
+                ✕ Rejeter
+              </button>
+            </td>
+          </tr>
+        `).join('');
+
+        // Listeners boutons Approuver / Rejeter
+        document.querySelectorAll('.btn-approve-e').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            await window.Store.approveExpression(id);
+            window.showToast('✅ Phrase validée ! Elle est désormais visible pour tous.');
+            renderView();
+          });
         });
-      });
+
+        document.querySelectorAll('.btn-reject-e').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm('Rejeter et supprimer définitivement cette proposition ?')) {
+              await window.Store.rejectExpression(id);
+              window.showToast('Proposition rejetée.', 'info');
+              renderView();
+            }
+          });
+        });
+
+      } else {
+        tableHead.innerHTML = `
+          <tr>
+            <th>Expression (Français)</th>
+            <th>Traduction Gabon</th>
+            <th>Langue</th>
+            <th>Contexte</th>
+            <th>Statut</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        `;
+
+        if (approvedList.length === 0) {
+          container.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">Aucune expression validée</td></tr>`;
+          return;
+        }
+
+        container.innerHTML = approvedList.map(e => `
+          <tr>
+            <td style="font-weight: 700; color: #FFF;">${e.phrase}</td>
+            <td style="font-weight: 700; color: var(--primary);">${e.translation}</td>
+            <td><span class="badge badge-green">${e.targetLang}</span></td>
+            <td style="color: var(--text-muted); font-size: 0.85rem;">${e.context || 'Usage général'}</td>
+            <td><span class="badge badge-green">✓ Validé</span></td>
+            <td style="text-align: right;">
+              <button class="btn btn-danger btn-del-e" data-id="${e.id}" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer</button>
+            </td>
+          </tr>
+        `).join('');
+
+        document.querySelectorAll('.btn-del-e').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Supprimer cette expression ?')) {
+              await window.Store.deleteExpression(btn.getAttribute('data-id'));
+              window.showToast('Expression supprimée !');
+              renderView();
+            }
+          });
+        });
+      }
     }
   </script>
 </body>

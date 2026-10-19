@@ -1,0 +1,141 @@
+================================================================================
+SCRIPT & PROMPT MAÎTRE POUR LA GÉNÉRATION DES MAQUETTES DE L'APPLICATION MOBILE
+PROJET : TRADITION IA (Application mobile de traduction des langues gabonaises)
+================================================================================
+
+Ce document contient le script complet (spécifications détaillées et prompts prêts 
+à copier-coller) à fournir à une autre IA (Claude, ChatGPT, v0.dev, Midjourney, Figma AI) 
+pour concevoir les maquettes UI/UX de l'application mobile Tradition IA.
+
+--------------------------------------------------------------------------------
+1. CONTEXTE ET IDENTITÉ DU PROJET
+--------------------------------------------------------------------------------
+Nom de l'application : Tradition IA
+Plateforme cible : Mobile (iOS iPhone 16 Pro & Android)
+Mission : Traduction instantanée, apprentissage et préservation du patrimoine linguistique 
+et culturel du Gabon (Français vers Fang, Punu, Nzébi, Myènè, Téké, Vili, Kota, Obamba, etc.).
+
+Charte Graphique & Design System (Thème Sombre Ardoise Luxe) :
+- Arrière-plan principal : Noir Obsidienne / Gris Profond (#0B0E14)
+- Cartes & Conteneurs : Gris Ardoise Sombre (#161C26 et #1E2636)
+- Bordures : Lignes subtiles en verre dépoli (rgba(255, 255, 255, 0.08))
+- Couleur Primaire : Ardoise Argentée (#94A3B8) et Gris Clair (#CBD5E1)
+- Accents Culturels : Or Ambré (#F59E0B) pour les traditions et proverbes
+- Accent Technologique : Bleu Acier / Cyan (#38BDF8) pour l'Intelligence Artificielle
+- Validation & Succès : Vert Menthe (#10B981)
+- Typographie : Sans-serif moderne, géométrique et épurée (type DM Sans / Space Grotesk)
+- Formes : Angles très arrondis (radius 20px à 28px), effet glassmorphism discret.
+
+--------------------------------------------------------------------------------
+2. ARCHITECTURE DE L'APPLICATION (LES 4 ÉCRANS CLÉS)
+--------------------------------------------------------------------------------
+
+[ÉCRAN 1 : TRADUCTION INTELLIGENTE & VOCALE (HOME)]
+- Barre supérieure :
+  * Logo Tradition IA (typographie moderne avec 'IA' en cyan)
+  * Mini-badge affichant le masque culturel gabonais correspondant au dialecte actif
+- Sélecteur de langues moderne :
+  * Langue Source : Badge 'Français'
+  * Flèche directionnelle '➔'
+  * Langue Cible : Sélecteur défilant horizontal (Fang, Punu, Nzébi, Myènè, Téké, etc.)
+- Zone de saisie (Source) :
+  * Carte en verre fumé avec champ de texte spacieux
+  * Bouton microphone pour la reconnaissance vocale
+  * Suggestions de phrases rapides en puces ('Bonjour', 'Merci', 'Comment vas-tu ?')
+- Bouton d'action principal :
+  * Bouton large aux coins arrondis : 'Traduire instantanément 🚀'
+- Carte de Résultat (Traduction Gabon) :
+  * Titre de la langue traduite en cyan (#38BDF8)
+  * Texte traduit mis en valeur avec typographie contrastée
+  * Bouton d'écoute audio (icône haut-parleur pour la prononciation vocale)
+  * Bouton copier (presse-papier)
+  * Note phonétique d'aide à la prononciation locale.
+
+[ÉCRAN 2 : DICTIONNAIRE & PROVERBES GABONAIS]
+- Barre de recherche supérieure avec loupe et filtre rapide par dialecte
+- Puces de filtrage par catégorie : 'Salutations', 'Nature', 'Famille', 'Proverbes & Sagesse'
+- Liste de cartes de vocabulaire :
+  * Mot en français en gras
+  * Traductions correspondantes dans les dialectes gabonais (Fang, Punu, etc.)
+  * Définition contextuelle et signification traditionnelle ancestrale
+  * Bouton d'écoute audio pour chaque mot.
+
+[ÉCRAN 3 : ASSISTANT CULTUREL IA (MBOLO IA)]
+- En-tête de chat :
+  * Avatar Mbolo IA avec couronne ou masque traditionnel stylisé
+  * Nom : 'Mbolo IA - Guide Culturel'
+  * Pastille verte : 'En ligne • Spécialiste Traditions Gabonaises'
+- Zone de discussion :
+  * Bulles utilisateur à droite (bleu acier sombre)
+  * Bulles IA à gauche (gris ardoise fumé avec icône de masque)
+  * L'IA répond aux questions sur les rites, les proverbes, l'histoire des peuples 
+    (Fang, Punu, Kota...) et l'apprentissage des phrases.
+- Barre inférieure :
+  * Champ de saisie 'Posez votre question culturelle...' avec bouton d'envoi.
+
+[ÉCRAN 4 : MON PROFIL & MASQUES TRADITIONNELS]
+- Carte d'identité du membre :
+  * Photo de profil / Avatar circulaire avec initiales
+  * Nom de l'utilisateur et statut 'Membre Actif'
+- Section 'Votre Masque Représentatif' :
+  * Grand visuel artistique d'un masque gabonais traditionnel (ex: Masque Ngil Fang, 
+    Masque Okuyi Punu blanc ou Masque Kota en cuivre)
+  * Description symbolique du masque (sagesse, protection, justice)
+- Préférences et Paramètres :
+  * Choix du dialecte gabonais favori
+  * Compteur de phrases apprises et historique sauvegardé
+  * Bouton de synchronisation cloud.
+
+[NAVIGATION COMMUNE : BOTTOM TAB BAR]
+- Barre fixe en bas de l'écran avec flou d'arrière-plan (glassmorphism) :
+  1. Icône Globe ➔ 'Traduire'
+  2. Icône Livre ➔ 'Dictionnaire'
+  3. Icône Robot/Bulle ➔ 'Assistant IA'
+  4. Icône Utilisateur ➔ 'Profil'
+
+================================================================================
+3. PROMPTS PRÊTS À COPIER-COLLER DANS VOTRE IA
+================================================================================
+
+─── OPTION A : PROMPT POUR IA DE CODE & PROTOTYPAGE UI (v0.dev, Claude, ChatGPT) ───
+Copiez le texte ci-dessous :
+
+"""
+Agis comme un designer UI/UX senior et développeur mobile expert. 
+Crée les maquettes d'une application mobile moderne et luxueuse appelée 'Tradition IA', 
+dédiée à la traduction instantanée entre le Français et les langues traditionnelles 
+du Gabon (Fang, Punu, Nzébi, Myènè, Téké, etc.).
+
+Directives de design strictes :
+- Thème sombre ardoise luxueux (fond noir obsidienne #0B0E14, cartes ardoise #161C26, 
+  bordures en verre dépoli très fines, typographie blanche et gris argenté #94A3B8, 
+  accents discrets or ambré #F59E0B pour les traditions et cyan #38BDF8 pour l'IA).
+- Format mobile iPhone 16 Pro avec bordures d'écran arrondies et Dynamic Island.
+- Barre d'onglets inférieure fixe (Traduire, Dictionnaire, Assistant IA, Profil).
+
+Génère les 4 écrans suivants :
+1. Écran Traduction : sélecteur de dialecte gabonais, zone de texte avec bouton micro 
+   pour la voix, bouton de traduction 'Traduire instantanément', zone de résultat avec 
+   prononciation audio et mini-masque gabonais.
+2. Écran Dictionnaire : barre de recherche, filtres par catégorie (Salutations, Nature, 
+   Proverbes) et cartes de mots détaillées.
+3. Écran Assistant Mbolo IA : chat conversationnel culturel gabonais fluide avec bulles 
+   stylisées.
+4. Écran Profil : avatar, présentation du masque culturel gabonais représentatif 
+   et dialecte préféré.
+"""
+
+─── OPTION B : PROMPT POUR GÉNÉRATEUR D'IMAGES (Midjourney, DALL-E 3) ───
+Copiez le texte ci-dessous :
+
+"""
+High-end mobile app UI/UX design mockups for 'Tradition IA', an African language translation 
+app for Gabon languages (Fang, Punu, Myene). Sleek dark obsidian and slate theme (#0B0E14), 
+minimalist glassmorphism cards, glowing cyan accents, subtle gold highlights, traditional 
+Gabonese cultural mask icon, translation interface, voice input button, dictionary screen, 
+and AI chatbot view. Displayed on modern bezel-less smartphone screens, clean typography, 
+Dribbble trending, Figma presentation, ultra detailed, 8k resolution.
+"""
+================================================================================
+FIN DU DOCUMENT
+================================================================================

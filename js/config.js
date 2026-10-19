@@ -23,43 +23,43 @@ window.CONFIG = {
 };
 
 window.MOCK_LANGUAGES = [
-  { id: '1', name: 'Fang', code: 'fan', nativeName: 'Fang-Beti', description: 'Langue parlée par le peuple Fang (Estuaire, Woleu-Ntem, Ogooué-Ivindo)', wordCount: 1250, speakers: '800 000' },
-  { id: '2', name: 'Punu', code: 'puu', nativeName: 'Yipunu', description: 'Langue parlée au Sud du Gabon (Nyanga, Ngounié, Tchibanga)', wordCount: 760, speakers: '300 000' },
-  { id: '3', name: 'Nzébi', code: 'nzb', nativeName: 'Inzébi', description: 'Langue parlée au Sud et au Centre du Gabon (Ngounié, Ogooué-Lolo, Koulamoutou)', wordCount: 620, speakers: '150 000' },
-  { id: '4', name: 'Myènè', code: 'mye', nativeName: 'Omyènè', description: 'Langue littorale du Gabon (Port-Gentil, Lambaréné, Libreville)', wordCount: 890, speakers: '50 000' },
-  { id: '5', name: 'Téké', code: 'tek', nativeName: 'Iteké', description: 'Langue parlée dans le Sud-Est du Gabon (Haut-Ogooué, Franceville)', wordCount: 580, speakers: '140 000' },
-  { id: '6', name: 'Vili', code: 'vif', nativeName: 'Icivili', description: 'Langue parlée sur la côte sud (Mayumba et zone frontalière)', wordCount: 320, speakers: '35 000' },
-  { id: '7', name: 'Obamba', code: 'obb', nativeName: 'Lembaama', description: 'Langue parlée à Franceville, Moanda et le Haut-Ogooué', wordCount: 380, speakers: '90 000' },
-  { id: '8', name: 'Guisir', code: 'gsi', nativeName: 'Yigisir', description: 'Langue parlée dans la Ngounié (Fougamou, Mouila, Ndendé)', wordCount: 450, speakers: '60 000' },
-  { id: '9', name: 'Kota', code: 'kto', nativeName: 'Ikota', description: 'Langue parlée dans l\'Ogooué-Ivindo (Makokou) et le Haut-Ogooué', wordCount: 410, speakers: '45 000' },
-  { id: '10', name: 'Anglais', code: 'eng', nativeName: 'English', description: 'Langue internationale (English)', wordCount: 2500, speakers: '1.5 milliard' }
+  { id: '1', name: 'Fang', code: 'fan', nativeName: 'Fang', description: 'Langue parlée par le peuple Fang (Estuaire, Woleu-Ntem, Ogooué-Ivindo)', wordCount: 1250, speakers: '800 000' },
+  { id: '2', name: 'Punu', code: 'puu', nativeName: 'Punu', description: 'Langue parlée au Sud du Gabon (Nyanga, Ngounié, Tchibanga)', wordCount: 760, speakers: '300 000' },
+  { id: '3', name: 'Nzébi', code: 'nzb', nativeName: 'Nzébi', description: 'Langue parlée au Sud et au Centre du Gabon (Ngounié, Ogooué-Lolo, Koulamoutou)', wordCount: 620, speakers: '150 000' },
+  { id: '4', name: 'Myènè', code: 'mye', nativeName: 'Myènè', description: 'Langue littorale du Gabon (Port-Gentil, Lambaréné, Libreville)', wordCount: 890, speakers: '50 000' },
+  { id: '5', name: 'Téké', code: 'tek', nativeName: 'Téké', description: 'Langue parlée dans le Sud-Est du Gabon (Haut-Ogooué, Franceville)', wordCount: 580, speakers: '140 000' },
+  { id: '6', name: 'Vili', code: 'vif', nativeName: 'Vili', description: 'Langue parlée sur la côte sud (Mayumba et zone frontalière)', wordCount: 320, speakers: '35 000' },
+  { id: '7', name: 'Obamba', code: 'obb', nativeName: 'Obamba', description: 'Langue parlée à Franceville, Moanda et le Haut-Ogooué', wordCount: 380, speakers: '90 000' },
+  { id: '8', name: 'Guisir', code: 'gsi', nativeName: 'Guisir', description: 'Langue parlée dans la Ngounié (Fougamou, Mouila, Ndendé)', wordCount: 450, speakers: '60 000' },
+  { id: '9', name: 'Kota', code: 'kto', nativeName: 'Kota', description: 'Langue parlée dans l\'Ogooué-Ivindo (Makokou) et le Haut-Ogooué', wordCount: 410, speakers: '45 000' },
+  { id: '10', name: 'Anglais', code: 'eng', nativeName: 'Anglais', description: 'Langue internationale et commerciale', wordCount: 950, speakers: '1 500 000 000' }
 ];
 
-window.MOCK_DICTIONARY = [
-  { id: '1', word: 'Bonjour', translation: 'Mbolo', sourceLang: 'Français', targetLang: 'Fang', category: 'Salutations', example: 'Mbolo mi neng (Bonjour comment vas-tu)' },
-  { id: '2', word: 'Merci', translation: 'Akiba', sourceLang: 'Français', targetLang: 'Fang', category: 'Expressions', example: 'Akiba mon ami pour ton aide' },
-  { id: '3', word: 'Eau', translation: 'Owusu', sourceLang: 'Français', targetLang: 'Fang', category: 'Nourriture', example: 'Je veux boire de l\'owusu' },
-  { id: '4', word: 'Bonjour', translation: 'Mbolo', sourceLang: 'Français', targetLang: 'Myènè', category: 'Salutations', example: 'Mbolo ami d\'enfance' },
-  { id: '5', word: 'Femme', translation: 'Biké', sourceLang: 'Français', targetLang: 'Punu', category: 'Personnes', example: 'La biké prépare le repas traditionnel' },
-  { id: '6', word: 'Maison', translation: 'Ntang', sourceLang: 'Français', targetLang: 'Myènè', category: 'Lieux', example: 'Mon ntang est situé au bord du fleuve' },
-  { id: '7', word: 'Arbre', translation: 'Nkogo', sourceLang: 'Français', targetLang: 'Fang', category: 'Nature', example: 'Le grand nkogo dans la forêt équatoriale' },
-  { id: '8', word: 'Merci', translation: 'Yine', sourceLang: 'Français', targetLang: 'Punu', category: 'Expressions', example: 'Yine moke pour ce présent' },
-  { id: '9', word: 'Merci', translation: 'Ogula', sourceLang: 'Français', targetLang: 'Myènè', category: 'Expressions', example: 'Ogula va imwè' },
-  { id: '10', word: 'Bonjour', translation: 'Mbolo', sourceLang: 'Français', targetLang: 'Guisir', category: 'Salutations', example: 'Mbolo na biani (Bonjour tout le monde)' },
-  { id: '11', word: 'Bonjour', translation: 'Mbolo', sourceLang: 'Français', targetLang: 'Kota', category: 'Salutations', example: 'Mbolo ma mba (Bonjour mon ami)' },
-  { id: '12', word: 'Bonjour', translation: 'Hello', sourceLang: 'Français', targetLang: 'Anglais', category: 'Salutations', example: 'Hello my friend' },
-  { id: '13', word: 'Merci', translation: 'Thank you', sourceLang: 'Français', targetLang: 'Anglais', category: 'Expressions', example: 'Thank you very much' }
-];
+// Le dictionnaire et les traductions proviennent désormais exclusivement de la base de données MySQL (276 mots réels)
+window.MOCK_DICTIONARY = [];
 
+// Expressions officielles issues de txt.txt
 window.MOCK_EXPRESSIONS = [
-  { id: '1', phrase: 'Comment allez-vous ?', translation: 'Mbolo mi neng ?', sourceLang: 'Français', targetLang: 'Fang', context: 'Salutation formelle' },
-  { id: '2', phrase: 'Bienvenue au Gabon', translation: 'Mbolo ma Gabon', sourceLang: 'Français', targetLang: 'Fang', context: 'Accueil de visiteurs' },
-  { id: '3', phrase: 'Je vous remercie sincèrement', translation: 'Akiba mi neng', sourceLang: 'Français', targetLang: 'Fang', context: 'Politesse' },
-  { id: '4', phrase: 'Bonne journée', translation: 'Mbote moke', sourceLang: 'Français', targetLang: 'Punu', context: 'Au revoir' },
-  { id: '5', phrase: 'Où allez-vous ?', translation: 'Nka ve ?', sourceLang: 'Français', targetLang: 'Myènè', context: 'Question quotidienne' },
-  { id: '6', phrase: 'Comment vas-tu ?', translation: 'Mbolo, o di bueni ?', sourceLang: 'Français', targetLang: 'Guisir', context: 'Salutation quotidienne' },
-  { id: '7', phrase: 'Bienvenue mon ami', translation: 'Mbolo nzo ma', sourceLang: 'Français', targetLang: 'Kota', context: 'Accueil' },
-  { id: '8', phrase: 'Comment allez-vous ?', translation: 'How are you ?', sourceLang: 'Français', targetLang: 'Anglais', context: 'Salutation' }
+  { id: '1', phrase: "Je n'ai pas de temps", translation: 'Me bele ki Eyong', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Temps', isValidated: true },
+  { id: '2', phrase: "Je n'ai pas d'argent", translation: 'Me bele ki miang', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Argent', isValidated: true },
+  { id: '3', phrase: "Je n'ai pas fini", translation: 'Me bele mane', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Action', isValidated: true },
+  { id: '4', phrase: "Je n'ai pas vu", translation: 'Me dzi yene', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Perception', isValidated: true },
+  { id: '5', phrase: "Je n'ai pas de chance", translation: 'Me belé mvôm', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Chance', isValidated: true },
+  { id: '6', phrase: "Je n'ai pas entendu", translation: 'Me dzi wok', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Ouïe', isValidated: true },
+  { id: '7', phrase: "Je n'ai pas réussi", translation: 'Me dzi dengh', sourceLang: 'Français', targetLang: 'Fang', context: 'Négation / Réussite', isValidated: true },
+  { id: '8', phrase: "Voici mon enfant", translation: 'Émo wom ényenyi', sourceLang: 'Français', targetLang: 'Fang', context: 'Présentation', isValidated: true },
+  { id: '9', phrase: "Comment s'appelle-t-il ?", translation: "A n'éwula ya ?", sourceLang: 'Français', targetLang: 'Fang', context: 'Présentation', isValidated: true },
+  { id: '10', phrase: "Il s'appelle Obiang", translation: "A n'éwula nâ Obiang", sourceLang: 'Français', targetLang: 'Fang', context: 'Présentation', isValidated: true },
+  { id: '11', phrase: "Il a quel âge ?", translation: 'A bele mimbu tang ?', sourceLang: 'Français', targetLang: 'Fang', context: 'Présentation', isValidated: true },
+  { id: '12', phrase: "Il a cinq ans", translation: 'A bele mimbu mitan', sourceLang: 'Français', targetLang: 'Fang', context: 'Présentation', isValidated: true },
+  { id: '13', phrase: "Tu as combien de frères ?", translation: 'Ô bele monenyang tang ya ?', sourceLang: 'Français', targetLang: 'Fang', context: 'Famille', isValidated: true },
+  { id: '14', phrase: "J'ai deux frères", translation: 'Me bele bobenyang bebegn', sourceLang: 'Français', targetLang: 'Fang', context: 'Famille', isValidated: true },
+  { id: '15', phrase: "Je veux manger", translation: "Ma kum'a dzi", sourceLang: 'Français', targetLang: 'Fang', context: 'Volonté', isValidated: true },
+  { id: '16', phrase: "Je veux boire", translation: "Ma kum'a nyu", sourceLang: 'Français', targetLang: 'Fang', context: 'Volonté', isValidated: true },
+  { id: '17', phrase: "Ne m'embête pas", translation: "Ô tagha m'a ndeghele", sourceLang: 'Français', targetLang: 'Fang', context: 'Impératif négatif', isValidated: true },
+  { id: '18', phrase: "Fiche-moi la paix", translation: 'Korgh me mïs', sourceLang: 'Français', targetLang: 'Fang', context: 'Expression familière', isValidated: true },
+  { id: '19', phrase: "Ça m'est égal", translation: 'Maa bïs', sourceLang: 'Français', targetLang: 'Fang', context: 'Expression familière', isValidated: true },
+  { id: '20', phrase: "Je parle le fang", translation: 'Ma kobe fang', sourceLang: 'Français', targetLang: 'Fang', context: 'Langue', isValidated: true }
 ];
 
 window.MOCK_AI_SUGGESTIONS = [
@@ -69,11 +69,7 @@ window.MOCK_AI_SUGGESTIONS = [
   { id: '4', sourceText: 'Bienvenue dans notre village', suggestedTranslation: 'Mbolo na ivanga', sourceLang: 'Français', targetLang: 'Myènè', confidence: 0.95, status: 'accepted', createdAt: '2026-08-04' }
 ];
 
-window.MOCK_TRANSLATIONS = [
-  { id: '1', sourceText: 'Bonjour, comment allez-vous ?', translatedText: 'Mbolo, mi neng ?', sourceLang: 'Français', targetLang: 'Fang', createdAt: '2026-08-05 10:30', isAI: false },
-  { id: '2', sourceText: 'Merci beaucoup mon cher ami', translatedText: 'Akiba mi neng mon ami', sourceLang: 'Français', targetLang: 'Fang', createdAt: '2026-08-06 14:15', isAI: false },
-  { id: '3', sourceText: 'Bienvenue à Libreville', translatedText: 'Mbolo ma Libreville (Traduction Punu)', sourceLang: 'Français', targetLang: 'Punu', createdAt: '2026-08-07 09:12', isAI: true }
-];
+window.MOCK_TRANSLATIONS = [];
 
 window.MOCK_USERS = [
   { id: '1', name: 'Administrateur Gabon', email: 'admin@tradition.ga', role: 'admin', joinedAt: '2026-01-10', status: 'Actif' },
