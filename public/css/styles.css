@@ -294,7 +294,7 @@ a {
   background-position: center;
   background-size: contain;
   opacity: 0.22;
-  filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.35));
+  filter: none;
   pointer-events: none;
   z-index: 1;
   transition: opacity 0.35s ease, transform 0.4s ease, filter 0.35s ease;
@@ -309,7 +309,7 @@ a {
 
 [data-theme="light"] .target-mask-watermark {
   opacity: 0.32;
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.16)) drop-shadow(0 0 10px rgba(37, 99, 235, 0.12));
+  filter: none;
   mix-blend-mode: normal;
 }
 
@@ -1314,14 +1314,7 @@ body.auth-body .main-content {
 }
 
 .auth-img-glow-wrapper::before {
-  content: '';
-  position: absolute;
-  width: 85%;
-  height: 85%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.26) 0%, rgba(148, 163, 184, 0.1) 60%, transparent 100%);
-  border-radius: 50%;
-  filter: blur(36px);
-  z-index: 0;
+  display: none;
 }
 
 .auth-gabon-img {
@@ -1332,13 +1325,13 @@ body.auth-body .main-content {
   width: auto;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.45));
-  transition: transform 0.4s ease, filter 0.4s ease;
+  filter: none;
+  transition: transform 0.4s ease;
 }
 
 .auth-container:hover .auth-gabon-img {
   transform: scale(1.05);
-  filter: drop-shadow(0 24px 48px rgba(56, 189, 248, 0.35));
+  filter: none;
 }
 
 .auth-left-title {
@@ -1788,8 +1781,8 @@ body.auth-body .main-content {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 12px rgba(0, 230, 118, 0.25));
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+  filter: none;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: block;
 }
 
@@ -1800,18 +1793,18 @@ body.auth-body .main-content {
 
 .glass-card-interactive:hover .mask-real-img,
 .glass-card:hover .mask-real-img {
-  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(0, 230, 118, 0.6));
+  filter: none;
   transform: scale(1.12);
 }
 
 /* Light Theme */
 [data-theme="light"] .mask-real-img {
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15)) drop-shadow(0 0 8px rgba(0, 200, 83, 0.25));
+  filter: none;
 }
 
 [data-theme="light"] .glass-card-interactive:hover .mask-real-img,
 [data-theme="light"] .glass-card:hover .mask-real-img {
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25)) drop-shadow(0 0 16px rgba(0, 200, 83, 0.5));
+  filter: none;
 }
 
 /* Profile Big Cultural Mask */
@@ -1823,7 +1816,7 @@ body.auth-body .main-content {
 
 #prof-mask-container .mask-real-img,
 #profile-mask-preview-spa .mask-real-img {
-  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 25px rgba(0, 230, 118, 0.35));
+  filter: none;
   animation: floatMask 4s ease-in-out infinite alternate;
 }
 
